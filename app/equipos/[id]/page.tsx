@@ -5,6 +5,7 @@ import {
 	CalendarBlank,
 	CheckCircle,
 	Clock,
+	ClipboardText,
 	Download,
 	Eye,
 	FileDoc,
@@ -13,6 +14,7 @@ import {
 	Images,
 	Info,
 	MapPin,
+	PencilSimple,
 	QrCode,
 	Timer,
 	Wrench,
@@ -43,7 +45,7 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { equipos, registrosMantenimiento } from "@/lib/mock-data"
+import { equipos, registrosMantenimiento, formulariosTemplate, enviosFormularios, usuarios } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 // Mock documents for equipment
@@ -167,7 +169,7 @@ const actividadesMock: Record<string, ActividadEquipo[]> = {
 	],
 }
 
-type TabType = "info" | "documentos" | "galeria" | "historial"
+type TabType = "info" | "formularios" | "documentos" | "galeria" | "historial"
 
 export default function EquipoDetailPage({
 	params,
@@ -186,6 +188,22 @@ export default function EquipoDetailPage({
 	const documentos = documentosMock[equipoId] || []
 	const imagenes = imagenesMock[equipoId] || []
 	const actividades = actividadesMock[equipoId] || []
+
+	// Get applicable forms for this equipment
+	const formulariosAplicables = formulariosTemplate.filter((f) => {
+		if (!f.activo) return false
+		if (f.asociacion.tipo === "general") return true
+		if (f.asociacion.tipo === "equipo" && f.asociacion.valor === equipoId) return true
+		if (f.asociacion.tipo === "tipo-equipo" && f.asociacion.valor === equipo?.tipo) return true
+		if (f.asociacion.tipo === "area" && equipo?.ubicacion.includes(f.asociacion.valor || "")) return true
+		return false
+	})
+
+	// Get recent form submissions for this equipment
+	const enviosRecientes = enviosFormularios
+		.filter((e) => e.idEquipo === equipoId)
+		.sort((a, b) => b.fechaEnvio.getTime() - a.fechaEnvio.getTime())
+		.slice(0, 10)
 
 	// Combine maintenance records with other activities for full timeline
 	const timelineCompleto = [
@@ -228,6 +246,7 @@ export default function EquipoDetailPage({
 
 	const tabs = [
 		{ id: "info" as TabType, label: "Información", icon: Info },
+		{ id: "formularios" as TabType, label: "Formularios", icon: ClipboardText, count: formulariosAplicables.length },
 		{ id: "documentos" as TabType, label: "Documentos", icon: FileText, count: documentos.length },
 		{ id: "galeria" as TabType, label: "Galería", icon: Images, count: imagenes.length },
 		{ id: "historial" as TabType, label: "Historial", icon: Timer, count: timelineCompleto.length },
@@ -476,6 +495,154 @@ export default function EquipoDetailPage({
 									</CardContent>
 								</Card>
 							</div>
+						</div>
+					)}
+
+					{activeTab === "formularios" && (
+						<div className="grid gap-6 lg:grid-cols-2">
+							{/* Available Forms */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center justify-between">
+										<div>
+											<CardTitle>Formularios Disponibles</CardTitle>
+											<CardDescription>
+												Formularios aplicables a este equipo
+											</CardDescription>
+										</div>
+									</div>
+								</CardHeader>
+								<CardContent>
+									{formulariosAplicables.length === 0 ? (
+										<div className="flex flex-col items-center justify-center py-8 text-center">
+											<ClipboardText className="mb-4 size-12 text-muted-foreground" />
+											<p className="text-muted-foreground">
+												No hay formularios configurados para este equipo
+											</p>
+										</div>
+									) : (
+										<div className="space-y-3">
+											{formulariosAplicables.map((form) => (
+												<div
+													key={form.id}
+													className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
+												>
+													<div className="flex items-center gap-4">
+														<div
+															className={cn(
+																"flex size-10 items-center justify-center rounded-lg",
+																form.tipo === "inspeccion" && "bg-blue-100 text-blue-700",
+																form.tipo === "preventivo" && "bg-green-100 text-green-700",
+																form.tipo === "correctivo" && "bg-orange-100 text-orange-700",
+																form.tipo === "reporte-fallas" && "bg-red-100 text-red-700",
+															)}
+														>
+															<ClipboardText className="size-5" weight="duotone" />
+														</div>
+														<div>
+															<p className="font-medium">{form.nombre}</p>
+															<div className="flex items-center gap-2 text-sm text-muted-foreground">
+																<span className="capitalize">{form.tipo.replace("-", " ")}</span>
+																{form.frecuencia && (
+																	<>
+																		<span>•</span>
+																		<span className="capitalize">{form.frecuencia}</span>
+																	</>
+																)}
+															</div>
+														</div>
+													</div>
+													<Button
+														size="sm"
+														onClick={() => router.push(`/formularios/llenar/${form.id}?equipo=${equipoId}`)}
+													>
+														<PencilSimple className="mr-2 size-4" />
+														Llenar
+													</Button>
+												</div>
+											))}
+										</div>
+									)}
+								</CardContent>
+							</Card>
+
+							{/* Recent Submissions */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center justify-between">
+										<div>
+											<CardTitle>Envíos Recientes</CardTitle>
+											<CardDescription>
+												Últimos formularios diligenciados
+											</CardDescription>
+										</div>
+										<Button variant="outline" size="sm" onClick={() => setActiveTab("historial")}>
+											Ver todo
+										</Button>
+									</div>
+								</CardHeader>
+								<CardContent>
+									{enviosRecientes.length === 0 ? (
+										<div className="flex flex-col items-center justify-center py-8 text-center">
+											<ClipboardText className="mb-4 size-12 text-muted-foreground" />
+											<p className="text-muted-foreground">
+												No hay envíos registrados para este equipo
+											</p>
+										</div>
+									) : (
+										<div className="space-y-3">
+											{enviosRecientes.map((envio) => {
+												const formulario = formulariosTemplate.find((f) => f.id === envio.idFormulario)
+												const usuario = usuarios.find((u) => u.id === envio.idUsuario)
+												return (
+													<div
+														key={envio.id}
+														className="flex items-center justify-between rounded-lg border p-4"
+													>
+														<div className="flex items-center gap-4">
+															<div
+																className={cn(
+																	"flex size-10 items-center justify-center rounded-lg",
+																	envio.estado === "completado" && "bg-green-100 text-green-700",
+																	envio.estado === "pendiente" && "bg-yellow-100 text-yellow-700",
+																	envio.estado === "rechazado" && "bg-red-100 text-red-700",
+																)}
+															>
+																<CheckCircle className="size-5" weight="duotone" />
+															</div>
+															<div>
+																<p className="font-medium">{formulario?.nombre || "Formulario"}</p>
+																<div className="flex items-center gap-2 text-sm text-muted-foreground">
+																	<span>{usuario?.nombre || "Usuario"}</span>
+																	<span>•</span>
+																	<span>
+																		{envio.fechaEnvio.toLocaleDateString("es-ES", {
+																			day: "2-digit",
+																			month: "short",
+																			hour: "2-digit",
+																			minute: "2-digit",
+																		})}
+																	</span>
+																</div>
+															</div>
+														</div>
+														<span
+															className={cn(
+																"rounded-full px-2 py-0.5 text-xs font-medium",
+																envio.estado === "completado" && "bg-green-100 text-green-800",
+																envio.estado === "pendiente" && "bg-yellow-100 text-yellow-800",
+																envio.estado === "rechazado" && "bg-red-100 text-red-800",
+															)}
+														>
+															{envio.estado === "completado" ? "Completado" : envio.estado === "pendiente" ? "Pendiente" : "Rechazado"}
+														</span>
+													</div>
+												)
+											})}
+										</div>
+									)}
+								</CardContent>
+							</Card>
 						</div>
 					)}
 

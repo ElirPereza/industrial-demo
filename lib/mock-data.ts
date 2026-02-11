@@ -23,6 +23,18 @@ export interface FormField {
 	opciones?: string[]
 }
 
+// Tipo de asociación de formulario
+export type TipoAsociacion = "equipo" | "tipo-equipo" | "area" | "general"
+
+export interface FormAsociacion {
+	tipo: TipoAsociacion
+	// Si tipo = "equipo" → id del equipo específico
+	// Si tipo = "tipo-equipo" → tipo de equipo (maquinaria-pesada, hvac, etc.)
+	// Si tipo = "area" → nombre del área (Nave A, Nave B, etc.)
+	// Si tipo = "general" → null (aplica a todos)
+	valor: string | null
+}
+
 export interface FormTemplate {
 	id: string
 	nombre: string
@@ -32,6 +44,10 @@ export interface FormTemplate {
 	campos: FormField[]
 	fechaCreacion: Date
 	activo: boolean
+	// Nueva asociación
+	asociacion: FormAsociacion
+	// Frecuencia sugerida
+	frecuencia?: "diario" | "semanal" | "mensual" | "trimestral" | "eventual"
 }
 
 export interface Usuario {
@@ -145,6 +161,8 @@ export const formulariosTemplate: FormTemplate[] = [
 		version: 1,
 		activo: true,
 		fechaCreacion: new Date("2025-12-01"),
+		asociacion: { tipo: "tipo-equipo", valor: "maquinaria-pesada" },
+		frecuencia: "diario",
 		campos: [
 			{
 				id: "campo-001",
@@ -194,6 +212,8 @@ export const formulariosTemplate: FormTemplate[] = [
 		version: 1,
 		activo: true,
 		fechaCreacion: new Date("2025-12-01"),
+		asociacion: { tipo: "general", valor: null },
+		frecuencia: "eventual",
 		campos: [
 			{
 				id: "campo-101",
@@ -255,6 +275,8 @@ export const formulariosTemplate: FormTemplate[] = [
 		version: 1,
 		activo: true,
 		fechaCreacion: new Date("2025-12-01"),
+		asociacion: { tipo: "general", valor: null },
+		frecuencia: "mensual",
 		campos: [
 			{
 				id: "campo-201",
@@ -308,6 +330,8 @@ export const formulariosTemplate: FormTemplate[] = [
 		version: 1,
 		activo: true,
 		fechaCreacion: new Date("2025-12-01"),
+		asociacion: { tipo: "general", valor: null },
+		frecuencia: "eventual",
 		campos: [
 			{
 				id: "campo-301",
