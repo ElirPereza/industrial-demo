@@ -1,6 +1,6 @@
 "use client"
 
-import { Factory, Gear, Lightning, Wind } from "@phosphor-icons/react"
+import { Factory, Gear, Lightning, Plus, Wind } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -11,6 +11,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
 import {
 	Card,
 	CardContent,
@@ -96,12 +97,18 @@ export default function EquiposPage() {
 				</header>
 
 				<div className="flex flex-1 flex-col gap-6 p-4 pt-0">
-					<div>
-						<h1 className="text-2xl font-semibold">Gestión de Equipos</h1>
-						<p className="text-sm text-muted-foreground">
-							Visualiza el estado y el historial de mantenimiento de todos los
-							equipos
-						</p>
+					<div className="flex items-center justify-between">
+						<div>
+							<h1 className="text-2xl font-semibold">Gestión de Equipos</h1>
+							<p className="text-sm text-muted-foreground">
+								Visualiza el estado y el historial de mantenimiento de todos los
+								equipos
+							</p>
+						</div>
+						<Button onClick={() => router.push("/equipos/nuevo")}>
+							<Plus className="mr-2 size-4" weight="bold" />
+							Nuevo Equipo
+						</Button>
 					</div>
 
 					{Object.entries(equiposPorTipo).map(([tipo, equiposGrupo]) => (
