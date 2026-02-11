@@ -17,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: "Industrial Portal",
-	description: "Portal de Gestión Industrial - Formularios, Equipos y Mantenimiento",
+	description:
+		"Portal de Gestión Industrial - Formularios, Equipos y Mantenimiento",
 }
 
 export default function RootLayout({

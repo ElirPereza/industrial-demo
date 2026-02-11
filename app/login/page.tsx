@@ -1,11 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Factory } from "@phosphor-icons/react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LoginPage() {
 	const router = useRouter()
@@ -59,11 +65,15 @@ export default function LoginPage() {
 									setEmail(e.target.value)
 									if (errors.email) setErrors({ ...errors, email: false })
 								}}
-								className={errors.email ? "border-red-500 ring-1 ring-red-500/20" : ""}
+								className={
+									errors.email ? "border-red-500 ring-1 ring-red-500/20" : ""
+								}
 								aria-invalid={errors.email}
 							/>
 							{errors.email && (
-								<p className="text-xs text-red-600">El correo electrónico es requerido</p>
+								<p className="text-xs text-red-600">
+									El correo electrónico es requerido
+								</p>
 							)}
 						</div>
 
@@ -80,11 +90,15 @@ export default function LoginPage() {
 									setPassword(e.target.value)
 									if (errors.password) setErrors({ ...errors, password: false })
 								}}
-								className={errors.password ? "border-red-500 ring-1 ring-red-500/20" : ""}
+								className={
+									errors.password ? "border-red-500 ring-1 ring-red-500/20" : ""
+								}
 								aria-invalid={errors.password}
 							/>
 							{errors.password && (
-								<p className="text-xs text-red-600">La contraseña es requerida</p>
+								<p className="text-xs text-red-600">
+									La contraseña es requerida
+								</p>
 							)}
 						</div>
 

@@ -1,7 +1,15 @@
 "use client"
 
-import { useRef, useState } from "react"
+import {
+	CalendarBlank,
+	Check,
+	Eraser,
+	MapPin,
+	Upload,
+	User,
+} from "@phosphor-icons/react"
 import { useParams, useRouter } from "next/navigation"
+import { useRef, useState } from "react"
 import SignatureCanvas from "react-signature-canvas"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -12,17 +20,22 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { formulariosTemplate, usuarios } from "@/lib/mock-data"
-import { Eraser, Check, Upload, MapPin, User, CalendarBlank } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
 export default function FormFillPage() {
@@ -43,8 +56,13 @@ export default function FormFillPage() {
 				<SidebarInset>
 					<div className="flex min-h-screen items-center justify-center">
 						<div className="text-center">
-							<h1 className="text-2xl font-semibold">Formulario no encontrado</h1>
-							<Button className="mt-4" onClick={() => router.push("/formularios")}>
+							<h1 className="text-2xl font-semibold">
+								Formulario no encontrado
+							</h1>
+							<Button
+								className="mt-4"
+								onClick={() => router.push("/formularios")}
+							>
 								Volver a Formularios
 							</Button>
 						</div>
@@ -101,11 +119,15 @@ export default function FormFillPage() {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem className="hidden md:block">
-									<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
-									<BreadcrumbLink href="/formularios">Formularios</BreadcrumbLink>
+									<BreadcrumbLink href="/formularios">
+										Formularios
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -119,7 +141,9 @@ export default function FormFillPage() {
 				<div className="flex flex-1 flex-col gap-6 p-4 pt-0">
 					<div>
 						<h1 className="text-2xl font-semibold">{formulario.nombre}</h1>
-						<p className="text-sm text-muted-foreground">{formulario.descripcion}</p>
+						<p className="text-sm text-muted-foreground">
+							{formulario.descripcion}
+						</p>
 					</div>
 
 					{/* Metadata Section */}
@@ -143,7 +167,9 @@ export default function FormFillPage() {
 										<CalendarBlank className="size-5" weight="duotone" />
 									</div>
 									<div>
-										<p className="text-xs text-muted-foreground">Fecha y Hora</p>
+										<p className="text-xs text-muted-foreground">
+											Fecha y Hora
+										</p>
 										<p className="text-sm font-medium">
 											{currentDate.toLocaleDateString("es-ES", {
 												day: "2-digit",
@@ -161,7 +187,9 @@ export default function FormFillPage() {
 									</div>
 									<div>
 										<p className="text-xs text-muted-foreground">Ubicación</p>
-										<p className="text-sm font-medium">Planta Principal (mock)</p>
+										<p className="text-sm font-medium">
+											Planta Principal (mock)
+										</p>
 									</div>
 								</div>
 							</div>
@@ -173,7 +201,8 @@ export default function FormFillPage() {
 						<CardHeader>
 							<CardTitle className="text-base">Campos del Formulario</CardTitle>
 							<CardDescription>
-								Los campos marcados con <span className="text-red-600">*</span> son obligatorios
+								Los campos marcados con <span className="text-red-600">*</span>{" "}
+								son obligatorios
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-6">
@@ -181,7 +210,9 @@ export default function FormFillPage() {
 								<div key={campo.id}>
 									<div className="mb-2 text-sm font-medium">
 										{campo.nombre}
-										{campo.requerido && <span className="ml-1 text-red-600">*</span>}
+										{campo.requerido && (
+											<span className="ml-1 text-red-600">*</span>
+										)}
 									</div>
 
 									{campo.tipo === "texto-corto" && (
@@ -193,7 +224,10 @@ export default function FormFillPage() {
 													setErrors({ ...errors, [campo.id]: false })
 												}
 											}}
-											className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+											className={cn(
+												errors[campo.id] &&
+													"border-red-500 ring-1 ring-red-500/20",
+											)}
 											placeholder="Ingrese el texto"
 										/>
 									)}
@@ -209,7 +243,8 @@ export default function FormFillPage() {
 											}}
 											className={cn(
 												"w-full rounded-none border p-2 text-xs",
-												errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+												errors[campo.id] &&
+													"border-red-500 ring-1 ring-red-500/20",
 											)}
 											rows={4}
 											placeholder="Ingrese el texto"
@@ -226,7 +261,10 @@ export default function FormFillPage() {
 													setErrors({ ...errors, [campo.id]: false })
 												}
 											}}
-											className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+											className={cn(
+												errors[campo.id] &&
+													"border-red-500 ring-1 ring-red-500/20",
+											)}
 											placeholder="Ingrese el número"
 										/>
 									)}
@@ -241,7 +279,10 @@ export default function FormFillPage() {
 													setErrors({ ...errors, [campo.id]: false })
 												}
 											}}
-											className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+											className={cn(
+												errors[campo.id] &&
+													"border-red-500 ring-1 ring-red-500/20",
+											)}
 										/>
 									)}
 
@@ -256,7 +297,8 @@ export default function FormFillPage() {
 											}}
 											className={cn(
 												"w-full rounded-none border p-2 text-xs",
-												errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+												errors[campo.id] &&
+													"border-red-500 ring-1 ring-red-500/20",
 											)}
 										>
 											<option value="">Seleccione una opción</option>
@@ -273,7 +315,8 @@ export default function FormFillPage() {
 											<div
 												className={cn(
 													"rounded-lg border-2 bg-white",
-													errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+													errors[campo.id] &&
+														"border-red-500 ring-1 ring-red-500/20",
 												)}
 											>
 												<SignatureCanvas
@@ -285,7 +328,11 @@ export default function FormFillPage() {
 												/>
 											</div>
 											<div className="mt-2 flex gap-2">
-												<Button variant="outline" size="sm" onClick={handleClearSignature}>
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={handleClearSignature}
+												>
 													<Eraser className="mr-2 size-4" weight="duotone" />
 													Limpiar
 												</Button>
@@ -312,7 +359,10 @@ export default function FormFillPage() {
 										<div>
 											<div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed bg-muted/30">
 												<div className="text-center">
-													<Upload className="mx-auto size-8 text-muted-foreground" weight="duotone" />
+													<Upload
+														className="mx-auto size-8 text-muted-foreground"
+														weight="duotone"
+													/>
 													<p className="mt-2 text-sm text-muted-foreground">
 														Haga clic para cargar una foto
 													</p>
@@ -322,7 +372,10 @@ export default function FormFillPage() {
 														className="hidden"
 														onChange={(e) => {
 															if (e.target.files?.[0]) {
-																setFormData({ ...formData, [campo.id]: e.target.files[0].name })
+																setFormData({
+																	...formData,
+																	[campo.id]: e.target.files[0].name,
+																})
 																if (errors[campo.id]) {
 																	setErrors({ ...errors, [campo.id]: false })
 																}
@@ -340,7 +393,9 @@ export default function FormFillPage() {
 									)}
 
 									{errors[campo.id] && (
-										<p className="mt-1 text-xs text-red-600">Este campo es obligatorio</p>
+										<p className="mt-1 text-xs text-red-600">
+											Este campo es obligatorio
+										</p>
 									)}
 								</div>
 							))}
@@ -349,7 +404,10 @@ export default function FormFillPage() {
 
 					{/* Submit Button */}
 					<div className="flex justify-end gap-2">
-						<Button variant="outline" onClick={() => router.push("/formularios")}>
+						<Button
+							variant="outline"
+							onClick={() => router.push("/formularios")}
+						>
 							Cancelar
 						</Button>
 						<Button onClick={handleSubmit}>

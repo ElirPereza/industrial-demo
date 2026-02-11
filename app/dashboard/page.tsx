@@ -1,5 +1,6 @@
 "use client"
 
+import { ClockCounterClockwise, WarningCircle } from "@phosphor-icons/react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -9,15 +10,20 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { kpis, equipos, registrosMantenimiento } from "@/lib/mock-data"
-import { WarningCircle, ClockCounterClockwise } from "@phosphor-icons/react"
+import { equipos, kpis, registrosMantenimiento } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
@@ -25,12 +31,24 @@ export default function DashboardPage() {
 	const kpiData = kpis.slice(0, 4).map((kpi) => ({
 		name: kpi.nombre,
 		value: `${kpi.valor}${kpi.unidad}`,
-		change: kpi.tendencia === "arriba" ? "+12%" : kpi.tendencia === "abajo" ? "-5%" : "0%",
-		changeType: kpi.tendencia === "arriba" ? "positive" : kpi.tendencia === "abajo" ? "negative" : "neutral",
+		change:
+			kpi.tendencia === "arriba"
+				? "+12%"
+				: kpi.tendencia === "abajo"
+					? "-5%"
+					: "0%",
+		changeType:
+			kpi.tendencia === "arriba"
+				? "positive"
+				: kpi.tendencia === "abajo"
+					? "negative"
+					: "neutral",
 	}))
 
 	// Critical equipment (not operational)
-	const equiposCriticos = equipos.filter((e) => e.estado !== "operativo").slice(0, 5)
+	const equiposCriticos = equipos
+		.filter((e) => e.estado !== "operativo")
+		.slice(0, 5)
 
 	// Recent activity
 	const actividadReciente = registrosMantenimiento
@@ -51,7 +69,9 @@ export default function DashboardPage() {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem className="hidden md:block">
-									<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -77,7 +97,9 @@ export default function DashboardPage() {
 									)}
 								>
 									<CardContent className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 p-4 sm:p-6">
-										<div className="text-sm font-medium text-muted-foreground">{stat.name}</div>
+										<div className="text-sm font-medium text-muted-foreground">
+											{stat.name}
+										</div>
 										<div
 											className={cn(
 												"tabular-nums text-xs font-medium",
@@ -102,7 +124,10 @@ export default function DashboardPage() {
 					{/* Equipos Críticos Section */}
 					<div>
 						<div className="mb-4 flex items-center gap-2">
-							<WarningCircle className="size-5 text-orange-600" weight="duotone" />
+							<WarningCircle
+								className="size-5 text-orange-600"
+								weight="duotone"
+							/>
 							<h2 className="text-lg font-semibold">Equipos Críticos</h2>
 						</div>
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -114,15 +139,21 @@ export default function DashboardPage() {
 									</CardHeader>
 									<CardContent>
 										<div className="flex items-center justify-between">
-											<span className="text-xs text-muted-foreground">Estado:</span>
+											<span className="text-xs text-muted-foreground">
+												Estado:
+											</span>
 											<span
 												className={cn(
 													"rounded-full px-2 py-0.5 text-xs font-medium",
-													equipo.estado === "mantenimiento" && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-													equipo.estado === "fuera-servicio" && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+													equipo.estado === "mantenimiento" &&
+														"bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+													equipo.estado === "fuera-servicio" &&
+														"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 												)}
 											>
-												{equipo.estado === "mantenimiento" ? "Mantenimiento" : "Fuera de Servicio"}
+												{equipo.estado === "mantenimiento"
+													? "Mantenimiento"
+													: "Fuera de Servicio"}
 											</span>
 										</div>
 									</CardContent>
@@ -134,16 +165,24 @@ export default function DashboardPage() {
 					{/* Actividad Reciente Section */}
 					<div>
 						<div className="mb-4 flex items-center gap-2">
-							<ClockCounterClockwise className="size-5 text-blue-600" weight="duotone" />
+							<ClockCounterClockwise
+								className="size-5 text-blue-600"
+								weight="duotone"
+							/>
 							<h2 className="text-lg font-semibold">Actividad Reciente</h2>
 						</div>
 						<Card>
 							<CardContent className="p-0">
 								<div className="divide-y">
 									{actividadReciente.map((registro) => {
-										const equipo = equipos.find((e) => e.id === registro.idEquipo)
+										const equipo = equipos.find(
+											(e) => e.id === registro.idEquipo,
+										)
 										return (
-											<div key={registro.id} className="flex items-start gap-4 p-4">
+											<div
+												key={registro.id}
+												className="flex items-start gap-4 p-4"
+											>
 												<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
 													<div
 														className={cn(
@@ -155,7 +194,9 @@ export default function DashboardPage() {
 													/>
 												</div>
 												<div className="flex-1 space-y-1">
-													<p className="text-sm font-medium">{registro.descripcion}</p>
+													<p className="text-sm font-medium">
+														{registro.descripcion}
+													</p>
 													<p className="text-xs text-muted-foreground">
 														{equipo?.nombre} • {registro.tecnico}
 													</p>
@@ -172,12 +213,19 @@ export default function DashboardPage() {
 												<span
 													className={cn(
 														"rounded-full px-2 py-0.5 text-xs font-medium",
-														registro.estado === "completado" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-														registro.estado === "en-progreso" && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-														registro.estado === "pendiente" && "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+														registro.estado === "completado" &&
+															"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+														registro.estado === "en-progreso" &&
+															"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+														registro.estado === "pendiente" &&
+															"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
 													)}
 												>
-													{registro.estado === "completado" ? "Completado" : registro.estado === "en-progreso" ? "En Progreso" : "Pendiente"}
+													{registro.estado === "completado"
+														? "Completado"
+														: registro.estado === "en-progreso"
+															? "En Progreso"
+															: "Pendiente"}
 												</span>
 											</div>
 										)

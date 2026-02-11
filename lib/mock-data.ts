@@ -5,7 +5,15 @@
 // TIPOS
 // ============================================================================
 
-export type FieldType = "texto-corto" | "texto-largo" | "numerico" | "fecha" | "seleccion-unica" | "seleccion-multiple" | "firma" | "foto"
+export type FieldType =
+	| "texto-corto"
+	| "texto-largo"
+	| "numerico"
+	| "fecha"
+	| "seleccion-unica"
+	| "seleccion-multiple"
+	| "firma"
+	| "foto"
 
 export interface FormField {
 	id: string
@@ -192,7 +200,12 @@ export const formulariosTemplate: FormTemplate[] = [
 				nombre: "Equipo afectado",
 				tipo: "seleccion-unica",
 				requerido: true,
-				opciones: ["Torno CNC-01", "Prensa Hidráulica-02", "Fresadora-03", "Compresor-04"],
+				opciones: [
+					"Torno CNC-01",
+					"Prensa Hidráulica-02",
+					"Fresadora-03",
+					"Compresor-04",
+				],
 			},
 			{
 				id: "campo-102",
@@ -212,7 +225,13 @@ export const formulariosTemplate: FormTemplate[] = [
 				nombre: "Componentes afectados",
 				tipo: "seleccion-multiple",
 				requerido: true,
-				opciones: ["Motor", "Transmisión", "Hidráulica", "Eléctrica", "Estructura"],
+				opciones: [
+					"Motor",
+					"Transmisión",
+					"Hidráulica",
+					"Eléctrica",
+					"Estructura",
+				],
 			},
 			{
 				id: "campo-105",
@@ -242,7 +261,12 @@ export const formulariosTemplate: FormTemplate[] = [
 				nombre: "Equipo a mantener",
 				tipo: "seleccion-unica",
 				requerido: true,
-				opciones: ["Torno CNC-01", "Prensa Hidráulica-02", "Fresadora-03", "Compresor-04"],
+				opciones: [
+					"Torno CNC-01",
+					"Prensa Hidráulica-02",
+					"Fresadora-03",
+					"Compresor-04",
+				],
 			},
 			{
 				id: "campo-202",
@@ -290,7 +314,12 @@ export const formulariosTemplate: FormTemplate[] = [
 				nombre: "Equipo reparado",
 				tipo: "seleccion-unica",
 				requerido: true,
-				opciones: ["Torno CNC-01", "Prensa Hidráulica-02", "Fresadora-03", "Compresor-04"],
+				opciones: [
+					"Torno CNC-01",
+					"Prensa Hidráulica-02",
+					"Fresadora-03",
+					"Compresor-04",
+				],
 			},
 			{
 				id: "campo-302",
@@ -553,9 +582,15 @@ export const enviosFormularios: EnvioFormulario[] = [
 		estado: "completado",
 		respuestas: [
 			{ idCampo: "campo-201", valor: "Torno CNC-01" },
-			{ idCampo: "campo-202", valor: "Cambio de aceite, limpieza de filtros, calibración de ejes" },
+			{
+				idCampo: "campo-202",
+				valor: "Cambio de aceite, limpieza de filtros, calibración de ejes",
+			},
 			{ idCampo: "campo-203", valor: 3.5 },
-			{ idCampo: "campo-204", valor: "Aceite ISO 46, filtros de aire, grasa NLGI 2" },
+			{
+				idCampo: "campo-204",
+				valor: "Aceite ISO 46, filtros de aire, grasa NLGI 2",
+			},
 			{ idCampo: "campo-205", valor: new Date("2026-03-08") },
 			{ idCampo: "campo-206", valor: "firma_digital_004" },
 		],
@@ -588,7 +623,10 @@ export const enviosFormularios: EnvioFormulario[] = [
 		respuestas: [
 			{ idCampo: "campo-301", valor: "Línea Ensamble-01" },
 			{ idCampo: "campo-302", valor: "Sensor de posición defectuoso" },
-			{ idCampo: "campo-303", valor: "Reemplazo de sensor y recalibración del sistema" },
+			{
+				idCampo: "campo-303",
+				valor: "Reemplazo de sensor y recalibración del sistema",
+			},
 			{ idCampo: "campo-304", valor: 450 },
 			{ idCampo: "campo-305", valor: 120 },
 			{ idCampo: "campo-306", valor: "foto_reparacion_001.jpg" },
@@ -622,7 +660,10 @@ export const enviosFormularios: EnvioFormulario[] = [
 		estado: "completado",
 		respuestas: [
 			{ idCampo: "campo-201", valor: "Transformador Principal-01" },
-			{ idCampo: "campo-202", valor: "Inspección de bobinados, prueba de aislamiento, limpieza" },
+			{
+				idCampo: "campo-202",
+				valor: "Inspección de bobinados, prueba de aislamiento, limpieza",
+			},
 			{ idCampo: "campo-203", valor: 2 },
 			{ idCampo: "campo-204", valor: "Solvente dieléctrico, papel aislante" },
 			{ idCampo: "campo-205", valor: new Date("2026-05-04") },
@@ -657,7 +698,10 @@ export const enviosFormularios: EnvioFormulario[] = [
 		respuestas: [
 			{ idCampo: "campo-301", valor: "Aire Acondicionado Central-01" },
 			{ idCampo: "campo-302", valor: "Fuga de refrigerante en conexión" },
-			{ idCampo: "campo-303", valor: "Reemplazo de tuberías y recarga de refrigerante" },
+			{
+				idCampo: "campo-303",
+				valor: "Reemplazo de tuberías y recarga de refrigerante",
+			},
 			{ idCampo: "campo-304", valor: 320 },
 			{ idCampo: "campo-305", valor: 180 },
 			{ idCampo: "campo-306", valor: "foto_reparacion_002.jpg" },
@@ -708,9 +752,15 @@ export const enviosFormularios: EnvioFormulario[] = [
 		estado: "completado",
 		respuestas: [
 			{ idCampo: "campo-201", valor: "Compresor Eléctrico-03" },
-			{ idCampo: "campo-202", valor: "Reemplazo de rodamientos, alineación de ejes" },
+			{
+				idCampo: "campo-202",
+				valor: "Reemplazo de rodamientos, alineación de ejes",
+			},
 			{ idCampo: "campo-203", valor: 4 },
-			{ idCampo: "campo-204", valor: "Rodamientos SKF, grasa de alta temperatura" },
+			{
+				idCampo: "campo-204",
+				valor: "Rodamientos SKF, grasa de alta temperatura",
+			},
 			{ idCampo: "campo-205", valor: new Date("2026-03-30") },
 			{ idCampo: "campo-206", valor: "firma_digital_013" },
 		],
@@ -742,7 +792,10 @@ export const enviosFormularios: EnvioFormulario[] = [
 		estado: "completado",
 		respuestas: [
 			{ idCampo: "campo-201", valor: "Taladro Radial-04" },
-			{ idCampo: "campo-202", valor: "Cambio de aceite, inspección de brocas, ajuste de mesa" },
+			{
+				idCampo: "campo-202",
+				valor: "Cambio de aceite, inspección de brocas, ajuste de mesa",
+			},
 			{ idCampo: "campo-203", valor: 2.5 },
 			{ idCampo: "campo-204", valor: "Aceite ISO 32, brocas de repuesto" },
 			{ idCampo: "campo-205", valor: new Date("2026-02-28") },

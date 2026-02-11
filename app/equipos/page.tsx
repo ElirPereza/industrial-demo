@@ -1,5 +1,6 @@
 "use client"
 
+import { Factory, Gear, Lightning, Wind } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -10,15 +11,20 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { equipos } from "@/lib/mock-data"
-import { Gear, Factory, Lightning, Wind } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
 export default function EquiposPage() {
@@ -76,7 +82,9 @@ export default function EquiposPage() {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem className="hidden md:block">
-									<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -91,13 +99,16 @@ export default function EquiposPage() {
 					<div>
 						<h1 className="text-2xl font-semibold">Gestión de Equipos</h1>
 						<p className="text-sm text-muted-foreground">
-							Visualiza el estado y el historial de mantenimiento de todos los equipos
+							Visualiza el estado y el historial de mantenimiento de todos los
+							equipos
 						</p>
 					</div>
 
 					{Object.entries(equiposPorTipo).map(([tipo, equiposGrupo]) => (
 						<div key={tipo}>
-							<h2 className="mb-4 text-lg font-semibold">{getTipoLabel(tipo)}</h2>
+							<h2 className="mb-4 text-lg font-semibold">
+								{getTipoLabel(tipo)}
+							</h2>
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 								{equiposGrupo.map((equipo) => (
 									<Card
@@ -110,9 +121,12 @@ export default function EquiposPage() {
 												<div
 													className={cn(
 														"flex size-10 items-center justify-center rounded-lg",
-														equipo.estado === "operativo" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-														equipo.estado === "mantenimiento" && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-														equipo.estado === "fuera-servicio" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+														equipo.estado === "operativo" &&
+															"bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+														equipo.estado === "mantenimiento" &&
+															"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+														equipo.estado === "fuera-servicio" &&
+															"bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 													)}
 												>
 													{getIcon(tipo)}
@@ -120,12 +134,19 @@ export default function EquiposPage() {
 												<span
 													className={cn(
 														"rounded-full px-2 py-0.5 text-xs font-medium",
-														equipo.estado === "operativo" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-														equipo.estado === "mantenimiento" && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-														equipo.estado === "fuera-servicio" && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+														equipo.estado === "operativo" &&
+															"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+														equipo.estado === "mantenimiento" &&
+															"bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+														equipo.estado === "fuera-servicio" &&
+															"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 													)}
 												>
-													{equipo.estado === "operativo" ? "Operativo" : equipo.estado === "mantenimiento" ? "Mantenimiento" : "Fuera de Servicio"}
+													{equipo.estado === "operativo"
+														? "Operativo"
+														: equipo.estado === "mantenimiento"
+															? "Mantenimiento"
+															: "Fuera de Servicio"}
 												</span>
 											</div>
 											<CardTitle className="mt-4">{equipo.nombre}</CardTitle>
@@ -134,21 +155,31 @@ export default function EquiposPage() {
 										<CardContent>
 											<div className="space-y-2 text-xs">
 												<div className="flex justify-between">
-													<span className="text-muted-foreground">Último mantenimiento:</span>
+													<span className="text-muted-foreground">
+														Último mantenimiento:
+													</span>
 													<span className="font-medium">
-														{equipo.ultimoMantenimiento.toLocaleDateString("es-ES", {
-															day: "2-digit",
-															month: "short",
-														})}
+														{equipo.ultimoMantenimiento.toLocaleDateString(
+															"es-ES",
+															{
+																day: "2-digit",
+																month: "short",
+															},
+														)}
 													</span>
 												</div>
 												<div className="flex justify-between">
-													<span className="text-muted-foreground">Próximo mantenimiento:</span>
+													<span className="text-muted-foreground">
+														Próximo mantenimiento:
+													</span>
 													<span className="font-medium">
-														{equipo.proximoMantenimiento.toLocaleDateString("es-ES", {
-															day: "2-digit",
-															month: "short",
-														})}
+														{equipo.proximoMantenimiento.toLocaleDateString(
+															"es-ES",
+															{
+																day: "2-digit",
+																month: "short",
+															},
+														)}
 													</span>
 												</div>
 											</div>

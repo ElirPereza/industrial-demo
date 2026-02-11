@@ -1,5 +1,7 @@
 "use client"
 
+import { Download, QrCode } from "@phosphor-icons/react"
+import { QRCodeSVG } from "qrcode.react"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -10,14 +12,14 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
 import {
 	Dialog,
 	DialogContent,
@@ -25,19 +27,29 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
+import { Separator } from "@/components/ui/separator"
+import {
+	SidebarInset,
+	SidebarProvider,
+	SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { formulariosTemplate } from "@/lib/mock-data"
-import { QRCodeSVG } from "qrcode.react"
-import { Download, QrCode } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
 export default function QRCodesPage() {
-	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(null)
+	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(
+		null,
+	)
 
-	const selectedForm = formulariosTemplate.find((f) => f.id === selectedFormulario)
+	const selectedForm = formulariosTemplate.find(
+		(f) => f.id === selectedFormulario,
+	)
 
 	const handleDownload = (formularioId: string, nombre: string) => {
 		// Simulate download by opening QR in new tab
-		const canvas = document.getElementById(`qr-${formularioId}`) as HTMLCanvasElement
+		const canvas = document.getElementById(
+			`qr-${formularioId}`,
+		) as HTMLCanvasElement
 		if (canvas) {
 			const url = canvas.toDataURL("image/png")
 			const link = document.createElement("a")
@@ -61,7 +73,9 @@ export default function QRCodesPage() {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem className="hidden md:block">
-									<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -74,7 +88,9 @@ export default function QRCodesPage() {
 
 				<div className="flex flex-1 flex-col gap-6 p-4 pt-0">
 					<div>
-						<h1 className="text-2xl font-semibold">Códigos QR de Formularios</h1>
+						<h1 className="text-2xl font-semibold">
+							Códigos QR de Formularios
+						</h1>
 						<p className="text-sm text-muted-foreground">
 							Genera y descarga códigos QR para acceso rápido a formularios
 						</p>
@@ -93,7 +109,10 @@ export default function QRCodesPage() {
 									<CardHeader>
 										<div className="flex items-start justify-between">
 											<div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-												<QrCode className="size-6 text-primary" weight="duotone" />
+												<QrCode
+													className="size-6 text-primary"
+													weight="duotone"
+												/>
 											</div>
 											<span
 												className={cn(
@@ -139,7 +158,10 @@ export default function QRCodesPage() {
 			</SidebarInset>
 
 			{/* Detail Dialog */}
-			<Dialog open={selectedFormulario !== null} onOpenChange={() => setSelectedFormulario(null)}>
+			<Dialog
+				open={selectedFormulario !== null}
+				onOpenChange={() => setSelectedFormulario(null)}
+			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>{selectedForm?.nombre}</DialogTitle>
@@ -159,7 +181,9 @@ export default function QRCodesPage() {
 						<div className="space-y-2 text-sm">
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Tipo:</span>
-								<span className="font-medium capitalize">{selectedForm?.tipo.replace("-", " ")}</span>
+								<span className="font-medium capitalize">
+									{selectedForm?.tipo.replace("-", " ")}
+								</span>
 							</div>
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Versión:</span>

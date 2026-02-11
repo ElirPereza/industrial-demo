@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { Card, CardContent } from "@/components/ui/card";
-import { ChartContainer } from "@/components/ui/chart";
-import { cn } from "@/lib/utils";
-import { Area, AreaChart, XAxis } from "recharts";
+import { Area, AreaChart, XAxis } from "recharts"
+import { Card, CardContent } from "@/components/ui/card"
+import { ChartContainer } from "@/components/ui/chart"
+import { cn } from "@/lib/utils"
 
 const data = [
 	{
@@ -96,7 +96,7 @@ const data = [
 		"Beta Solutions": 78.54,
 		"Gamma Industries": 75.68,
 	},
-];
+]
 
 const summary = [
 	{
@@ -123,27 +123,27 @@ const summary = [
 		percentageChange: "-7.1%",
 		changeType: "negative",
 	},
-];
+]
 
 const sanitizeName = (name: string) => {
 	return name
 		.replace(/\s+/g, "-")
 		.replace(/[^a-zA-Z0-9-]/g, "_")
-		.toLowerCase();
-};
+		.toLowerCase()
+}
 
 export default function Stats10() {
 	return (
 		<div className="flex items-center justify-center p-10 w-full">
 			<dl className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">
 				{summary.map((item) => {
-					const sanitizedName = sanitizeName(item.name);
-					const gradientId = `gradient-${sanitizedName}`;
+					const sanitizedName = sanitizeName(item.name)
+					const gradientId = `gradient-${sanitizedName}`
 
 					const color =
 						item.changeType === "positive"
 							? "hsl(142.1 76.2% 36.3%)"
-							: "hsl(0 72.2% 50.6%)";
+							: "hsl(0 72.2% 50.6%)"
 
 					return (
 						<Card key={item.name} className="p-0">
@@ -161,7 +161,7 @@ export default function Stats10() {
 												item.changeType === "positive"
 													? "text-green-600 dark:text-green-500"
 													: "text-red-600 dark:text-red-500",
-												"text-lg font-semibold"
+												"text-lg font-semibold",
 											)}
 										>
 											{item.value}
@@ -174,7 +174,7 @@ export default function Stats10() {
 												className={cn(
 													item.changeType === "positive"
 														? "text-green-600 dark:text-green-500"
-														: "text-red-600 dark:text-red-500"
+														: "text-red-600 dark:text-red-500",
 												)}
 											>
 												({item.percentageChange})
@@ -228,9 +228,9 @@ export default function Stats10() {
 								</div>
 							</CardContent>
 						</Card>
-					);
+					)
 				})}
 			</dl>
 		</div>
-	);
+	)
 }

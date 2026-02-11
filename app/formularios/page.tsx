@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Eye, PencilSimple, Plus, Trash } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -11,13 +12,20 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
 import {
 	Table,
 	TableBody,
@@ -27,14 +35,11 @@ import {
 	TableRow,
 } from "@/components/ui/table"
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog"
-import { enviosFormularios, formulariosTemplate, equipos, usuarios } from "@/lib/mock-data"
-import { Plus, Eye, PencilSimple, Trash } from "@phosphor-icons/react"
+	enviosFormularios,
+	equipos,
+	formulariosTemplate,
+	usuarios,
+} from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 export default function FormulariosPage() {
@@ -43,7 +48,9 @@ export default function FormulariosPage() {
 
 	// Prepare table data with joins
 	const tableData = enviosFormularios.map((envio) => {
-		const formulario = formulariosTemplate.find((f) => f.id === envio.idFormulario)
+		const formulario = formulariosTemplate.find(
+			(f) => f.id === envio.idFormulario,
+		)
 		const equipo = equipos.find((e) => e.id === envio.idEquipo)
 		const usuario = usuarios.find((u) => u.id === envio.idUsuario)
 
@@ -76,7 +83,9 @@ export default function FormulariosPage() {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem className="hidden md:block">
-									<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -142,12 +151,19 @@ export default function FormulariosPage() {
 											<span
 												className={cn(
 													"inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
-													row.estado === "completado" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-													row.estado === "pendiente" && "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-													row.estado === "rechazado" && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+													row.estado === "completado" &&
+														"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+													row.estado === "pendiente" &&
+														"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+													row.estado === "rechazado" &&
+														"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 												)}
 											>
-												{row.estado === "completado" ? "Completado" : row.estado === "pendiente" ? "Pendiente" : "Rechazado"}
+												{row.estado === "completado"
+													? "Completado"
+													: row.estado === "pendiente"
+														? "Pendiente"
+														: "Rechazado"}
 											</span>
 										</TableCell>
 										<TableCell className="text-right">
@@ -193,7 +209,10 @@ export default function FormulariosPage() {
 			</SidebarInset>
 
 			{/* Detail Dialog */}
-			<Dialog open={selectedEnvio !== null} onOpenChange={() => setSelectedEnvio(null)}>
+			<Dialog
+				open={selectedEnvio !== null}
+				onOpenChange={() => setSelectedEnvio(null)}
+			>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>{selectedData?.titulo}</DialogTitle>
@@ -220,11 +239,15 @@ export default function FormulariosPage() {
 							</div>
 							<div>
 								<span className="font-medium">Equipo:</span>
-								<p className="text-muted-foreground">{selectedData?.equipo?.nombre}</p>
+								<p className="text-muted-foreground">
+									{selectedData?.equipo?.nombre}
+								</p>
 							</div>
 							<div>
 								<span className="font-medium">Estado:</span>
-								<p className="text-muted-foreground capitalize">{selectedData?.estado}</p>
+								<p className="text-muted-foreground capitalize">
+									{selectedData?.estado}
+								</p>
 							</div>
 						</div>
 						<div>

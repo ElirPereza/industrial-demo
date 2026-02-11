@@ -1,5 +1,6 @@
 "use client"
 
+import { PencilSimple, Trash } from "@phosphor-icons/react"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -10,15 +11,8 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
+import { Card, CardContent } from "@/components/ui/card"
 import {
 	Dialog,
 	DialogContent,
@@ -27,6 +21,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
+import { Separator } from "@/components/ui/separator"
+import {
+	SidebarInset,
+	SidebarProvider,
+	SidebarTrigger,
+} from "@/components/ui/sidebar"
+import { Switch } from "@/components/ui/switch"
 import {
 	Table,
 	TableBody,
@@ -35,14 +36,15 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
-import { formulariosTemplate, equipos } from "@/lib/mock-data"
-import { Trash, PencilSimple } from "@phosphor-icons/react"
+import { equipos, formulariosTemplate } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 export default function FormAdminPage() {
 	const [formularios, setFormularios] = useState(formulariosTemplate)
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(null)
+	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(
+		null,
+	)
 
 	const handleToggleActivo = (id: string) => {
 		setFormularios((prev) =>
@@ -73,11 +75,15 @@ export default function FormAdminPage() {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem className="hidden md:block">
-									<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
-									<BreadcrumbLink href="/formularios">Formularios</BreadcrumbLink>
+									<BreadcrumbLink href="/formularios">
+										Formularios
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -90,7 +96,9 @@ export default function FormAdminPage() {
 
 				<div className="flex flex-1 flex-col gap-6 p-4 pt-0">
 					<div>
-						<h1 className="text-2xl font-semibold">Administración de Formularios</h1>
+						<h1 className="text-2xl font-semibold">
+							Administración de Formularios
+						</h1>
 						<p className="text-sm text-muted-foreground">
 							Activa, desactiva y gestiona los formularios del sistema
 						</p>
@@ -112,20 +120,28 @@ export default function FormAdminPage() {
 								<TableBody>
 									{formularios.map((formulario) => (
 										<TableRow key={formulario.id}>
-											<TableCell className="font-medium">{formulario.nombre}</TableCell>
+											<TableCell className="font-medium">
+												{formulario.nombre}
+											</TableCell>
 											<TableCell>
-												<span className="capitalize">{formulario.tipo.replace("-", " ")}</span>
+												<span className="capitalize">
+													{formulario.tipo.replace("-", " ")}
+												</span>
 											</TableCell>
 											<TableCell>
 												<div className="flex items-center gap-2">
 													<Switch
 														checked={formulario.activo}
-														onCheckedChange={() => handleToggleActivo(formulario.id)}
+														onCheckedChange={() =>
+															handleToggleActivo(formulario.id)
+														}
 													/>
 													<span
 														className={cn(
 															"text-xs font-medium",
-															formulario.activo ? "text-green-600" : "text-gray-500",
+															formulario.activo
+																? "text-green-600"
+																: "text-gray-500",
 														)}
 													>
 														{formulario.activo ? "Activo" : "Inactivo"}
@@ -192,12 +208,15 @@ export default function FormAdminPage() {
 					<DialogHeader>
 						<DialogTitle>¿Eliminar formulario?</DialogTitle>
 						<DialogDescription>
-							Esta acción no se puede deshacer. El formulario será eliminado permanentemente del
-							sistema.
+							Esta acción no se puede deshacer. El formulario será eliminado
+							permanentemente del sistema.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
-						<Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+						<Button
+							variant="outline"
+							onClick={() => setDeleteDialogOpen(false)}
+						>
 							Cancelar
 						</Button>
 						<Button variant="destructive" onClick={handleDelete}>

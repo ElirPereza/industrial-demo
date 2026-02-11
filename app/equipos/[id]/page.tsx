@@ -1,5 +1,6 @@
 "use client"
 
+import { ArrowLeft, CheckCircle, Clock, Wrench } from "@phosphor-icons/react"
 import { useParams, useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -10,16 +11,21 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { equipos, registrosMantenimiento, usuarios } from "@/lib/mock-data"
-import { ArrowLeft, Wrench, CheckCircle, Clock } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
 export default function EquipoDetailPage() {
@@ -69,7 +75,9 @@ export default function EquipoDetailPage() {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem className="hidden md:block">
-									<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -86,7 +94,11 @@ export default function EquipoDetailPage() {
 
 				<div className="flex flex-1 flex-col gap-6 p-4 pt-0">
 					{/* Back button */}
-					<Button variant="ghost" className="w-fit" onClick={() => router.push("/equipos")}>
+					<Button
+						variant="ghost"
+						className="w-fit"
+						onClick={() => router.push("/equipos")}
+					>
 						<ArrowLeft className="mr-2 size-4" weight="bold" />
 						Volver a Equipos
 					</Button>
@@ -100,12 +112,19 @@ export default function EquipoDetailPage() {
 						<span
 							className={cn(
 								"rounded-full px-3 py-1 text-sm font-medium",
-								equipo.estado === "operativo" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-								equipo.estado === "mantenimiento" && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-								equipo.estado === "fuera-servicio" && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+								equipo.estado === "operativo" &&
+									"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+								equipo.estado === "mantenimiento" &&
+									"bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+								equipo.estado === "fuera-servicio" &&
+									"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 							)}
 						>
-							{equipo.estado === "operativo" ? "Operativo" : equipo.estado === "mantenimiento" ? "En Mantenimiento" : "Fuera de Servicio"}
+							{equipo.estado === "operativo"
+								? "Operativo"
+								: equipo.estado === "mantenimiento"
+									? "En Mantenimiento"
+									: "Fuera de Servicio"}
 						</span>
 					</div>
 
@@ -114,7 +133,9 @@ export default function EquipoDetailPage() {
 						<Card>
 							<CardHeader>
 								<CardDescription>Total Intervenciones</CardDescription>
-								<CardTitle className="text-3xl">{totalIntervenciones}</CardTitle>
+								<CardTitle className="text-3xl">
+									{totalIntervenciones}
+								</CardTitle>
 							</CardHeader>
 						</Card>
 						<Card>
@@ -141,15 +162,21 @@ export default function EquipoDetailPage() {
 
 					{/* Timeline */}
 					<div>
-						<h2 className="mb-4 text-xl font-semibold">Historial de Mantenimiento</h2>
+						<h2 className="mb-4 text-xl font-semibold">
+							Historial de Mantenimiento
+						</h2>
 						<Card>
 							<CardContent className="p-6">
 								{historial.length === 0 ? (
-									<p className="text-center text-muted-foreground">No hay registros de mantenimiento</p>
+									<p className="text-center text-muted-foreground">
+										No hay registros de mantenimiento
+									</p>
 								) : (
 									<div className="space-y-6">
 										{historial.map((registro, index) => {
-											const tecnico = usuarios.find((u) => u.nombre === registro.tecnico)
+											const tecnico = usuarios.find(
+												(u) => u.nombre === registro.tecnico,
+											)
 											return (
 												<div key={registro.id} className="relative flex gap-4">
 													{/* Timeline line */}
@@ -161,9 +188,12 @@ export default function EquipoDetailPage() {
 													<div
 														className={cn(
 															"flex size-10 shrink-0 items-center justify-center rounded-full",
-															registro.tipo === "preventivo" && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-															registro.tipo === "correctivo" && "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-															registro.tipo === "inspección" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+															registro.tipo === "preventivo" &&
+																"bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+															registro.tipo === "correctivo" &&
+																"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+															registro.tipo === "inspección" &&
+																"bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
 														)}
 													>
 														{registro.estado === "completado" ? (
@@ -179,24 +209,36 @@ export default function EquipoDetailPage() {
 													<div className="flex-1 space-y-2 pb-6">
 														<div className="flex items-start justify-between">
 															<div>
-																<h3 className="font-semibold capitalize">{registro.tipo}</h3>
+																<h3 className="font-semibold capitalize">
+																	{registro.tipo}
+																</h3>
 																<p className="text-sm text-muted-foreground">
-																	{registro.fechaInicio.toLocaleDateString("es-ES", {
-																		day: "2-digit",
-																		month: "long",
-																		year: "numeric",
-																	})}
+																	{registro.fechaInicio.toLocaleDateString(
+																		"es-ES",
+																		{
+																			day: "2-digit",
+																			month: "long",
+																			year: "numeric",
+																		},
+																	)}
 																</p>
 															</div>
 															<span
 																className={cn(
 																	"rounded-full px-2 py-0.5 text-xs font-medium",
-																	registro.estado === "completado" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-																	registro.estado === "en-progreso" && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-																	registro.estado === "pendiente" && "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+																	registro.estado === "completado" &&
+																		"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+																	registro.estado === "en-progreso" &&
+																		"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+																	registro.estado === "pendiente" &&
+																		"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
 																)}
 															>
-																{registro.estado === "completado" ? "Completado" : registro.estado === "en-progreso" ? "En Progreso" : "Pendiente"}
+																{registro.estado === "completado"
+																	? "Completado"
+																	: registro.estado === "en-progreso"
+																		? "En Progreso"
+																		: "Pendiente"}
 															</span>
 														</div>
 														<p className="text-sm">{registro.descripcion}</p>
@@ -205,7 +247,9 @@ export default function EquipoDetailPage() {
 															<span>•</span>
 															<span>{registro.horasEmpleadas}h empleadas</span>
 															<span>•</span>
-															<span>${registro.costo.toLocaleString("es-ES")}</span>
+															<span>
+																${registro.costo.toLocaleString("es-ES")}
+															</span>
 														</div>
 													</div>
 												</div>
