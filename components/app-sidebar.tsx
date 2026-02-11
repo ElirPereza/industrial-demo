@@ -1,13 +1,14 @@
 "use client"
 
 import {
+	ChartBarIcon,
 	ChartLineIcon,
 	CubeIcon,
 	FactoryIcon,
 	FileTextIcon,
 	GearIcon,
-	LifebuoyIcon,
 	QrCodeIcon,
+	SlidersIcon,
 	WrenchIcon,
 } from "@phosphor-icons/react"
 import type * as React from "react"
@@ -43,40 +44,35 @@ const data = {
 			title: "Formularios",
 			url: "/formularios",
 			icon: <FileTextIcon />,
+			items: [
+				{ title: "Envíos", url: "/formularios" },
+				{ title: "Constructor", url: "/formularios/constructor" },
+				{ title: "Administración", url: "/formularios/admin" },
+			],
 		},
 		{
 			title: "Equipos",
 			url: "/equipos",
 			icon: <CubeIcon />,
 		},
-	],
-	navSecondary: [
 		{
-			title: "Soporte",
-			url: "/soporte",
-			icon: <LifebuoyIcon />,
-		},
-		{
-			title: "Configuración",
-			url: "/configuracion",
-			icon: <GearIcon />,
+			title: "Analíticas",
+			url: "/analiticas",
+			icon: <ChartBarIcon />,
 		},
 	],
-	projects: [
-		{
-			name: "Constructor",
-			url: "/formularios/constructor",
-			icon: <WrenchIcon />,
-		},
-		{
-			name: "Administración",
-			url: "/formularios/admin",
-			icon: <GearIcon />,
-		},
+	herramientas: [
 		{
 			name: "Códigos QR",
 			url: "/qr-codes",
 			icon: <QrCodeIcon />,
+		},
+	],
+	navSecondary: [
+		{
+			title: "Configuración",
+			url: "/configuracion",
+			icon: <SlidersIcon />,
 		},
 	],
 }
@@ -105,7 +101,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={data.navMain} />
-				<NavProjects projects={data.projects} />
+				<NavProjects projects={data.herramientas} />
 				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>

@@ -1,26 +1,11 @@
 "use client"
 
 import {
-	DotsThreeOutlineIcon,
-	FolderIcon,
-	ShareIcon,
-	TrashIcon,
-} from "@phosphor-icons/react"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
 	SidebarGroup,
 	SidebarGroupLabel,
 	SidebarMenu,
-	SidebarMenuAction,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	useSidebar,
 } from "@/components/ui/sidebar"
 
 export function NavProjects({
@@ -32,11 +17,9 @@ export function NavProjects({
 		icon: React.ReactNode
 	}[]
 }) {
-	const { isMobile } = useSidebar()
-
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-			<SidebarGroupLabel>Projects</SidebarGroupLabel>
+			<SidebarGroupLabel>Herramientas</SidebarGroupLabel>
 			<SidebarMenu>
 				{projects.map((item) => (
 					<SidebarMenuItem key={item.name}>
@@ -46,44 +29,8 @@ export function NavProjects({
 								<span>{item.name}</span>
 							</a>
 						</SidebarMenuButton>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<SidebarMenuAction
-									showOnHover
-									className="aria-expanded:bg-muted"
-								>
-									<DotsThreeOutlineIcon />
-									<span className="sr-only">More</span>
-								</SidebarMenuAction>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								className="w-48"
-								side={isMobile ? "bottom" : "right"}
-								align={isMobile ? "end" : "start"}
-							>
-								<DropdownMenuItem>
-									<FolderIcon className="text-muted-foreground" />
-									<span>View Project</span>
-								</DropdownMenuItem>
-								<DropdownMenuItem>
-									<ShareIcon className="text-muted-foreground" />
-									<span>Share Project</span>
-								</DropdownMenuItem>
-								<DropdownMenuSeparator />
-								<DropdownMenuItem>
-									<TrashIcon className="text-muted-foreground" />
-									<span>Delete Project</span>
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
 					</SidebarMenuItem>
 				))}
-				<SidebarMenuItem>
-					<SidebarMenuButton>
-						<DotsThreeOutlineIcon />
-						<span>More</span>
-					</SidebarMenuButton>
-				</SidebarMenuItem>
 			</SidebarMenu>
 		</SidebarGroup>
 	)
