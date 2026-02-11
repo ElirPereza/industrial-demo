@@ -15,153 +15,82 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { TerminalIcon, RobotIcon, BookOpenIcon, GearIcon, LifebuoyIcon, PaperPlaneTiltIcon, CropIcon, ChartPieIcon, MapTrifoldIcon, CommandIcon } from "@phosphor-icons/react"
+import { ChartLineIcon, FileTextIcon, CubeIcon, WrenchIcon, GearIcon, QrCodeIcon, LifebuoyIcon, FactoryIcon } from "@phosphor-icons/react"
+import { usuarios } from "@/lib/mock-data"
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: usuarios[0].nombre,
+    email: usuarios[0].email,
+    avatar: "/avatars/admin.jpg",
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: "Dashboard",
+      url: "/dashboard",
       icon: (
-        <TerminalIcon
+        <ChartLineIcon
         />
       ),
       isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Models",
-      url: "#",
+      title: "Formularios",
+      url: "/formularios",
       icon: (
-        <RobotIcon
+        <FileTextIcon
         />
       ),
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Documentation",
-      url: "#",
+      title: "Equipos",
+      url: "/equipos",
       icon: (
-        <BookOpenIcon
+        <CubeIcon
         />
       ),
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <GearIcon
-        />
-      ),
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
     },
   ],
   navSecondary: [
     {
-      title: "Support",
-      url: "#",
+      title: "Soporte",
+      url: "/soporte",
       icon: (
         <LifebuoyIcon
         />
       ),
     },
     {
-      title: "Feedback",
-      url: "#",
+      title: "Configuración",
+      url: "/configuracion",
       icon: (
-        <PaperPlaneTiltIcon
+        <GearIcon
         />
       ),
     },
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
+      name: "Constructor",
+      url: "/formularios/constructor",
       icon: (
-        <CropIcon
+        <WrenchIcon
         />
       ),
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
+      name: "Administración",
+      url: "/formularios/admin",
       icon: (
-        <ChartPieIcon
+        <GearIcon
         />
       ),
     },
     {
-      name: "Travel",
-      url: "#",
+      name: "Códigos QR",
+      url: "/qr-codes",
       icon: (
-        <MapTrifoldIcon
+        <QrCodeIcon
         />
       ),
     },
@@ -175,13 +104,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/dashboard">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <CommandIcon className="size-4" />
+                  <FactoryIcon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">Industrial Portal</span>
+                  <span className="truncate text-xs">Gestión Industrial</span>
                 </div>
               </a>
             </SidebarMenuButton>
