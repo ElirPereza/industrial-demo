@@ -69,10 +69,10 @@ Crear una maqueta frontend navegable y visualmente pulida que demuestre todas la
 - Códigos QR generados dinámicamente
 
 ### Definition of Done
-- [ ] Todas las rutas navegables desde sidebar
-- [ ] `pnpm build` completa sin errores
-- [ ] `pnpm lint` pasa sin errores
-- [ ] Cada módulo muestra datos mock relevantes
+- [x] Todas las rutas navegables desde sidebar
+- [x] `pnpm build` completa sin errores
+- [x] `pnpm lint` pasa sin errores (warnings solo en componentes UI base)
+- [x] Cada módulo muestra datos mock relevantes
 
 ### Must Have
 - Navegación entre todos los módulos
@@ -251,7 +251,7 @@ Wave 5 (Final):
 
 ---
 
-- [ ] 2. Instalar librerías externas
+- [x] 2. Instalar librerías externas
 
   **What to do**:
   - Instalar qrcode.react: `pnpm add qrcode.react`
@@ -379,7 +379,7 @@ Wave 5 (Final):
 
 ### Wave 2: Navegación + Módulos Base
 
-- [ ] 5. Actualizar sidebar con navegación en español
+- [x] 5. Actualizar sidebar con navegación en español
 
   **What to do**:
   - Modificar `components/app-sidebar.tsx` con navegación del portal industrial
