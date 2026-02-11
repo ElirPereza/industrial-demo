@@ -30,7 +30,6 @@ import {
 	TextT,
 	Trash,
 } from "@phosphor-icons/react"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -199,7 +198,6 @@ function SortableField({
 }
 
 export default function FormBuilderPage() {
-	const router = useRouter()
 	const [formName, setFormName] = useState("Nuevo Formulario")
 	const [fields, setFields] = useState<FormField[]>([])
 	const [selectedField, setSelectedField] = useState<FormField | null>(null)

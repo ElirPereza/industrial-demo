@@ -1,17 +1,10 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Noto_Sans } from "next/font/google"
+import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
-const notoSans = Noto_Sans({ variable: "--font-sans" })
-
-const geistSans = Geist({
-	variable: "--font-geist-sans",
-	subsets: ["latin"],
-})
-
-const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+	variable: "--font-mono",
 	subsets: ["latin"],
 })
 
@@ -27,10 +20,8 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="es" className={notoSans.variable}>
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
+		<html lang="es" className={jetbrainsMono.variable}>
+			<body className={`${jetbrainsMono.className} antialiased`}>
 				<TooltipProvider>{children}</TooltipProvider>
 			</body>
 		</html>

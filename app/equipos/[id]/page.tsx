@@ -1,7 +1,8 @@
 "use client"
 
 import { ArrowLeft, CheckCircle, Clock, Wrench } from "@phosphor-icons/react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { use } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -28,10 +29,13 @@ import {
 import { equipos, registrosMantenimiento, usuarios } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
-export default function EquipoDetailPage() {
-	const params = useParams()
+export default function EquipoDetailPage({
+	params,
+}: {
+	params: Promise<{ id: string }>
+}) {
+	const { id: equipoId } = use(params)
 	const router = useRouter()
-	const equipoId = params.id as string
 
 	const equipo = equipos.find((e) => e.id === equipoId)
 	const historial = registrosMantenimiento

@@ -8,8 +8,8 @@ import {
 	Upload,
 	User,
 } from "@phosphor-icons/react"
-import { useParams, useRouter } from "next/navigation"
-import { useRef, useState } from "react"
+import { useRouter } from "next/navigation"
+import { use, useRef, useState } from "react"
 import SignatureCanvas from "react-signature-canvas"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -38,10 +38,13 @@ import {
 import { formulariosTemplate, usuarios } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
-export default function FormFillPage() {
-	const params = useParams()
+export default function FormFillPage({
+	params,
+}: {
+	params: Promise<{ id: string }>
+}) {
+	const { id: formularioId } = use(params)
 	const router = useRouter()
-	const formularioId = params.id as string
 	const signatureRef = useRef<SignatureCanvas>(null)
 
 	const formulario = formulariosTemplate.find((f) => f.id === formularioId)
