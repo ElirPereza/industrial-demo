@@ -1,6 +1,7 @@
 "use client"
 
 import {
+	Buildings,
 	ChartBarIcon,
 	ChartLineIcon,
 	CubeIcon,
@@ -9,9 +10,11 @@ import {
 	GearIcon,
 	QrCodeIcon,
 	SlidersIcon,
+	Users,
 	WrenchIcon,
 } from "@phosphor-icons/react"
 import type * as React from "react"
+import { NavAdmin } from "@/components/nav-admin"
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
@@ -61,6 +64,18 @@ const data = {
 			icon: <ChartBarIcon />,
 		},
 	],
+	administracion: [
+		{
+			title: "Usuarios",
+			url: "/usuarios",
+			icon: <Users />,
+		},
+		{
+			title: "Contratistas",
+			url: "/contratistas",
+			icon: <Buildings />,
+		},
+	],
 	herramientas: [
 		{
 			name: "Códigos QR",
@@ -101,6 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={data.navMain} />
+				<NavAdmin items={data.administracion} />
 				<NavProjects projects={data.herramientas} />
 				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
