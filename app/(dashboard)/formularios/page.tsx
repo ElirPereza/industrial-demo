@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
-	getEnvios,
 	type EnvioFormulario,
+	getEnvios,
 } from "@/app/(dashboard)/formularios/envios-actions"
 import {
 	Breadcrumb,
@@ -26,10 +26,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import {
 	Table,
 	TableBody,
@@ -97,9 +94,7 @@ export default function FormulariosPage() {
 					{/* Header with actions */}
 					<div className="flex items-center justify-between">
 						<div>
-							<h1 className="text-2xl font-semibold">
-								Gestión de Formularios
-							</h1>
+							<h1 className="text-2xl font-semibold">Gestión de Formularios</h1>
 							<p className="text-sm text-muted-foreground">
 								Administra y revisa los formularios enviados
 							</p>
@@ -175,10 +170,7 @@ export default function FormulariosPage() {
 											</TableCell>
 											<TableCell>{row.equipo_ubicacion ?? "N/A"}</TableCell>
 											<TableCell>
-												{format(
-													new Date(row.created_at),
-													"dd/MM/yyyy HH:mm",
-												)}
+												{format(new Date(row.created_at), "dd/MM/yyyy HH:mm")}
 											</TableCell>
 											<TableCell>
 												<span
@@ -218,10 +210,7 @@ export default function FormulariosPage() {
 															e.stopPropagation()
 														}}
 													>
-														<PencilSimple
-															className="size-4"
-															weight="duotone"
-														/>
+														<PencilSimple className="size-4" weight="duotone" />
 													</Button>
 													<Button
 														variant="ghost"

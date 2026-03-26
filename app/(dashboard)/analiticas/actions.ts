@@ -78,9 +78,7 @@ export async function getDashboardKPIs(): Promise<
 }
 
 export async function getFormulariosPorMes(): Promise<
-	ActionResult<
-		Array<{ mes: string; completados: number; pendientes: number }>
-	>
+	ActionResult<Array<{ mes: string; completados: number; pendientes: number }>>
 > {
 	const user = await getUser()
 	if (!user) return { success: false, error: "No autorizado" }
@@ -179,7 +177,10 @@ export async function getEquiposMasIntervenidos(): Promise<
 	const grouped: Record<string, { nombre: string; count: number }> = {}
 	for (const r of data ?? []) {
 		const id = r.equipo_id
-		const nombre = ((r as Record<string, unknown>).equipos as Record<string, unknown> | null)?.nombre as string ?? id
+		const nombre =
+			((
+				(r as Record<string, unknown>).equipos as Record<string, unknown> | null
+			)?.nombre as string) ?? id
 		if (!grouped[id]) grouped[id] = { nombre, count: 0 }
 		grouped[id].count++
 	}
@@ -251,13 +252,11 @@ export async function getRecentActivity(): Promise<
 		estado: r.estado as string,
 		fecha_inicio: r.fecha_inicio as string,
 		equipo_nombre:
-			(
-				r.equipos as Record<string, unknown> | null
-			)?.nombre as string ?? "Equipo",
+			((r.equipos as Record<string, unknown> | null)?.nombre as string) ??
+			"Equipo",
 		tecnico_nombre:
-			(
-				r.perfiles as Record<string, unknown> | null
-			)?.nombre as string ?? "Técnico",
+			((r.perfiles as Record<string, unknown> | null)?.nombre as string) ??
+			"Técnico",
 	}))
 
 	return { success: true, data: mapped }
@@ -279,7 +278,13 @@ export async function getTecnicosActivos(): Promise<
 	const grouped: Record<string, { nombre: string; count: number }> = {}
 	for (const e of data ?? []) {
 		const id = e.usuario_id
-		const nombre = ((e as Record<string, unknown>).perfiles as Record<string, unknown> | null)?.nombre as string ?? id
+		const nombre =
+			((
+				(e as Record<string, unknown>).perfiles as Record<
+					string,
+					unknown
+				> | null
+			)?.nombre as string) ?? id
 		if (!grouped[id]) grouped[id] = { nombre, count: 0 }
 		grouped[id].count++
 	}

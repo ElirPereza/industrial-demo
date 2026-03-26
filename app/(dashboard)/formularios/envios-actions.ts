@@ -27,6 +27,21 @@ export type EnvioFormulario = {
 	usuario_nombre?: string
 }
 
+type EnvioRow = EnvioFormulario & {
+	formularios_template?: {
+		nombre?: string
+		tipo?: string
+		descripcion?: string | null
+	} | null
+	equipos?: {
+		nombre?: string
+		ubicacion?: string
+	} | null
+	perfiles?: {
+		nombre?: string
+	} | null
+}
+
 export async function getEnvios(filters?: {
 	estado?: string
 	equipo_id?: string
@@ -53,15 +68,19 @@ export async function getEnvios(filters?: {
 	const { data, error } = await query
 	if (error) return { success: false, error: error.message }
 
-	const mapped = (data ?? []).map((envio: any) => ({
-		...envio,
-		formulario_nombre: envio.formularios_template?.nombre,
-		formulario_tipo: envio.formularios_template?.tipo,
-		formulario_descripcion: envio.formularios_template?.descripcion,
-		equipo_nombre: envio.equipos?.nombre,
-		equipo_ubicacion: envio.equipos?.ubicacion,
-		usuario_nombre: envio.perfiles?.nombre,
-	}))
+	const mapped = (data ?? []).map((envio) => {
+		const row = envio as EnvioRow
+
+		return {
+			...row,
+			formulario_nombre: row.formularios_template?.nombre,
+			formulario_tipo: row.formularios_template?.tipo,
+			formulario_descripcion: row.formularios_template?.descripcion,
+			equipo_nombre: row.equipos?.nombre,
+			equipo_ubicacion: row.equipos?.ubicacion,
+			usuario_nombre: row.perfiles?.nombre,
+		}
+	})
 
 	return { success: true, data: mapped }
 }
@@ -210,7 +229,8 @@ export async function getEnvioStats(): Promise<
 		"Nov",
 		"Dic",
 	]
-	const grouped: Record<string, { completados: number; pendientes: number }> = {}
+	const grouped: Record<string, { completados: number; pendientes: number }> =
+		{}
 	for (const envio of envios) {
 		const date = new Date(envio.created_at)
 		const key = meses[date.getMonth()]

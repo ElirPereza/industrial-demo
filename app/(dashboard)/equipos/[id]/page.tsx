@@ -3,8 +3,8 @@
 import {
 	ArrowLeft,
 	CheckCircle,
-	Clock,
 	ClipboardText,
+	Clock,
 	Download,
 	Eye,
 	FileDoc,
@@ -18,26 +18,10 @@ import {
 	Timer,
 	Wrench,
 } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { use, useEffect, useMemo, useState } from "react"
 import { QRCodeSVG } from "qrcode.react"
-import {
-	getEquipoById,
-	getEquipoStats,
-	type Equipo,
-} from "../actions"
-import {
-	getActividadesPorEquipo,
-	type ActividadEquipo,
-} from "../maintenance-actions"
-import {
-	getFormulariosParaEquipo,
-	type FormularioTemplate,
-} from "../../formularios/actions"
-import {
-	getEnviosPorEquipo,
-	type EnvioFormulario,
-} from "../../formularios/envios-actions"
+import { use, useEffect, useMemo, useState } from "react"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -57,6 +41,19 @@ import {
 import { Separator } from "../../../../components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "../../../../components/ui/sidebar"
 import { cn } from "../../../../lib/utils"
+import {
+	type FormularioTemplate,
+	getFormulariosParaEquipo,
+} from "../../formularios/actions"
+import {
+	type EnvioFormulario,
+	getEnviosPorEquipo,
+} from "../../formularios/envios-actions"
+import { type Equipo, getEquipoById, getEquipoStats } from "../actions"
+import {
+	type ActividadEquipo,
+	getActividadesPorEquipo,
+} from "../maintenance-actions"
 
 type TabType = "info" | "formularios" | "documentos" | "galeria" | "historial"
 
@@ -184,14 +181,19 @@ export default function EquipoDetailPage({
 
 		async function loadData() {
 			setLoading(true)
-			const [equipoResult, statsResult, formulariosResult, enviosResult, actividadesResult] =
-				await Promise.all([
-					getEquipoById(equipoId),
-					getEquipoStats(equipoId),
-					getFormulariosParaEquipo(equipoId),
-					getEnviosPorEquipo(equipoId),
-					getActividadesPorEquipo(equipoId),
-				])
+			const [
+				equipoResult,
+				statsResult,
+				formulariosResult,
+				enviosResult,
+				actividadesResult,
+			] = await Promise.all([
+				getEquipoById(equipoId),
+				getEquipoStats(equipoId),
+				getFormulariosParaEquipo(equipoId),
+				getEnviosPorEquipo(equipoId),
+				getActividadesPorEquipo(equipoId),
+			])
 
 			if (!mounted) return
 
@@ -229,7 +231,8 @@ export default function EquipoDetailPage({
 	const timelineCompleto = useMemo(
 		() =>
 			[...actividades].sort(
-				(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+				(a, b) =>
+					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			),
 		[actividades],
 	)
@@ -277,7 +280,6 @@ export default function EquipoDetailPage({
 				return Clock
 			case "documento":
 				return FileText
-			case "modificacion":
 			default:
 				return Wrench
 		}
@@ -293,7 +295,6 @@ export default function EquipoDetailPage({
 				return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
 			case "documento":
 				return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-			case "modificacion":
 			default:
 				return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
 		}
@@ -430,7 +431,9 @@ export default function EquipoDetailPage({
 							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 								<Card>
 									<CardContent className="p-4">
-										<p className="text-sm text-muted-foreground">Intervenciones</p>
+										<p className="text-sm text-muted-foreground">
+											Intervenciones
+										</p>
 										<p className="text-2xl font-semibold">
 											{stats?.totalIntervenciones ?? 0}
 										</p>
@@ -438,9 +441,13 @@ export default function EquipoDetailPage({
 								</Card>
 								<Card>
 									<CardContent className="p-4">
-										<p className="text-sm text-muted-foreground">Última Falla</p>
+										<p className="text-sm text-muted-foreground">
+											Última Falla
+										</p>
 										<p className="text-lg font-semibold">
-											{stats?.ultimaFalla ? formatDateShort(stats.ultimaFalla) : "Sin fallas"}
+											{stats?.ultimaFalla
+												? formatDateShort(stats.ultimaFalla)
+												: "Sin fallas"}
 										</p>
 									</CardContent>
 								</Card>
@@ -489,13 +496,17 @@ export default function EquipoDetailPage({
 											</p>
 										</div>
 										<div>
-											<p className="text-sm text-muted-foreground">Último Mantenimiento</p>
+											<p className="text-sm text-muted-foreground">
+												Último Mantenimiento
+											</p>
 											<p className="font-medium">
 												{formatDate(equipo.ultimo_mantenimiento)}
 											</p>
 										</div>
 										<div>
-											<p className="text-sm text-muted-foreground">Próximo Mantenimiento</p>
+											<p className="text-sm text-muted-foreground">
+												Próximo Mantenimiento
+											</p>
 											<p className="font-medium">
 												{formatDate(equipo.proximo_mantenimiento)}
 											</p>
@@ -512,9 +523,7 @@ export default function EquipoDetailPage({
 										<QrCode className="size-5" />
 										Código QR
 									</CardTitle>
-									<CardDescription>
-										Escanear para acceso rápido
-									</CardDescription>
+									<CardDescription>Escanear para acceso rápido</CardDescription>
 								</CardHeader>
 								<CardContent className="flex flex-col items-center gap-4">
 									<div className="rounded-lg bg-white p-4">
@@ -572,7 +581,10 @@ export default function EquipoDetailPage({
 																"bg-red-100 text-red-700",
 														)}
 													>
-														<ClipboardText className="size-5" weight="duotone" />
+														<ClipboardText
+															className="size-5"
+															weight="duotone"
+														/>
 													</div>
 													<div>
 														<p className="font-medium">{form.nombre}</p>
@@ -583,7 +595,9 @@ export default function EquipoDetailPage({
 															{form.frecuencia && (
 																<>
 																	<span>•</span>
-																	<span className="capitalize">{form.frecuencia}</span>
+																	<span className="capitalize">
+																		{form.frecuencia}
+																	</span>
 																</>
 															)}
 														</div>
@@ -638,8 +652,11 @@ export default function EquipoDetailPage({
 										{envios.slice(0, 10).map((envio) => {
 											const nombreFormulario =
 												envio.formulario_nombre ??
-												(envio as unknown as { formularios_template?: { nombre?: string } })
-													.formularios_template?.nombre ??
+												(
+													envio as unknown as {
+														formularios_template?: { nombre?: string }
+													}
+												).formularios_template?.nombre ??
 												"Formulario"
 
 											return (
@@ -659,14 +676,19 @@ export default function EquipoDetailPage({
 																	"bg-red-100 text-red-700",
 															)}
 														>
-															<CheckCircle className="size-5" weight="duotone" />
+															<CheckCircle
+																className="size-5"
+																weight="duotone"
+															/>
 														</div>
 														<div>
 															<p className="font-medium">{nombreFormulario}</p>
 															<div className="flex items-center gap-2 text-sm text-muted-foreground">
 																<span>{envio.usuario_nombre ?? "Usuario"}</span>
 																<span>•</span>
-																<span>{formatDate(envio.created_at, true)}</span>
+																<span>
+																	{formatDate(envio.created_at, true)}
+																</span>
 															</div>
 														</div>
 													</div>
@@ -745,9 +767,12 @@ export default function EquipoDetailPage({
 														<FileIcon className="size-5" weight="duotone" />
 													</div>
 													<div>
-														<p className="font-medium">{doc.nombre ?? "Documento"}</p>
+														<p className="font-medium">
+															{doc.nombre ?? "Documento"}
+														</p>
 														<p className="text-sm text-muted-foreground">
-															{doc.tamano ?? "Tamaño no disponible"} • {formatDate(fileDate)}
+															{doc.tamano ?? "Tamaño no disponible"} •{" "}
+															{formatDate(fileDate)}
 														</p>
 													</div>
 												</div>
@@ -756,7 +781,12 @@ export default function EquipoDetailPage({
 														variant="ghost"
 														size="icon-sm"
 														onClick={() => {
-															if (doc.url) window.open(doc.url, "_blank", "noopener,noreferrer")
+															if (doc.url)
+																window.open(
+																	doc.url,
+																	"_blank",
+																	"noopener,noreferrer",
+																)
 														}}
 													>
 														<Eye className="size-4" />
@@ -765,7 +795,12 @@ export default function EquipoDetailPage({
 														variant="ghost"
 														size="icon-sm"
 														onClick={() => {
-															if (doc.url) window.open(doc.url, "_blank", "noopener,noreferrer")
+															if (doc.url)
+																window.open(
+																	doc.url,
+																	"_blank",
+																	"noopener,noreferrer",
+																)
 														}}
 													>
 														<Download className="size-4" />
@@ -815,10 +850,12 @@ export default function EquipoDetailPage({
 											className="group relative aspect-square overflow-hidden rounded-lg border bg-muted"
 										>
 											{img.url ? (
-												<img
+												<Image
 													src={img.url}
 													alt={img.titulo ?? "Imagen de equipo"}
-													className="size-full object-cover"
+													fill
+													unoptimized
+													className="object-cover"
 												/>
 											) : (
 												<div className="flex size-full items-center justify-center text-muted-foreground">
@@ -859,10 +896,14 @@ export default function EquipoDetailPage({
 									{timelineCompleto.map((actividad, index) => {
 										const IconComponent = getActividadIcon(actividad.tipo)
 										const detalles = actividad.detalles ?? {}
-										const horas = parseNumber(detalles.horas ?? detalles.horasEmpleadas)
+										const horas = parseNumber(
+											detalles.horas ?? detalles.horasEmpleadas,
+										)
 										const costo = parseNumber(detalles.costo)
 										const estado =
-											typeof detalles.estado === "string" ? detalles.estado : null
+											typeof detalles.estado === "string"
+												? detalles.estado
+												: null
 
 										return (
 											<div key={actividad.id} className="relative flex gap-4">
@@ -882,7 +923,9 @@ export default function EquipoDetailPage({
 												<div className="flex-1 space-y-2 pb-6">
 													<div className="flex items-start justify-between">
 														<div>
-															<h3 className="font-semibold">{actividad.titulo}</h3>
+															<h3 className="font-semibold">
+																{actividad.titulo}
+															</h3>
 															<p className="text-sm text-muted-foreground">
 																{formatDate(actividad.created_at, true)}
 															</p>

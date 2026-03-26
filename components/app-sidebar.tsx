@@ -7,11 +7,9 @@ import {
 	CubeIcon,
 	FactoryIcon,
 	FileTextIcon,
-	GearIcon,
 	QrCodeIcon,
 	SlidersIcon,
 	Users,
-	WrenchIcon,
 } from "@phosphor-icons/react"
 import type * as React from "react"
 import { NavAdmin } from "@/components/nav-admin"
@@ -28,12 +26,11 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { usuarios } from "@/lib/mock-data"
 
 const data = {
 	user: {
-		name: usuarios[0].nombre,
-		email: usuarios[0].email,
+		name: "Administrador",
+		email: "admin@industrial.local",
 		avatar: "/avatars/admin.jpg",
 	},
 	navMain: [

@@ -8,8 +8,8 @@ export default function Loading() {
 				<Skeleton className="h-10 w-32" />
 			</div>
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{Array.from({ length: 6 }).map((_, i) => (
-					<Skeleton key={i} className="h-40 rounded-xl" />
+				{["a", "b", "c", "d", "e", "f"].map((key) => (
+					<Skeleton key={key} className="h-40 rounded-xl" />
 				))}
 			</div>
 		</div>

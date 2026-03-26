@@ -12,7 +12,9 @@ export async function uploadFile(
 
 	if (error) return { url: null, error: error.message }
 
-	const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path)
+	const { data: urlData } = supabase.storage
+		.from(bucket)
+		.getPublicUrl(data.path)
 	return { url: urlData.publicUrl, error: null }
 }
 
@@ -30,7 +32,10 @@ export async function getSignedUrl(
 	return data.signedUrl
 }
 
-export async function deleteFile(bucket: string, path: string): Promise<boolean> {
+export async function deleteFile(
+	bucket: string,
+	path: string,
+): Promise<boolean> {
 	const supabase = createClient()
 	const { error } = await supabase.storage.from(bucket).remove([path])
 	return !error

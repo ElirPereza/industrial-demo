@@ -36,8 +36,7 @@ export async function getContratistas(filters?: {
 	if (filters?.estado) query = query.eq("estado", filters.estado)
 	if (filters?.especialidad)
 		query = query.ilike("especialidad", `%${filters.especialidad}%`)
-	if (filters?.search)
-		query = query.ilike("nombre", `%${filters.search}%`)
+	if (filters?.search) query = query.ilike("nombre", `%${filters.search}%`)
 
 	const { data, error } = await query
 	if (error) return { success: false, error: error.message }

@@ -7,8 +7,8 @@ import {
 	getDashboardKPIs,
 	getRecentActivity,
 } from "@/app/(dashboard)/analiticas/actions"
-import { getEquipos } from "@/app/(dashboard)/equipos/actions"
 import type { Equipo } from "@/app/(dashboard)/equipos/actions"
+import { getEquipos } from "@/app/(dashboard)/equipos/actions"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -25,10 +25,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { useRealtimeKPIs } from "@/hooks/use-realtime-kpis"
 import { cn } from "@/lib/utils"
 
@@ -68,9 +65,7 @@ export default function DashboardPage() {
 		if (kpiResult.success) setKpis(kpiResult.data)
 		if (equiposResult.success) {
 			setEquiposCriticos(
-				equiposResult.data
-					.filter((e) => e.estado !== "operativo")
-					.slice(0, 5),
+				equiposResult.data.filter((e) => e.estado !== "operativo").slice(0, 5),
 			)
 		}
 		if (activityResult.success) setActividadReciente(activityResult.data)
@@ -251,10 +246,7 @@ export default function DashboardPage() {
 						<CardContent className="p-0">
 							<div className="divide-y">
 								{actividadReciente.map((registro) => (
-									<div
-										key={registro.id}
-										className="flex items-start gap-4 p-4"
-									>
+									<div key={registro.id} className="flex items-start gap-4 p-4">
 										<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
 											<div
 												className={cn(

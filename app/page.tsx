@@ -23,7 +23,10 @@ export default function LandingPage() {
 				<div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 					<div className="flex items-center gap-2">
 						<div className="flex size-9 items-center justify-center rounded-lg bg-primary">
-							<Factory className="size-5 text-primary-foreground" weight="fill" />
+							<Factory
+								className="size-5 text-primary-foreground"
+								weight="fill"
+							/>
 						</div>
 						<span className="text-xl font-semibold">Industrial Portal</span>
 					</div>
@@ -40,26 +43,27 @@ export default function LandingPage() {
 			<section className="relative overflow-hidden pt-16">
 				{/* Background gradient */}
 				<div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]" />
-				
+
 				<div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
 					<div className="text-center">
 						<div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm">
 							<Lightning className="size-4 text-primary" weight="fill" />
 							<span>Plataforma de Gestión Industrial</span>
 						</div>
-						
+
 						<h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
 							Digitaliza tu{" "}
 							<span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
 								mantenimiento industrial
 							</span>
 						</h1>
-						
+
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-							Gestiona formularios, equipos, firmas digitales y códigos QR en una sola plataforma. 
-							Aumenta la eficiencia operativa y reduce tiempos de respuesta.
+							Gestiona formularios, equipos, firmas digitales y códigos QR en
+							una sola plataforma. Aumenta la eficiencia operativa y reduce
+							tiempos de respuesta.
 						</p>
-						
+
 						<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 							<Link href="/dashboard">
 								<Button size="lg" className="h-12 px-8 text-base">
@@ -78,7 +82,7 @@ export default function LandingPage() {
 					<div className="relative mx-auto mt-16 max-w-6xl">
 						{/* Glow effect */}
 						<div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 blur-2xl" />
-						
+
 						{/* Browser mockup */}
 						<div className="relative overflow-hidden rounded-xl border bg-background shadow-2xl">
 							{/* Browser header */}
@@ -94,47 +98,78 @@ export default function LandingPage() {
 									</div>
 								</div>
 							</div>
-							
+
 							{/* Dashboard content mockup */}
 							<div className="bg-muted/30 p-6">
 								<div className="grid gap-4 md:grid-cols-4">
 									{/* KPI Cards */}
 									{[
-										{ label: "Disponibilidad", value: "94.5%", trend: "+2.3%", color: "text-green-500" },
-										{ label: "MTTR", value: "4.2h", trend: "-15%", color: "text-green-500" },
-										{ label: "Equipos Activos", value: "14/16", trend: "", color: "text-blue-500" },
-										{ label: "Mantenimientos", value: "10", trend: "+3", color: "text-primary" },
+										{
+											label: "Disponibilidad",
+											value: "94.5%",
+											trend: "+2.3%",
+											color: "text-green-500",
+										},
+										{
+											label: "MTTR",
+											value: "4.2h",
+											trend: "-15%",
+											color: "text-green-500",
+										},
+										{
+											label: "Equipos Activos",
+											value: "14/16",
+											trend: "",
+											color: "text-blue-500",
+										},
+										{
+											label: "Mantenimientos",
+											value: "10",
+											trend: "+3",
+											color: "text-primary",
+										},
 									].map((kpi) => (
-										<div key={kpi.label} className="rounded-lg border bg-background p-4 shadow-sm">
-											<p className="text-xs text-muted-foreground">{kpi.label}</p>
+										<div
+											key={kpi.label}
+											className="rounded-lg border bg-background p-4 shadow-sm"
+										>
+											<p className="text-xs text-muted-foreground">
+												{kpi.label}
+											</p>
 											<div className="mt-1 flex items-end gap-2">
 												<span className="text-2xl font-bold">{kpi.value}</span>
 												{kpi.trend && (
-													<span className={`text-xs ${kpi.color}`}>{kpi.trend}</span>
+													<span className={`text-xs ${kpi.color}`}>
+														{kpi.trend}
+													</span>
 												)}
 											</div>
 										</div>
 									))}
 								</div>
-								
+
 								<div className="mt-4 grid gap-4 md:grid-cols-3">
 									{/* Chart placeholder */}
 									<div className="col-span-2 rounded-lg border bg-background p-4 shadow-sm">
 										<div className="mb-4 flex items-center justify-between">
-											<span className="font-medium">Tendencia de Mantenimientos</span>
+											<span className="font-medium">
+												Tendencia de Mantenimientos
+											</span>
 											<ChartLineUp className="size-5 text-muted-foreground" />
 										</div>
 										<div className="flex h-32 items-end gap-2">
-											{[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map((h) => (
-												<div
-													key={`bar-${h}`}
-													className="flex-1 rounded-t bg-primary/80"
-													style={{ height: `${h}%` }}
-												/>
-											))}
+											{[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map(
+												(h) => (
+													<div
+														key={`bar-${h}`}
+														className="flex-1 rounded-t bg-primary/80"
+														style={{ height: `${h}%` }}
+													/>
+												),
+											)}
 										</div>
 									</div>
-									
+
 									{/* Equipment status */}
 									<div className="rounded-lg border bg-background p-4 shadow-sm">
 										<div className="mb-4 flex items-center justify-between">
@@ -143,12 +178,31 @@ export default function LandingPage() {
 										</div>
 										<div className="space-y-3">
 											{[
-												{ name: "Torno CNC-01", status: "Operativo", color: "bg-green-500" },
-												{ name: "Prensa Hidráulica", status: "Operativo", color: "bg-green-500" },
-												{ name: "Fresadora-03", status: "Mantenimiento", color: "bg-yellow-500" },
-												{ name: "Línea Pintura", status: "Fuera Servicio", color: "bg-red-500" },
+												{
+													name: "Torno CNC-01",
+													status: "Operativo",
+													color: "bg-green-500",
+												},
+												{
+													name: "Prensa Hidráulica",
+													status: "Operativo",
+													color: "bg-green-500",
+												},
+												{
+													name: "Fresadora-03",
+													status: "Mantenimiento",
+													color: "bg-yellow-500",
+												},
+												{
+													name: "Línea Pintura",
+													status: "Fuera Servicio",
+													color: "bg-red-500",
+												},
 											].map((eq) => (
-												<div key={eq.name} className="flex items-center justify-between text-sm">
+												<div
+													key={eq.name}
+													className="flex items-center justify-between text-sm"
+												>
 													<span className="truncate">{eq.name}</span>
 													<div className={`size-2 rounded-full ${eq.color}`} />
 												</div>
@@ -170,7 +224,8 @@ export default function LandingPage() {
 							Todo lo que necesitas para gestionar tu planta
 						</h2>
 						<p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-							Una suite completa de herramientas diseñadas para optimizar las operaciones de mantenimiento industrial
+							Una suite completa de herramientas diseñadas para optimizar las
+							operaciones de mantenimiento industrial
 						</p>
 					</div>
 
@@ -179,32 +234,38 @@ export default function LandingPage() {
 							{
 								icon: ClipboardText,
 								title: "Formularios Digitales",
-								description: "Constructor visual de formularios con firmas digitales y validación automática",
+								description:
+									"Constructor visual de formularios con firmas digitales y validación automática",
 							},
 							{
 								icon: Wrench,
 								title: "Gestión de Equipos",
-								description: "Historial completo de mantenimientos, documentos y galería de imágenes por equipo",
+								description:
+									"Historial completo de mantenimientos, documentos y galería de imágenes por equipo",
 							},
 							{
 								icon: QrCode,
 								title: "Códigos QR",
-								description: "Genera QR únicos para cada equipo y formulario para acceso rápido desde móvil",
+								description:
+									"Genera QR únicos para cada equipo y formulario para acceso rápido desde móvil",
 							},
 							{
 								icon: ChartLineUp,
 								title: "Analíticas en Tiempo Real",
-								description: "Dashboards con KPIs, MTBF, MTTR y métricas de disponibilidad operativa",
+								description:
+									"Dashboards con KPIs, MTBF, MTTR y métricas de disponibilidad operativa",
 							},
 							{
 								icon: ShieldCheck,
 								title: "Firmas Digitales",
-								description: "Trazabilidad legal con captura de firmas y timestamps en cada formulario",
+								description:
+									"Trazabilidad legal con captura de firmas y timestamps en cada formulario",
 							},
 							{
 								icon: Gear,
 								title: "Gestión de Contratistas",
-								description: "Control de proveedores externos con evaluaciones y seguimiento de trabajos",
+								description:
+									"Control de proveedores externos con evaluaciones y seguimiento de trabajos",
 							},
 						].map((feature) => (
 							<div
@@ -215,7 +276,9 @@ export default function LandingPage() {
 									<feature.icon className="size-6" weight="duotone" />
 								</div>
 								<h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
-								<p className="text-sm text-muted-foreground">{feature.description}</p>
+								<p className="text-sm text-muted-foreground">
+									{feature.description}
+								</p>
 							</div>
 						))}
 					</div>
@@ -227,22 +290,40 @@ export default function LandingPage() {
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="relative overflow-hidden rounded-2xl bg-primary px-6 py-16 text-center sm:px-16">
 						{/* Background pattern */}
-						<div className="absolute inset-0 -z-10 opacity-10" aria-hidden="true">
-							<svg className="size-full" xmlns="http://www.w3.org/2000/svg" role="presentation">
+						<div
+							className="absolute inset-0 -z-10 opacity-10"
+							aria-hidden="true"
+						>
+							<svg
+								className="size-full"
+								xmlns="http://www.w3.org/2000/svg"
+								role="presentation"
+							>
 								<defs>
-									<pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-										<path d="M0 32V0h32" fill="none" stroke="currentColor" strokeWidth="1"/>
+									<pattern
+										id="grid"
+										width="32"
+										height="32"
+										patternUnits="userSpaceOnUse"
+									>
+										<path
+											d="M0 32V0h32"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="1"
+										/>
 									</pattern>
 								</defs>
 								<rect width="100%" height="100%" fill="url(#grid)" />
 							</svg>
 						</div>
-						
+
 						<h2 className="text-3xl font-bold text-primary-foreground sm:text-4xl">
 							Explora todas las funcionalidades
 						</h2>
 						<p className="mx-auto mt-4 max-w-xl text-primary-foreground/80">
-							Navega por el dashboard interactivo y descubre cómo Industrial Portal puede transformar tu gestión de mantenimiento
+							Navega por el dashboard interactivo y descubre cómo Industrial
+							Portal puede transformar tu gestión de mantenimiento
 						</p>
 						<Link href="/dashboard">
 							<Button
@@ -264,7 +345,10 @@ export default function LandingPage() {
 					<div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
 						<div className="flex items-center gap-2">
 							<div className="flex size-8 items-center justify-center rounded-lg bg-primary">
-								<Factory className="size-4 text-primary-foreground" weight="fill" />
+								<Factory
+									className="size-4 text-primary-foreground"
+									weight="fill"
+								/>
 							</div>
 							<span className="font-semibold">Industrial Portal</span>
 						</div>

@@ -145,19 +145,18 @@ export async function getMaintenanceStats(): Promise<
 
 	const { data: registros, error } = await supabase
 		.from("registros_mantenimiento")
-		.select("tipo, equipo_id, tecnico_id, fecha_inicio, equipos(nombre), perfiles(nombre)")
+		.select(
+			"tipo, equipo_id, tecnico_id, fecha_inicio, equipos(nombre), perfiles(nombre)",
+		)
 
 	if (error) return { success: false, error: error.message }
 
 	// Aggregate in JS (will be moved to SQL views in T8)
 	const porTipo = Object.entries(
-		(registros ?? []).reduce(
-			(acc: Record<string, number>, r) => {
-				acc[r.tipo] = (acc[r.tipo] ?? 0) + 1
-				return acc
-			},
-			{},
-		),
+		(registros ?? []).reduce((acc: Record<string, number>, r) => {
+			acc[r.tipo] = (acc[r.tipo] ?? 0) + 1
+			return acc
+		}, {}),
 	).map(([tipo, count]) => ({ tipo, count }))
 
 	return {

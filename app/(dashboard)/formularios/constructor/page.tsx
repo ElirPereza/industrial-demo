@@ -35,9 +35,11 @@ import {
 	Trash,
 	Upload,
 } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useRef, useState } from "react"
 import SignatureCanvas from "react-signature-canvas"
+import { toast } from "sonner"
 import {
 	createFormulario,
 	getFormularioById,
@@ -62,14 +64,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 type FieldType =
 	| "texto_corto"
@@ -313,10 +311,10 @@ function LivePreview({
 			<h4 className="text-lg font-semibold">{formName}</h4>
 			{fields.map((field) => (
 				<div key={field.id}>
-					<label className="mb-2 block text-sm font-medium">
+					<p className="mb-2 block text-sm font-medium">
 						{field.label}
 						{field.requerido && <span className="ml-1 text-red-600">*</span>}
-					</label>
+					</p>
 
 					{field.tipo === "texto_corto" && (
 						<Input
@@ -438,11 +436,13 @@ function LivePreview({
 					{field.tipo === "foto" && (
 						<div className="space-y-2">
 							{previewData[field.id] ? (
-								<div className="relative">
-									<img
+								<div className="relative h-32 overflow-hidden rounded-lg">
+									<Image
 										src={previewData[field.id]}
 										alt="Preview"
-										className="h-32 w-full rounded-lg object-cover"
+										fill
+										unoptimized
+										className="object-cover"
 									/>
 									<Button
 										variant="destructive"
@@ -684,267 +684,274 @@ function FormBuilderPageContent() {
 	}
 
 	return (
-			<SidebarInset>
-				<header className="flex h-16 shrink-0 items-center gap-2 border-b">
-					<div className="flex w-full items-center justify-between px-4">
-						<div className="flex items-center gap-2">
-							<SidebarTrigger className="-ml-1" />
-							<Separator
-								orientation="vertical"
-								className="mr-2 data-vertical:h-4"
-							/>
-							<Breadcrumb>
-								<BreadcrumbList>
-									<BreadcrumbItem className="hidden md:block">
-										<BreadcrumbLink href="/dashboard">
-											Portal Industrial
-										</BreadcrumbLink>
-									</BreadcrumbItem>
-									<BreadcrumbSeparator className="hidden md:block" />
-									<BreadcrumbItem>
-										<BreadcrumbLink href="/formularios">
-											Formularios
-										</BreadcrumbLink>
-									</BreadcrumbItem>
-									<BreadcrumbSeparator className="hidden md:block" />
-									<BreadcrumbItem>
-										<BreadcrumbPage>Constructor</BreadcrumbPage>
-									</BreadcrumbItem>
-								</BreadcrumbList>
-							</Breadcrumb>
-						</div>
-						<Button onClick={handleSave} disabled={isSaving || isLoadingForm}>
-							<FloppyDisk className="mr-2 size-4" weight="duotone" />
-							{isSaving ? "Guardando..." : "Guardar"}
-						</Button>
+		<SidebarInset>
+			<header className="flex h-16 shrink-0 items-center gap-2 border-b">
+				<div className="flex w-full items-center justify-between px-4">
+					<div className="flex items-center gap-2">
+						<SidebarTrigger className="-ml-1" />
+						<Separator
+							orientation="vertical"
+							className="mr-2 data-vertical:h-4"
+						/>
+						<Breadcrumb>
+							<BreadcrumbList>
+								<BreadcrumbItem className="hidden md:block">
+									<BreadcrumbLink href="/dashboard">
+										Portal Industrial
+									</BreadcrumbLink>
+								</BreadcrumbItem>
+								<BreadcrumbSeparator className="hidden md:block" />
+								<BreadcrumbItem>
+									<BreadcrumbLink href="/formularios">
+										Formularios
+									</BreadcrumbLink>
+								</BreadcrumbItem>
+								<BreadcrumbSeparator className="hidden md:block" />
+								<BreadcrumbItem>
+									<BreadcrumbPage>Constructor</BreadcrumbPage>
+								</BreadcrumbItem>
+							</BreadcrumbList>
+						</Breadcrumb>
 					</div>
-				</header>
+					<Button onClick={handleSave} disabled={isSaving || isLoadingForm}>
+						<FloppyDisk className="mr-2 size-4" weight="duotone" />
+						{isSaving ? "Guardando..." : "Guardar"}
+					</Button>
+				</div>
+			</header>
 
-				<DndContext
-					sensors={sensors}
-					onDragStart={handleDragStart}
-					onDragOver={handleDragOver}
-					onDragEnd={handleDragEnd}
-				>
-					<div className="flex flex-1 overflow-hidden">
-						{/* Left Panel - Field Palette */}
-						<div className="w-56 shrink-0 overflow-y-auto border-r p-4">
-							<h3 className="mb-4 text-sm font-semibold text-muted-foreground">
-								Arrastra los campos
-							</h3>
-							<div className="space-y-2">
-								{fieldTypes.map((fieldType) => (
-									<DraggablePaletteItem
-										key={fieldType.tipo}
-										tipo={fieldType.tipo}
-										label={fieldType.label}
-										icon={fieldType.icon}
+			<DndContext
+				sensors={sensors}
+				onDragStart={handleDragStart}
+				onDragOver={handleDragOver}
+				onDragEnd={handleDragEnd}
+			>
+				<div className="flex flex-1 overflow-hidden">
+					{/* Left Panel - Field Palette */}
+					<div className="w-56 shrink-0 overflow-y-auto border-r p-4">
+						<h3 className="mb-4 text-sm font-semibold text-muted-foreground">
+							Arrastra los campos
+						</h3>
+						<div className="space-y-2">
+							{fieldTypes.map((fieldType) => (
+								<DraggablePaletteItem
+									key={fieldType.tipo}
+									tipo={fieldType.tipo}
+									label={fieldType.label}
+									icon={fieldType.icon}
+								/>
+							))}
+						</div>
+					</div>
+
+					{/* Center Panel - Canvas */}
+					<div className="flex-1 overflow-y-auto p-6">
+						<div className="mb-6 space-y-4">
+							<Input
+								value={formName}
+								onChange={(e) => setFormName(e.target.value)}
+								className="text-xl font-semibold"
+								placeholder="Nombre del formulario"
+							/>
+
+							<div className="grid gap-4 md:grid-cols-2">
+								<div className="space-y-1.5 md:col-span-2">
+									<p className="text-xs font-medium">Descripción</p>
+									<Textarea
+										value={descripcion}
+										onChange={(e) => setDescripcion(e.target.value)}
+										placeholder="Describe el propósito del formulario"
+									/>
+								</div>
+
+								<div className="space-y-1.5">
+									<p className="text-xs font-medium">Tipo</p>
+									<Select
+										value={tipo}
+										onValueChange={(value) => setTipo(value as typeof tipo)}
+									>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="Selecciona tipo" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="inspeccion">Inspección</SelectItem>
+											<SelectItem value="reporte_fallas">
+												Reporte de fallas
+											</SelectItem>
+											<SelectItem value="preventivo">Preventivo</SelectItem>
+											<SelectItem value="correctivo">Correctivo</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className="space-y-1.5">
+									<p className="text-xs font-medium">Frecuencia</p>
+									<Select
+										value={frecuencia || "none"}
+										onValueChange={(value) =>
+											setFrecuencia(
+												value === "none" ? "" : (value as typeof frecuencia),
+											)
+										}
+									>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="Selecciona frecuencia" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="none">Sin frecuencia</SelectItem>
+											<SelectItem value="diario">Diario</SelectItem>
+											<SelectItem value="semanal">Semanal</SelectItem>
+											<SelectItem value="mensual">Mensual</SelectItem>
+											<SelectItem value="trimestral">Trimestral</SelectItem>
+											<SelectItem value="eventual">Eventual</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className="space-y-1.5">
+									<p className="text-xs font-medium">Tipo de asociación</p>
+									<Select
+										value={asociacionTipo}
+										onValueChange={(value) =>
+											setAsociacionTipo(value as typeof asociacionTipo)
+										}
+									>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="Selecciona asociación" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="general">General</SelectItem>
+											<SelectItem value="equipo">Equipo</SelectItem>
+											<SelectItem value="tipo_equipo">
+												Tipo de equipo
+											</SelectItem>
+											<SelectItem value="area">Área</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								{asociacionTipo !== "general" && (
+									<div className="space-y-1.5">
+										<p className="text-xs font-medium">Valor de asociación</p>
+										<Input
+											value={asociacionValor}
+											onChange={(e) => setAsociacionValor(e.target.value)}
+											placeholder="ID o valor de asociación"
+										/>
+									</div>
+								)}
+							</div>
+
+							{isLoadingForm && isEditMode && (
+								<p className="text-sm text-muted-foreground">
+									Cargando formulario...
+								</p>
+							)}
+						</div>
+
+						<SortableContext
+							items={fields.map((f) => f.id)}
+							strategy={verticalListSortingStrategy}
+						>
+							<CanvasDropZone
+								isEmpty={fields.length === 0}
+								isOver={isOverCanvas}
+							>
+								{fields.map((field) => (
+									<SortableField
+										key={field.id}
+										field={field}
+										isSelected={selectedField?.id === field.id}
+										onSelect={() => setSelectedField(field)}
+										onDelete={() => handleDeleteField(field.id)}
 									/>
 								))}
-							</div>
+							</CanvasDropZone>
+						</SortableContext>
+					</div>
+
+					{/* Right Panel - Properties + Live Preview */}
+					<div className="flex w-80 shrink-0 flex-col border-l">
+						{/* Properties Section */}
+						<div className="border-b p-4">
+							<h3 className="mb-4 text-sm font-semibold text-muted-foreground">
+								Propiedades
+							</h3>
+							{selectedField ? (
+								<div className="space-y-4">
+									<div>
+										<p className="mb-1.5 block text-xs font-medium">Etiqueta</p>
+										<Input
+											value={selectedField.label}
+											onChange={(e) =>
+												handleUpdateField({ label: e.target.value })
+											}
+											placeholder="Etiqueta del campo"
+										/>
+									</div>
+									<div>
+										<p className="mb-1.5 block text-xs font-medium">
+											Placeholder
+										</p>
+										<Input
+											value={selectedField.placeholder}
+											onChange={(e) =>
+												handleUpdateField({ placeholder: e.target.value })
+											}
+											placeholder="Texto de ayuda"
+										/>
+									</div>
+									<div className="flex items-center justify-between">
+										<p className="text-xs font-medium">Campo requerido</p>
+										<Switch
+											checked={selectedField.requerido}
+											onCheckedChange={(checked) =>
+												handleUpdateField({ requerido: checked })
+											}
+										/>
+									</div>
+								</div>
+							) : (
+								<p className="text-xs text-muted-foreground">
+									Selecciona un campo para editar
+								</p>
+							)}
 						</div>
 
-						{/* Center Panel - Canvas */}
-						<div className="flex-1 overflow-y-auto p-6">
-							<div className="mb-6 space-y-4">
-								<Input
-									value={formName}
-									onChange={(e) => setFormName(e.target.value)}
-									className="text-xl font-semibold"
-									placeholder="Nombre del formulario"
+						{/* Live Preview Section */}
+						<div className="flex-1 overflow-y-auto p-4">
+							<h3 className="mb-4 text-sm font-semibold text-muted-foreground">
+								Vista Previa en Vivo
+							</h3>
+							<div className="rounded-lg border bg-card p-4">
+								<LivePreview
+									formName={formName}
+									fields={fields}
+									previewData={previewData}
+									onPreviewDataChange={handlePreviewDataChange}
 								/>
-
-								<div className="grid gap-4 md:grid-cols-2">
-									<div className="space-y-1.5 md:col-span-2">
-										<label className="text-xs font-medium">Descripción</label>
-										<Textarea
-											value={descripcion}
-											onChange={(e) => setDescripcion(e.target.value)}
-											placeholder="Describe el propósito del formulario"
-										/>
-									</div>
-
-									<div className="space-y-1.5">
-										<label className="text-xs font-medium">Tipo</label>
-										<Select value={tipo} onValueChange={(value) => setTipo(value as typeof tipo)}>
-											<SelectTrigger className="w-full">
-												<SelectValue placeholder="Selecciona tipo" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="inspeccion">Inspección</SelectItem>
-												<SelectItem value="reporte_fallas">Reporte de fallas</SelectItem>
-												<SelectItem value="preventivo">Preventivo</SelectItem>
-												<SelectItem value="correctivo">Correctivo</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-
-									<div className="space-y-1.5">
-										<label className="text-xs font-medium">Frecuencia</label>
-										<Select
-											value={frecuencia || "none"}
-											onValueChange={(value) =>
-												setFrecuencia(value === "none" ? "" : (value as typeof frecuencia))
-											}
-										>
-											<SelectTrigger className="w-full">
-												<SelectValue placeholder="Selecciona frecuencia" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="none">Sin frecuencia</SelectItem>
-												<SelectItem value="diario">Diario</SelectItem>
-												<SelectItem value="semanal">Semanal</SelectItem>
-												<SelectItem value="mensual">Mensual</SelectItem>
-												<SelectItem value="trimestral">Trimestral</SelectItem>
-												<SelectItem value="eventual">Eventual</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-
-									<div className="space-y-1.5">
-										<label className="text-xs font-medium">Tipo de asociación</label>
-										<Select
-											value={asociacionTipo}
-											onValueChange={(value) =>
-												setAsociacionTipo(value as typeof asociacionTipo)
-											}
-										>
-											<SelectTrigger className="w-full">
-												<SelectValue placeholder="Selecciona asociación" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="general">General</SelectItem>
-												<SelectItem value="equipo">Equipo</SelectItem>
-												<SelectItem value="tipo_equipo">Tipo de equipo</SelectItem>
-												<SelectItem value="area">Área</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-
-									{asociacionTipo !== "general" && (
-										<div className="space-y-1.5">
-											<label className="text-xs font-medium">Valor de asociación</label>
-											<Input
-												value={asociacionValor}
-												onChange={(e) => setAsociacionValor(e.target.value)}
-												placeholder="ID o valor de asociación"
-											/>
-										</div>
-									)}
-								</div>
-
-								{isLoadingForm && isEditMode && (
-									<p className="text-sm text-muted-foreground">Cargando formulario...</p>
-								)}
-							</div>
-
-							<SortableContext
-								items={fields.map((f) => f.id)}
-								strategy={verticalListSortingStrategy}
-							>
-								<CanvasDropZone
-									isEmpty={fields.length === 0}
-									isOver={isOverCanvas}
-								>
-									{fields.map((field) => (
-										<SortableField
-											key={field.id}
-											field={field}
-											isSelected={selectedField?.id === field.id}
-											onSelect={() => setSelectedField(field)}
-											onDelete={() => handleDeleteField(field.id)}
-										/>
-									))}
-								</CanvasDropZone>
-							</SortableContext>
-						</div>
-
-						{/* Right Panel - Properties + Live Preview */}
-						<div className="flex w-80 shrink-0 flex-col border-l">
-							{/* Properties Section */}
-							<div className="border-b p-4">
-								<h3 className="mb-4 text-sm font-semibold text-muted-foreground">
-									Propiedades
-								</h3>
-								{selectedField ? (
-									<div className="space-y-4">
-										<div>
-											<label className="mb-1.5 block text-xs font-medium">
-												Etiqueta
-											</label>
-											<Input
-												value={selectedField.label}
-												onChange={(e) =>
-													handleUpdateField({ label: e.target.value })
-												}
-												placeholder="Etiqueta del campo"
-											/>
-										</div>
-										<div>
-											<label className="mb-1.5 block text-xs font-medium">
-												Placeholder
-											</label>
-											<Input
-												value={selectedField.placeholder}
-												onChange={(e) =>
-													handleUpdateField({ placeholder: e.target.value })
-												}
-												placeholder="Texto de ayuda"
-											/>
-										</div>
-										<div className="flex items-center justify-between">
-											<label className="text-xs font-medium">
-												Campo requerido
-											</label>
-											<Switch
-												checked={selectedField.requerido}
-												onCheckedChange={(checked) =>
-													handleUpdateField({ requerido: checked })
-												}
-											/>
-										</div>
-									</div>
-								) : (
-									<p className="text-xs text-muted-foreground">
-										Selecciona un campo para editar
-									</p>
-								)}
-							</div>
-
-							{/* Live Preview Section */}
-							<div className="flex-1 overflow-y-auto p-4">
-								<h3 className="mb-4 text-sm font-semibold text-muted-foreground">
-									Vista Previa en Vivo
-								</h3>
-								<div className="rounded-lg border bg-card p-4">
-									<LivePreview
-										formName={formName}
-										fields={fields}
-										previewData={previewData}
-										onPreviewDataChange={handlePreviewDataChange}
-									/>
-								</div>
 							</div>
 						</div>
 					</div>
+				</div>
 
-					{/* Drag Overlay */}
-					<DragOverlay>
-						{activeId && activeTipo ? (
-							<Card className="w-52 shadow-lg ring-2 ring-primary">
-								<CardContent className="flex items-center gap-3 p-3">
-									<div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-										{fieldTypes.find((f) => f.tipo === activeTipo)?.icon}
-									</div>
-									<span className="text-sm font-medium">
-										{fieldTypes.find((f) => f.tipo === activeTipo)?.label}
-									</span>
-								</CardContent>
-							</Card>
-						) : null}
-					</DragOverlay>
-				</DndContext>
-			</SidebarInset>
+				{/* Drag Overlay */}
+				<DragOverlay>
+					{activeId && activeTipo ? (
+						<Card className="w-52 shadow-lg ring-2 ring-primary">
+							<CardContent className="flex items-center gap-3 p-3">
+								<div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+									{fieldTypes.find((f) => f.tipo === activeTipo)?.icon}
+								</div>
+								<span className="text-sm font-medium">
+									{fieldTypes.find((f) => f.tipo === activeTipo)?.label}
+								</span>
+							</CardContent>
+						</Card>
+					) : null}
+				</DragOverlay>
+			</DndContext>
+		</SidebarInset>
 	)
 }
 

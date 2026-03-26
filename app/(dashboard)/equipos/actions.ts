@@ -46,9 +46,7 @@ export async function getEquipos(
 	return { success: true, data: (data ?? []) as Equipo[] }
 }
 
-export async function getEquipoById(
-	id: string,
-): Promise<
+export async function getEquipoById(id: string): Promise<
 	ActionResult<
 		Equipo & {
 			documentos: unknown[]
@@ -159,9 +157,7 @@ export async function updateEquipo(
 	return { success: true, data: data as Equipo }
 }
 
-export async function deleteEquipo(
-	id: string,
-): Promise<ActionResult<void>> {
+export async function deleteEquipo(id: string): Promise<ActionResult<void>> {
 	const user = await getUser()
 	if (!user) return { success: false, error: "No autorizado" }
 
@@ -174,9 +170,7 @@ export async function deleteEquipo(
 	return { success: true, data: undefined }
 }
 
-export async function getEquipoStats(
-	id: string,
-): Promise<
+export async function getEquipoStats(id: string): Promise<
 	ActionResult<{
 		totalIntervenciones: number
 		ultimaFalla: string | null
@@ -198,18 +192,15 @@ export async function getEquipoStats(
 
 	const totalIntervenciones = registros?.length ?? 0
 	const horasMantenimiento =
-		registros?.reduce(
-			(sum, r) => sum + (Number(r.horas_empleadas) || 0),
-			0,
-		) ?? 0
+		registros?.reduce((sum, r) => sum + (Number(r.horas_empleadas) || 0), 0) ??
+		0
 	const costoTotal =
 		registros?.reduce((sum, r) => sum + (Number(r.costo) || 0), 0) ?? 0
 	const fallas = registros
 		?.filter((r) => r.tipo === "correctivo")
 		.sort(
 			(a, b) =>
-				new Date(b.fecha_inicio).getTime() -
-				new Date(a.fecha_inicio).getTime(),
+				new Date(b.fecha_inicio).getTime() - new Date(a.fecha_inicio).getTime(),
 		)
 	const ultimaFalla = fallas?.[0]?.fecha_inicio ?? null
 

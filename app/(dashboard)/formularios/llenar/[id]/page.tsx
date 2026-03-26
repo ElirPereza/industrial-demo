@@ -5,19 +5,19 @@ import {
 	Check,
 	Eraser,
 	MapPin,
-	Upload,
 	User,
 } from "@phosphor-icons/react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useRef, useState } from "react"
 import SignatureCanvas from "react-signature-canvas"
+import { toast } from "sonner"
 import {
-	getFormularioById,
 	type FormularioTemplate,
+	getFormularioById,
 } from "@/app/(dashboard)/formularios/actions"
 import {
-	submitFormulario,
 	type CampoRespuesta,
+	submitFormulario,
 } from "@/app/(dashboard)/formularios/envios-actions"
 import {
 	Breadcrumb,
@@ -44,13 +44,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 type CampoTemplate = NonNullable<FormularioTemplate["campos"]>[number]
 type CampoValor = string | string[] | number | boolean | null
@@ -113,7 +109,9 @@ function FormFillPageContent() {
 				<Input
 					value={typeof value === "string" ? value : ""}
 					onChange={(e) => updateFieldValue(campo.id, e.target.value)}
-					className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+					className={cn(
+						errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+					)}
 					placeholder={campo.placeholder || "Ingrese el texto"}
 				/>
 			)
@@ -124,7 +122,9 @@ function FormFillPageContent() {
 				<Textarea
 					value={typeof value === "string" ? value : ""}
 					onChange={(e) => updateFieldValue(campo.id, e.target.value)}
-					className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+					className={cn(
+						errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+					)}
 					rows={4}
 					placeholder={campo.placeholder || "Ingrese el texto"}
 				/>
@@ -143,7 +143,9 @@ function FormFillPageContent() {
 					type="number"
 					value={numericValue}
 					onChange={(e) => updateFieldValue(campo.id, e.target.value)}
-					className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+					className={cn(
+						errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+					)}
 					placeholder={campo.placeholder || "Ingrese el número"}
 				/>
 			)
@@ -155,7 +157,9 @@ function FormFillPageContent() {
 					type="date"
 					value={typeof value === "string" ? value : ""}
 					onChange={(e) => updateFieldValue(campo.id, e.target.value)}
-					className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+					className={cn(
+						errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+					)}
 				/>
 			)
 		}
@@ -279,10 +283,14 @@ function FormFillPageContent() {
 							const file = e.target.files?.[0]
 							updateFieldValue(campo.id, file ? file.name : null)
 						}}
-						className={cn(errors[campo.id] && "border-red-500 ring-1 ring-red-500/20")}
+						className={cn(
+							errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
+						)}
 					/>
 					{typeof value === "string" && value.length > 0 && (
-						<p className="mt-2 text-xs text-muted-foreground">Archivo: {value}</p>
+						<p className="mt-2 text-xs text-muted-foreground">
+							Archivo: {value}
+						</p>
 					)}
 				</div>
 			)
@@ -317,22 +325,24 @@ function FormFillPageContent() {
 
 		setSubmitting(true)
 
-		const respuestas: CampoRespuesta[] = (formulario.campos ?? []).map((campo) => {
-			const rawValue = formData[campo.id] ?? null
+		const respuestas: CampoRespuesta[] = (formulario.campos ?? []).map(
+			(campo) => {
+				const rawValue = formData[campo.id] ?? null
 
-			if (campo.tipo === "numerico") {
-				if (rawValue === null || rawValue === "") {
-					return { idCampo: campo.id, valor: null }
+				if (campo.tipo === "numerico") {
+					if (rawValue === null || rawValue === "") {
+						return { idCampo: campo.id, valor: null }
+					}
+					const parsed = Number(rawValue)
+					return {
+						idCampo: campo.id,
+						valor: Number.isNaN(parsed) ? null : parsed,
+					}
 				}
-				const parsed = Number(rawValue)
-				return {
-					idCampo: campo.id,
-					valor: Number.isNaN(parsed) ? null : parsed,
-				}
-			}
 
-			return { idCampo: campo.id, valor: rawValue }
-		})
+				return { idCampo: campo.id, valor: rawValue }
+			},
+		)
 
 		const result = await submitFormulario({
 			formulario_id: formulario.id,
@@ -370,7 +380,10 @@ function FormFillPageContent() {
 				<div className="flex min-h-screen items-center justify-center">
 					<div className="text-center">
 						<h1 className="text-2xl font-semibold">Formulario no encontrado</h1>
-						<Button className="mt-4" onClick={() => router.push("/formularios")}>
+						<Button
+							className="mt-4"
+							onClick={() => router.push("/formularios")}
+						>
 							Volver a Formularios
 						</Button>
 					</div>
@@ -393,7 +406,9 @@ function FormFillPageContent() {
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem className="hidden md:block">
-								<BreadcrumbLink href="/dashboard">Portal Industrial</BreadcrumbLink>
+								<BreadcrumbLink href="/dashboard">
+									Portal Industrial
+								</BreadcrumbLink>
 							</BreadcrumbItem>
 							<BreadcrumbSeparator className="hidden md:block" />
 							<BreadcrumbItem>
@@ -411,7 +426,9 @@ function FormFillPageContent() {
 			<div className="flex flex-1 flex-col gap-6 p-4 pt-0">
 				<div>
 					<h1 className="text-2xl font-semibold">{formulario.nombre}</h1>
-					<p className="text-sm text-muted-foreground">{formulario.descripcion}</p>
+					<p className="text-sm text-muted-foreground">
+						{formulario.descripcion}
+					</p>
 				</div>
 
 				<Card>
@@ -452,7 +469,9 @@ function FormFillPageContent() {
 								</div>
 								<div>
 									<p className="text-xs text-muted-foreground">Equipo</p>
-									<p className="text-sm font-medium">{equipoId || "Sin equipo"}</p>
+									<p className="text-sm font-medium">
+										{equipoId || "Sin equipo"}
+									</p>
 								</div>
 							</div>
 						</div>
@@ -463,8 +482,8 @@ function FormFillPageContent() {
 					<CardHeader>
 						<CardTitle className="text-base">Campos del Formulario</CardTitle>
 						<CardDescription>
-							Los campos marcados con <span className="text-red-600">*</span> son
-							obligatorios
+							Los campos marcados con <span className="text-red-600">*</span>{" "}
+							son obligatorios
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
@@ -472,7 +491,9 @@ function FormFillPageContent() {
 							<div key={campo.id}>
 								<div className="mb-2 text-sm font-medium">
 									{campo.label}
-									{campo.requerido && <span className="ml-1 text-red-600">*</span>}
+									{campo.requerido && (
+										<span className="ml-1 text-red-600">*</span>
+									)}
 								</div>
 
 								{renderField(campo)}
@@ -488,7 +509,9 @@ function FormFillPageContent() {
 				</Card>
 
 				<div className="flex justify-end gap-2">
-					<Button variant="outline" onClick={() => router.push("/formularios")}>Cancelar</Button>
+					<Button variant="outline" onClick={() => router.push("/formularios")}>
+						Cancelar
+					</Button>
 					<Button onClick={handleSubmit} disabled={submitting}>
 						<Check className="mr-2 size-4" weight="bold" />
 						{submitting ? "Enviando..." : "Enviar Formulario"}

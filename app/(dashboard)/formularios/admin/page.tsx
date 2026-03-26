@@ -12,12 +12,11 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { getEquipos } from "@/app/(dashboard)/equipos/actions"
-import type { Equipo } from "@/app/(dashboard)/equipos/actions"
 import {
 	deleteFormulario,
+	type FormularioTemplate,
 	getFormularios,
 	toggleFormularioActivo,
-	type FormularioTemplate,
 } from "@/app/(dashboard)/formularios/actions"
 import {
 	Breadcrumb,
@@ -38,10 +37,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
 import {
 	Table,
@@ -107,9 +103,7 @@ export default function FormAdminPage() {
 		if (!selectedFormulario) return
 		const result = await deleteFormulario(selectedFormulario)
 		if (result.success) {
-			setFormularios((prev) =>
-				prev.filter((f) => f.id !== selectedFormulario),
-			)
+			setFormularios((prev) => prev.filter((f) => f.id !== selectedFormulario))
 			toast.success("Formulario eliminado")
 		} else {
 			toast.error(result.error)
@@ -192,9 +186,8 @@ export default function FormAdminPage() {
 											switch (formulario.asociacion_tipo) {
 												case "equipo": {
 													const eqName =
-														equiposMap.get(
-															formulario.asociacion_valor ?? "",
-														) ?? "Equipo"
+														equiposMap.get(formulario.asociacion_valor ?? "") ??
+														"Equipo"
 													return {
 														icon: Target,
 														label: eqName,
@@ -206,10 +199,8 @@ export default function FormAdminPage() {
 													return {
 														icon: Cube,
 														label:
-															formulario.asociacion_valor?.replace(
-																/_/g,
-																" ",
-															) ?? "Tipo",
+															formulario.asociacion_valor?.replace(/_/g, " ") ??
+															"Tipo",
 														color:
 															"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
 													}
@@ -222,7 +213,6 @@ export default function FormAdminPage() {
 															"bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
 													}
 												}
-												case "general":
 												default: {
 													return {
 														icon: Globe,

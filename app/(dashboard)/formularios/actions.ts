@@ -94,21 +94,30 @@ type UpdateFormularioInput = {
 	campos?: CampoInput[]
 }
 
+type FormularioRowWithRelations = Omit<FormularioTemplate, "campos"> & {
+	campos_formulario?: unknown
+	envios_formularios?: unknown
+}
+
 const getCountValue = (countNode: unknown): number => {
 	if (!Array.isArray(countNode) || countNode.length === 0) return 0
 	const first = countNode[0] as { count?: number }
 	return first.count ?? 0
 }
 
-const mapFormularioWithCampos = (row: any): FormularioTemplate => ({
+const mapFormularioWithCampos = (
+	row: FormularioRowWithRelations,
+): FormularioTemplate => ({
 	...row,
-	campos: row.campos_formulario ?? [],
+	campos: Array.isArray(row.campos_formulario) ? row.campos_formulario : [],
 })
 
 const toEscapedFilterValue = (value: string) =>
 	`"${value.replaceAll('"', '\\"')}"`
 
-export async function getFormularios(): Promise<ActionResult<FormularioConConteos[]>> {
+export async function getFormularios(): Promise<
+	ActionResult<FormularioConConteos[]>
+> {
 	const user = await getUser()
 	if (!user) return { success: false, error: "No autorizado" }
 
@@ -126,13 +135,17 @@ export async function getFormularios(): Promise<ActionResult<FormularioConConteo
 
 	if (error) return { success: false, error: error.message }
 
-	const mapped: FormularioConConteos[] = (data ?? []).map((row: any) => ({
-		...row,
-		_count: {
-			campos: getCountValue(row.campos_formulario),
-			envios: getCountValue(row.envios_formularios),
-		},
-	}))
+	const mapped: FormularioConConteos[] = (data ?? []).map((row) => {
+		const formulario = row as FormularioRowWithRelations
+
+		return {
+			...formulario,
+			_count: {
+				campos: getCountValue(formulario.campos_formulario),
+				envios: getCountValue(formulario.envios_formularios),
+			},
+		}
+	})
 
 	return { success: true, data: mapped }
 }
@@ -368,7 +381,9 @@ export async function toggleFormularioActivo(
 	return { success: true, data: { activo: data.activo } }
 }
 
-export async function deleteFormulario(id: string): Promise<ActionResult<void>> {
+export async function deleteFormulario(
+	id: string,
+): Promise<ActionResult<void>> {
 	const user = await getUser()
 	if (!user) return { success: false, error: "No autorizado" }
 
@@ -421,6 +436,8 @@ export async function getFormulariosParaEquipo(
 
 	return {
 		success: true,
-		data: (data ?? []).map((row: any) => mapFormularioWithCampos(row)),
+		data: (data ?? []).map((row) =>
+			mapFormularioWithCampos(row as FormularioRowWithRelations),
+		),
 	}
 }

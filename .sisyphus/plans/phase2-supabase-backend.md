@@ -2220,7 +2220,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 ### Wave 8 — Cleanup
 
-- [ ] 33. Remove mock-data.ts + unused deps + final build verification
+- [x] 33. Remove mock-data.ts + unused deps + final build verification
 
   **What to do**:
   - Delete `lib/mock-data.ts` — all data now comes from Supabase

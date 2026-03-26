@@ -11,6 +11,11 @@ import {
 } from "@phosphor-icons/react"
 import { QRCodeSVG } from "qrcode.react"
 import { useCallback, useEffect, useState } from "react"
+import { type Equipo, getEquipos } from "@/app/(dashboard)/equipos/actions"
+import {
+	type FormularioTemplate,
+	getFormularios,
+} from "@/app/(dashboard)/formularios/actions"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -36,16 +41,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import {
-	SidebarInset,
-	SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { getEquipos, type Equipo } from "@/app/(dashboard)/equipos/actions"
-import {
-	getFormularios,
-	type FormularioTemplate,
-} from "@/app/(dashboard)/formularios/actions"
 
 type TabType = "equipos" | "formularios"
 
@@ -56,7 +53,9 @@ type FormularioItem = FormularioTemplate & {
 export default function QRCodesPage() {
 	const [activeTab, setActiveTab] = useState<TabType>("equipos")
 	const [selectedEquipo, setSelectedEquipo] = useState<string | null>(null)
-	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(null)
+	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(
+		null,
+	)
 	const [searchEquipo, setSearchEquipo] = useState("")
 	const [searchFormulario, setSearchFormulario] = useState("")
 	const [filterTipo, setFilterTipo] = useState<string | null>(null)
@@ -81,11 +80,14 @@ export default function QRCodesPage() {
 	}, [fetchData])
 
 	const selectedEquipoData = equipos.find((e) => e.id === selectedEquipo)
-	const selectedFormularioData = formularios.find((f) => f.id === selectedFormulario)
+	const selectedFormularioData = formularios.find(
+		(f) => f.id === selectedFormulario,
+	)
 
 	// Filter equipment client-side
 	const equiposFiltrados = equipos.filter((e) => {
-		const matchSearch = e.nombre.toLowerCase().includes(searchEquipo.toLowerCase()) ||
+		const matchSearch =
+			e.nombre.toLowerCase().includes(searchEquipo.toLowerCase()) ||
 			e.ubicacion.toLowerCase().includes(searchEquipo.toLowerCase())
 		const matchTipo = !filterTipo || e.tipo === filterTipo
 		return matchSearch && matchTipo
@@ -93,7 +95,7 @@ export default function QRCodesPage() {
 
 	// Filter forms client-side
 	const formulariosFiltrados = formularios.filter((f) =>
-		f.nombre.toLowerCase().includes(searchFormulario.toLowerCase())
+		f.nombre.toLowerCase().includes(searchFormulario.toLowerCase()),
 	)
 
 	// Get unique equipment types
@@ -142,8 +144,18 @@ export default function QRCodesPage() {
 	}
 
 	const tabs = [
-		{ id: "equipos" as TabType, label: "Equipos", icon: Cube, count: equipos.length },
-		{ id: "formularios" as TabType, label: "Formularios", icon: FileText, count: formularios.length },
+		{
+			id: "equipos" as TabType,
+			label: "Equipos",
+			icon: Cube,
+			count: equipos.length,
+		},
+		{
+			id: "formularios" as TabType,
+			label: "Formularios",
+			icon: FileText,
+			count: formularios.length,
+		},
 	]
 
 	const getEquipoTipoLabel = (tipo: string) => {
@@ -174,8 +186,8 @@ export default function QRCodesPage() {
 		}
 	}
 
-		return (
-			<>
+	return (
+		<>
 			<SidebarInset>
 				<header className="flex h-16 shrink-0 items-center gap-2">
 					<div className="flex items-center gap-2 px-4">
@@ -270,7 +282,9 @@ export default function QRCodesPage() {
 											key={tipo}
 											variant={filterTipo === tipo ? "default" : "outline"}
 											size="sm"
-											onClick={() => setFilterTipo(filterTipo === tipo ? null : tipo)}
+											onClick={() =>
+												setFilterTipo(filterTipo === tipo ? null : tipo)
+											}
 										>
 											{getEquipoTipoLabel(tipo)}
 										</Button>
@@ -292,7 +306,10 @@ export default function QRCodesPage() {
 											<CardHeader className="pb-2">
 												<div className="flex items-start justify-between">
 													<div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-														<Cube className="size-5 text-primary" weight="duotone" />
+														<Cube
+															className="size-5 text-primary"
+															weight="duotone"
+														/>
 													</div>
 													<span
 														className={cn(
@@ -308,7 +325,9 @@ export default function QRCodesPage() {
 														{getEstadoLabel(equipo.estado)}
 													</span>
 												</div>
-												<CardTitle className="mt-3 text-base">{equipo.nombre}</CardTitle>
+												<CardTitle className="mt-3 text-base">
+													{equipo.nombre}
+												</CardTitle>
 												<div className="flex items-center gap-1 text-sm text-muted-foreground">
 													<MapPin className="size-3" />
 													<span>{equipo.ubicacion}</span>
@@ -396,8 +415,12 @@ export default function QRCodesPage() {
 														{formulario.activo ? "Activo" : "Inactivo"}
 													</span>
 												</div>
-												<CardTitle className="mt-4">{formulario.nombre}</CardTitle>
-												<CardDescription>{formulario.descripcion}</CardDescription>
+												<CardTitle className="mt-4">
+													{formulario.nombre}
+												</CardTitle>
+												<CardDescription>
+													{formulario.descripcion}
+												</CardDescription>
 											</CardHeader>
 											<CardContent>
 												<div className="flex items-center justify-center rounded-lg bg-white p-4">
@@ -414,7 +437,10 @@ export default function QRCodesPage() {
 													className="mt-4 w-full"
 													onClick={(e: React.MouseEvent) => {
 														e.stopPropagation()
-														handleDownloadFormulario(formulario.id, formulario.nombre)
+														handleDownloadFormulario(
+															formulario.id,
+															formulario.nombre,
+														)
 													}}
 												>
 													<Download className="mr-2 size-4" weight="bold" />
@@ -437,11 +463,11 @@ export default function QRCodesPage() {
 						</>
 					)}
 				</div>
-				</SidebarInset>
+			</SidebarInset>
 
-				{/* Equipment Detail Dialog */}
-				<Dialog
-					open={selectedEquipo !== null}
+			{/* Equipment Detail Dialog */}
+			<Dialog
+				open={selectedEquipo !== null}
 				onOpenChange={() => setSelectedEquipo(null)}
 			>
 				<DialogContent className="max-w-md">
@@ -456,22 +482,24 @@ export default function QRCodesPage() {
 					</DialogHeader>
 					<div className="space-y-4">
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
-					{selectedEquipoData && (
-						<QRCodeSVG
-							value={`${window.location.origin}/equipos/${selectedEquipoData.id}`}
-							size={256}
-							level="H"
-							includeMargin
-						/>
-					)}
-				</div>
-				<div className="space-y-2 text-sm">
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Tipo:</span>
-						<span className="font-medium">
-							{selectedEquipoData ? getEquipoTipoLabel(selectedEquipoData.tipo) : ""}
-						</span>
-					</div>
+							{selectedEquipoData && (
+								<QRCodeSVG
+									value={`${window.location.origin}/equipos/${selectedEquipoData.id}`}
+									size={256}
+									level="H"
+									includeMargin
+								/>
+							)}
+						</div>
+						<div className="space-y-2 text-sm">
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Tipo:</span>
+								<span className="font-medium">
+									{selectedEquipoData
+										? getEquipoTipoLabel(selectedEquipoData.tipo)
+										: ""}
+								</span>
+							</div>
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Estado:</span>
 								<span
@@ -485,24 +513,31 @@ export default function QRCodesPage() {
 											"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 									)}
 								>
-									{selectedEquipoData ? getEstadoLabel(selectedEquipoData.estado) : ""}
+									{selectedEquipoData
+										? getEstadoLabel(selectedEquipoData.estado)
+										: ""}
 								</span>
 							</div>
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Último Mant.:</span>
-						<span className="font-medium">
-							{selectedEquipoData?.ultimo_mantenimiento
-								? new Date(selectedEquipoData.ultimo_mantenimiento).toLocaleDateString("es-ES")
-								: "N/A"}
-						</span>
-					</div>
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Último Mant.:</span>
+								<span className="font-medium">
+									{selectedEquipoData?.ultimo_mantenimiento
+										? new Date(
+												selectedEquipoData.ultimo_mantenimiento,
+											).toLocaleDateString("es-ES")
+										: "N/A"}
+								</span>
+							</div>
 						</div>
 						<div className="flex gap-2">
 							<Button
 								className="flex-1"
 								onClick={() => {
 									if (selectedEquipoData) {
-										handleDownloadEquipo(selectedEquipoData.id, selectedEquipoData.nombre)
+										handleDownloadEquipo(
+											selectedEquipoData.id,
+											selectedEquipoData.nombre,
+										)
 									}
 								}}
 							>
@@ -525,29 +560,33 @@ export default function QRCodesPage() {
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>{selectedFormularioData?.nombre}</DialogTitle>
-						<DialogDescription>{selectedFormularioData?.descripcion}</DialogDescription>
+						<DialogDescription>
+							{selectedFormularioData?.descripcion}
+						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4">
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
-					{selectedFormularioData && (
-						<QRCodeSVG
-							value={`${window.location.origin}/formularios/llenar/${selectedFormularioData.id}`}
-							size={256}
-							level="H"
-							includeMargin
-						/>
-					)}
+							{selectedFormularioData && (
+								<QRCodeSVG
+									value={`${window.location.origin}/formularios/llenar/${selectedFormularioData.id}`}
+									size={256}
+									level="H"
+									includeMargin
+								/>
+							)}
 						</div>
 						<div className="space-y-2 text-sm">
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Tipo:</span>
-						<span className="font-medium capitalize">
-							{selectedFormularioData?.tipo?.replace(/_/g, " ") ?? ""}
-						</span>
-					</div>
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Tipo:</span>
+								<span className="font-medium capitalize">
+									{selectedFormularioData?.tipo?.replace(/_/g, " ") ?? ""}
+								</span>
+							</div>
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Versión:</span>
-								<span className="font-medium">v{selectedFormularioData?.version}</span>
+								<span className="font-medium">
+									v{selectedFormularioData?.version}
+								</span>
 							</div>
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Estado:</span>
@@ -567,7 +606,10 @@ export default function QRCodesPage() {
 							className="w-full"
 							onClick={() => {
 								if (selectedFormularioData) {
-									handleDownloadFormulario(selectedFormularioData.id, selectedFormularioData.nombre)
+									handleDownloadFormulario(
+										selectedFormularioData.id,
+										selectedFormularioData.nombre,
+									)
 								}
 							}}
 						>
@@ -575,8 +617,8 @@ export default function QRCodesPage() {
 							Descargar QR
 						</Button>
 					</div>
-					</DialogContent>
-				</Dialog>
-			</>
-			)
-		}
+				</DialogContent>
+			</Dialog>
+		</>
+	)
+}

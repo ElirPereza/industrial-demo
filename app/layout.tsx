@@ -21,11 +21,11 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-			<html lang="es" className={jetbrainsMono.variable}>
-				<body className={`${jetbrainsMono.className} antialiased`}>
-					<TooltipProvider>{children}</TooltipProvider>
-					<Toaster />
-				</body>
-			</html>
-		)
-	}
+		<html lang="es" className={jetbrainsMono.variable}>
+			<body className={`${jetbrainsMono.className} antialiased`}>
+				<TooltipProvider>{children}</TooltipProvider>
+				<Toaster />
+			</body>
+		</html>
+	)
+}

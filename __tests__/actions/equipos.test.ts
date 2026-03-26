@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 import { createEquipoSchema } from "@/lib/validations/equipos"
 
 // Note: Full Server Action tests require a live Supabase connection.

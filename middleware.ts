@@ -1,33 +1,36 @@
-import { type NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function middleware(request: NextRequest) {
 	let supabaseResponse = NextResponse.next({
 		request,
 	})
 
-	const supabase = createServerClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-		{
-			cookies: {
-				getAll() {
-					return request.cookies.getAll()
-				},
-				setAll(cookiesToSet) {
-					for (const { name, value } of cookiesToSet) {
-						request.cookies.set(name, value)
-					}
-					supabaseResponse = NextResponse.next({
-						request,
-					})
-					for (const { name, value, options } of cookiesToSet) {
-						supabaseResponse.cookies.set(name, value, options)
-					}
-				},
+	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+	const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+	if (!supabaseUrl || !supabaseAnonKey) {
+		return supabaseResponse
+	}
+
+	const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+		cookies: {
+			getAll() {
+				return request.cookies.getAll()
+			},
+			setAll(cookiesToSet) {
+				for (const { name, value } of cookiesToSet) {
+					request.cookies.set(name, value)
+				}
+				supabaseResponse = NextResponse.next({
+					request,
+				})
+				for (const { name, value, options } of cookiesToSet) {
+					supabaseResponse.cookies.set(name, value, options)
+				}
 			},
 		},
-	)
+	})
 
 	// IMPORTANT: Do NOT write additional code between createServerClient and
 	// supabase.auth.getUser(). This refreshes the session token.
