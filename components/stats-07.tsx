@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink } from "lucide-react"
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import Link from "next/link"
 import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts"
 import { Card, CardContent } from "@/components/ui/card"
@@ -59,7 +59,7 @@ export default function Stats07() {
 						className="inline-flex items-center gap-1 text-primary hover:underline hover:underline-offset-4"
 					>
 						View other plans
-						<ExternalLink className="size-4" aria-hidden={true} />
+						<ArrowSquareOut className="size-4" aria-hidden={true} />
 					</Link>
 				</p>
 				<dl className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

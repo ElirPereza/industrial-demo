@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
+import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 const jetbrainsMono = JetBrains_Mono({
@@ -20,10 +21,11 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="es" className={jetbrainsMono.variable}>
-			<body className={`${jetbrainsMono.className} antialiased`}>
-				<TooltipProvider>{children}</TooltipProvider>
-			</body>
-		</html>
-	)
-}
+			<html lang="es" className={jetbrainsMono.variable}>
+				<body className={`${jetbrainsMono.className} antialiased`}>
+					<TooltipProvider>{children}</TooltipProvider>
+					<Toaster />
+				</body>
+			</html>
+		)
+	}
