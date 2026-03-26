@@ -68,3 +68,8 @@
 - All 5 tabs wired to real Supabase data
 - Data loaded in parallel with Promise.all
 - Build: PASS
+
+## [T23+T24 Complete] Constructor + Llenar Pages
+- constructor: CREATE/EDIT modes, added metadata fields, wired to actions
+- llenar: dynamic field rendering, required validation, wired to submitFormulario
+- Build: PASS

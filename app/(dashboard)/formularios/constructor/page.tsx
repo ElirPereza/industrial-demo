@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import {
 	DndContext,
 	type DragEndEvent,
@@ -33,8 +35,14 @@ import {
 	Trash,
 	Upload,
 } from "@phosphor-icons/react"
-import { useRef, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useEffect, useRef, useState } from "react"
 import SignatureCanvas from "react-signature-canvas"
+import {
+	createFormulario,
+	getFormularioById,
+	updateFormulario,
+} from "@/app/(dashboard)/formularios/actions"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -46,22 +54,30 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import {
 	SidebarInset,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 type FieldType =
-	| "texto-corto"
-	| "texto-largo"
+	| "texto_corto"
+	| "texto_largo"
 	| "numerico"
 	| "fecha"
-	| "seleccion-unica"
-	| "seleccion-multiple"
+	| "seleccion_unica"
+	| "seleccion_multiple"
 	| "firma"
 	| "foto"
 
@@ -77,12 +93,12 @@ interface FormField {
 const fieldTypes: { tipo: FieldType; label: string; icon: React.ReactNode }[] =
 	[
 		{
-			tipo: "texto-corto",
+			tipo: "texto_corto",
 			label: "Texto Corto",
 			icon: <TextT className="size-5" weight="duotone" />,
 		},
 		{
-			tipo: "texto-largo",
+			tipo: "texto_largo",
 			label: "Texto Largo",
 			icon: <TextAlignLeft className="size-5" weight="duotone" />,
 		},
@@ -97,12 +113,12 @@ const fieldTypes: { tipo: FieldType; label: string; icon: React.ReactNode }[] =
 			icon: <CalendarBlank className="size-5" weight="duotone" />,
 		},
 		{
-			tipo: "seleccion-unica",
+			tipo: "seleccion_unica",
 			label: "Selección Única",
 			icon: <ListBullets className="size-5" weight="duotone" />,
 		},
 		{
-			tipo: "seleccion-multiple",
+			tipo: "seleccion_multiple",
 			label: "Selección Múltiple",
 			icon: <CheckSquare className="size-5" weight="duotone" />,
 		},
@@ -302,7 +318,7 @@ function LivePreview({
 						{field.requerido && <span className="ml-1 text-red-600">*</span>}
 					</label>
 
-					{field.tipo === "texto-corto" && (
+					{field.tipo === "texto_corto" && (
 						<Input
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
@@ -310,7 +326,7 @@ function LivePreview({
 						/>
 					)}
 
-					{field.tipo === "texto-largo" && (
+					{field.tipo === "texto_largo" && (
 						<textarea
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
@@ -337,7 +353,7 @@ function LivePreview({
 						/>
 					)}
 
-					{field.tipo === "seleccion-unica" && (
+					{field.tipo === "seleccion_unica" && (
 						<select
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
@@ -354,7 +370,7 @@ function LivePreview({
 						</select>
 					)}
 
-					{field.tipo === "seleccion-multiple" && (
+					{field.tipo === "seleccion_multiple" && (
 						<div className="space-y-2">
 							{(field.opciones || ["Opción 1", "Opción 2", "Opción 3"]).map(
 								(opt) => (
@@ -471,18 +487,79 @@ function LivePreview({
 	)
 }
 
-export default function FormBuilderPage() {
-	const [formName, setFormName] = useState("Nuevo Formulario")
+function FormBuilderPageContent() {
+	const router = useRouter()
+	const searchParams = useSearchParams()
+	const formId = searchParams.get("id")
+	const isEditMode = Boolean(formId)
+
+	const [formName, setFormName] = useState("")
+	const [descripcion, setDescripcion] = useState("")
+	const [tipo, setTipo] = useState<
+		"inspeccion" | "reporte_fallas" | "preventivo" | "correctivo"
+	>("inspeccion")
+	const [frecuencia, setFrecuencia] = useState<
+		"" | "diario" | "semanal" | "mensual" | "trimestral" | "eventual"
+	>("")
+	const [asociacionTipo, setAsociacionTipo] = useState<
+		"general" | "equipo" | "tipo_equipo" | "area"
+	>("general")
+	const [asociacionValor, setAsociacionValor] = useState("")
 	const [fields, setFields] = useState<FormField[]>([])
 	const [selectedField, setSelectedField] = useState<FormField | null>(null)
 	const [activeId, setActiveId] = useState<string | null>(null)
 	const [activeTipo, setActiveTipo] = useState<FieldType | null>(null)
 	const [isOverCanvas, setIsOverCanvas] = useState(false)
 	const [previewData, setPreviewData] = useState<Record<string, string>>({})
+	const [isLoadingForm, setIsLoadingForm] = useState(isEditMode)
+	const [isSaving, setIsSaving] = useState(false)
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
 	)
+
+	useEffect(() => {
+		if (!formId) {
+			setIsLoadingForm(false)
+			return
+		}
+
+		const currentFormId = formId
+
+		async function loadFormulario() {
+			setIsLoadingForm(true)
+			const result = await getFormularioById(currentFormId)
+			if (!result.success) {
+				toast.error(result.error)
+				router.push("/formularios/admin")
+				setIsLoadingForm(false)
+				return
+			}
+
+			const template = result.data
+			setFormName(template.nombre)
+			setDescripcion(template.descripcion ?? "")
+			setTipo(template.tipo)
+			setFrecuencia(template.frecuencia ?? "")
+			setAsociacionTipo(template.asociacion_tipo)
+			setAsociacionValor(template.asociacion_valor ?? "")
+			setFields(
+				(template.campos ?? []).map((campo) => ({
+					id: campo.id,
+					tipo: campo.tipo,
+					label: campo.label,
+					placeholder: campo.placeholder,
+					requerido: campo.requerido,
+					opciones: campo.opciones ?? undefined,
+				})),
+			)
+			setSelectedField(null)
+			setPreviewData({})
+			setIsLoadingForm(false)
+		}
+
+		loadFormulario()
+	}, [formId, router])
 
 	const handleDragStart = (event: DragStartEvent) => {
 		const { active } = event
@@ -518,7 +595,7 @@ export default function FormBuilderPage() {
 				placeholder: "",
 				requerido: false,
 				opciones:
-					tipo === "seleccion-unica" || tipo === "seleccion-multiple"
+					tipo === "seleccion_unica" || tipo === "seleccion_multiple"
 						? ["Opción 1", "Opción 2", "Opción 3"]
 						: undefined,
 			}
@@ -554,12 +631,56 @@ export default function FormBuilderPage() {
 	const handleUpdateField = (updates: Partial<FormField>) => {
 		if (!selectedField) return
 		const updated = { ...selectedField, ...updates }
-		setFields(fields.map((f) => (f.id === selectedField.id ? updated : f)))
+		setFields((prev) =>
+			prev.map((field) => (field.id === selectedField.id ? updated : field)),
+		)
 		setSelectedField(updated)
 	}
 
 	const handlePreviewDataChange = (id: string, value: string) => {
 		setPreviewData({ ...previewData, [id]: value })
+	}
+
+	const handleSave = async () => {
+		if (isSaving) return
+
+		setIsSaving(true)
+
+		const payload = {
+			nombre: formName,
+			descripcion: descripcion || undefined,
+			tipo,
+			frecuencia: frecuencia || undefined,
+			asociacion_tipo: asociacionTipo,
+			asociacion_valor:
+				asociacionTipo === "general" ? undefined : asociacionValor || undefined,
+			campos: fields.map((field, index) => ({
+				tipo: field.tipo,
+				label: field.label,
+				placeholder: field.placeholder,
+				requerido: field.requerido,
+				opciones:
+					field.tipo === "seleccion_unica" ||
+					field.tipo === "seleccion_multiple"
+						? field.opciones
+						: undefined,
+				orden: index,
+			})),
+		}
+
+		const result = formId
+			? await updateFormulario(formId, payload)
+			: await createFormulario(payload)
+
+		if (!result.success) {
+			toast.error(result.error)
+			setIsSaving(false)
+			return
+		}
+
+		toast.success("Formulario guardado")
+		router.push("/formularios/admin")
+		setIsSaving(false)
 	}
 
 	return (
@@ -592,9 +713,9 @@ export default function FormBuilderPage() {
 								</BreadcrumbList>
 							</Breadcrumb>
 						</div>
-						<Button onClick={() => toast.success("Formulario guardado (simulado)")}>
+						<Button onClick={handleSave} disabled={isSaving || isLoadingForm}>
 							<FloppyDisk className="mr-2 size-4" weight="duotone" />
-							Guardar
+							{isSaving ? "Guardando..." : "Guardar"}
 						</Button>
 					</div>
 				</header>
@@ -625,13 +746,96 @@ export default function FormBuilderPage() {
 
 						{/* Center Panel - Canvas */}
 						<div className="flex-1 overflow-y-auto p-6">
-							<div className="mb-6">
+							<div className="mb-6 space-y-4">
 								<Input
 									value={formName}
 									onChange={(e) => setFormName(e.target.value)}
 									className="text-xl font-semibold"
 									placeholder="Nombre del formulario"
 								/>
+
+								<div className="grid gap-4 md:grid-cols-2">
+									<div className="space-y-1.5 md:col-span-2">
+										<label className="text-xs font-medium">Descripción</label>
+										<Textarea
+											value={descripcion}
+											onChange={(e) => setDescripcion(e.target.value)}
+											placeholder="Describe el propósito del formulario"
+										/>
+									</div>
+
+									<div className="space-y-1.5">
+										<label className="text-xs font-medium">Tipo</label>
+										<Select value={tipo} onValueChange={(value) => setTipo(value as typeof tipo)}>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Selecciona tipo" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="inspeccion">Inspección</SelectItem>
+												<SelectItem value="reporte_fallas">Reporte de fallas</SelectItem>
+												<SelectItem value="preventivo">Preventivo</SelectItem>
+												<SelectItem value="correctivo">Correctivo</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+
+									<div className="space-y-1.5">
+										<label className="text-xs font-medium">Frecuencia</label>
+										<Select
+											value={frecuencia || "none"}
+											onValueChange={(value) =>
+												setFrecuencia(value === "none" ? "" : (value as typeof frecuencia))
+											}
+										>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Selecciona frecuencia" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">Sin frecuencia</SelectItem>
+												<SelectItem value="diario">Diario</SelectItem>
+												<SelectItem value="semanal">Semanal</SelectItem>
+												<SelectItem value="mensual">Mensual</SelectItem>
+												<SelectItem value="trimestral">Trimestral</SelectItem>
+												<SelectItem value="eventual">Eventual</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+
+									<div className="space-y-1.5">
+										<label className="text-xs font-medium">Tipo de asociación</label>
+										<Select
+											value={asociacionTipo}
+											onValueChange={(value) =>
+												setAsociacionTipo(value as typeof asociacionTipo)
+											}
+										>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Selecciona asociación" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="general">General</SelectItem>
+												<SelectItem value="equipo">Equipo</SelectItem>
+												<SelectItem value="tipo_equipo">Tipo de equipo</SelectItem>
+												<SelectItem value="area">Área</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+
+									{asociacionTipo !== "general" && (
+										<div className="space-y-1.5">
+											<label className="text-xs font-medium">Valor de asociación</label>
+											<Input
+												value={asociacionValor}
+												onChange={(e) => setAsociacionValor(e.target.value)}
+												placeholder="ID o valor de asociación"
+											/>
+										</div>
+									)}
+								</div>
+
+								{isLoadingForm && isEditMode && (
+									<p className="text-sm text-muted-foreground">Cargando formulario...</p>
+								)}
 							</div>
 
 							<SortableContext
@@ -741,5 +945,23 @@ export default function FormBuilderPage() {
 					</DragOverlay>
 				</DndContext>
 			</SidebarInset>
+	)
+}
+
+export default function FormBuilderPage() {
+	return (
+		<Suspense
+			fallback={
+				<SidebarInset>
+					<div className="flex h-full items-center justify-center p-8">
+						<p className="animate-pulse text-sm text-muted-foreground">
+							Cargando constructor...
+						</p>
+					</div>
+				</SidebarInset>
+			}
+		>
+			<FormBuilderPageContent />
+		</Suspense>
 	)
 }

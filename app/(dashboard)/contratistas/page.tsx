@@ -13,7 +13,7 @@ import {
 	UserCircle,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -37,88 +37,64 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-
-// Mock data for contractors
-const contratistasMock = [
-	{
-		id: "con-001",
-		nombre: "Servicios Industriales del Norte",
-		contacto: "Roberto Gómez",
-		email: "contacto@sinorte.com",
-		telefono: "+57 310 555 1234",
-		especialidad: "Mantenimiento Eléctrico",
-		estado: "activo",
-		calificacion: 4.8,
-		trabajosCompletados: 45,
-		contratoVigente: new Date("2024-12-31"),
-	},
-	{
-		id: "con-002",
-		nombre: "TechMaint Solutions",
-		contacto: "Carolina Ruiz",
-		email: "info@techmaint.co",
-		telefono: "+57 320 555 5678",
-		especialidad: "HVAC y Refrigeración",
-		estado: "activo",
-		calificacion: 4.5,
-		trabajosCompletados: 32,
-		contratoVigente: new Date("2024-09-30"),
-	},
-	{
-		id: "con-003",
-		nombre: "Mecánica Industrial Precisa",
-		contacto: "Andrés Martínez",
-		email: "amartinez@miprecisa.com",
-		telefono: "+57 315 555 9012",
-		especialidad: "Maquinaria Pesada",
-		estado: "activo",
-		calificacion: 4.9,
-		trabajosCompletados: 67,
-		contratoVigente: new Date("2025-06-30"),
-	},
-	{
-		id: "con-004",
-		nombre: "Automatización y Control SA",
-		contacto: "Laura Sánchez",
-		email: "lsanchez@autocontrol.com",
-		telefono: "+57 318 555 3456",
-		especialidad: "Sistemas de Control",
-		estado: "inactivo",
-		calificacion: 4.2,
-		trabajosCompletados: 18,
-		contratoVigente: new Date("2023-12-31"),
-	},
-	{
-		id: "con-005",
-		nombre: "Soldadura Especializada JR",
-		contacto: "Jorge Reyes",
-		email: "jorge@soldadurajr.com",
-		telefono: "+57 312 555 7890",
-		especialidad: "Soldadura Industrial",
-		estado: "activo",
-		calificacion: 4.7,
-		trabajosCompletados: 28,
-		contratoVigente: new Date("2024-08-15"),
-	},
-]
+import { toast } from "sonner"
+import {
+	getContratistas,
+	deleteContratista,
+	type Contratista,
+} from "@/app/(dashboard)/contratistas/actions"
 
 export default function ContratistasPage() {
 	const router = useRouter()
 	const [busqueda, setBusqueda] = useState("")
 	const [filtroEstado, setFiltroEstado] = useState<string | null>(null)
+	const [contratistas, setContratistas] = useState<Contratista[]>([])
+	const [loading, setLoading] = useState(true)
 
-	const contratistasFiltrados = contratistasMock.filter((c) => {
-		const matchBusqueda =
+	const fetchContratistas = useCallback(async () => {
+		setLoading(true)
+		const filters: { estado?: string; search?: string } = {}
+		if (filtroEstado) filters.estado = filtroEstado
+		if (busqueda.trim()) filters.search = busqueda.trim()
+
+		const result = await getContratistas(filters)
+		if (result.success) {
+			setContratistas(result.data)
+		}
+		setLoading(false)
+	}, [filtroEstado, busqueda])
+
+	useEffect(() => {
+		fetchContratistas()
+	}, [fetchContratistas])
+
+	const handleDelete = async (id: string) => {
+		const result = await deleteContratista(id)
+		if (result.success) {
+			toast.success("Contratista desactivado exitosamente")
+			fetchContratistas()
+		} else {
+			toast.error(result.error ?? "Error al eliminar contratista")
+		}
+	}
+
+	// Client-side filter for specialty search (server handles estado + name search)
+	const contratistasFiltrados = contratistas.filter((c) => {
+		if (!busqueda.trim()) return true
+		return (
 			c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
 			c.especialidad.toLowerCase().includes(busqueda.toLowerCase())
-		const matchEstado = !filtroEstado || c.estado === filtroEstado
-		return matchBusqueda && matchEstado
+		)
 	})
 
 	const conteoEstado = {
-		activo: contratistasMock.filter((c) => c.estado === "activo").length,
-		inactivo: contratistasMock.filter((c) => c.estado === "inactivo").length,
+		activo: contratistas.filter((c) => c.estado === "activo").length,
+		inactivo: contratistas.filter((c) => c.estado === "inactivo").length,
 	}
+
+	const calificacionProm = contratistas.length > 0
+		? Math.round(contratistas.reduce((sum, c) => sum + c.calificacion, 0) / contratistas.length * 10) / 10
+		: 0
 
 	return (
 			<SidebarInset>
@@ -170,7 +146,7 @@ export default function ContratistasPage() {
 								</div>
 								<div>
 									<p className="text-2xl font-semibold">
-										{contratistasMock.length}
+										{contratistas.length}
 									</p>
 									<p className="text-sm text-muted-foreground">
 										Total Contratistas
@@ -224,7 +200,7 @@ export default function ContratistasPage() {
 									<Star className="size-5" weight="duotone" />
 								</div>
 								<div>
-									<p className="text-2xl font-semibold">4.6</p>
+									<p className="text-2xl font-semibold">{calificacionProm}</p>
 									<p className="text-sm text-muted-foreground">
 										Calificación Prom.
 									</p>
@@ -244,109 +220,123 @@ export default function ContratistasPage() {
 						/>
 					</div>
 
+					{loading && (
+						<div className="flex items-center justify-center py-12">
+							<p className="text-muted-foreground">Cargando contratistas...</p>
+						</div>
+					)}
+
 					{/* Contractors Grid */}
-					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-						{contratistasFiltrados.map((contratista) => (
-							<Card
-								key={contratista.id}
-								className="transition-all hover:shadow-md"
-							>
-								<CardHeader>
-									<div className="flex items-start justify-between">
-										<div className="flex items-center gap-3">
-											<div className="flex size-12 items-center justify-center rounded-full bg-muted">
-												<UserCircle
-													className="size-8 text-muted-foreground"
-													weight="duotone"
-												/>
+					{!loading && (
+						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+							{contratistasFiltrados.map((contratista) => (
+								<Card
+									key={contratista.id}
+									className="transition-all hover:shadow-md"
+								>
+									<CardHeader>
+										<div className="flex items-start justify-between">
+											<div className="flex items-center gap-3">
+												<div className="flex size-12 items-center justify-center rounded-full bg-muted">
+													<UserCircle
+														className="size-8 text-muted-foreground"
+														weight="duotone"
+													/>
+												</div>
+												<div>
+													<CardTitle className="text-base">
+														{contratista.nombre}
+													</CardTitle>
+													<CardDescription>
+														{contratista.especialidad}
+													</CardDescription>
+												</div>
 											</div>
-											<div>
-												<CardTitle className="text-base">
-													{contratista.nombre}
-												</CardTitle>
-												<CardDescription>
-													{contratista.especialidad}
-												</CardDescription>
-											</div>
-										</div>
-										<span
-											className={cn(
-												"rounded-full px-2 py-0.5 text-xs font-medium",
-												contratista.estado === "activo"
-													? "bg-green-100 text-green-700"
-													: "bg-gray-100 text-gray-600",
-											)}
-										>
-											{contratista.estado === "activo" ? "Activo" : "Inactivo"}
-										</span>
-									</div>
-								</CardHeader>
-								<CardContent className="space-y-3">
-									<div className="space-y-2 text-sm">
-										<div className="flex items-center gap-2 text-muted-foreground">
-											<UserCircle className="size-4" />
-											<span>{contratista.contacto}</span>
-										</div>
-										<div className="flex items-center gap-2 text-muted-foreground">
-											<EnvelopeSimple className="size-4" />
-											<span className="truncate">{contratista.email}</span>
-										</div>
-										<div className="flex items-center gap-2 text-muted-foreground">
-											<Phone className="size-4" />
-											<span>{contratista.telefono}</span>
-										</div>
-									</div>
-
-									<Separator />
-
-									<div className="flex items-center justify-between text-sm">
-										<div className="flex items-center gap-1">
-											<Star
-												className="size-4 text-yellow-500"
-												weight="fill"
-											/>
-											<span className="font-medium">
-												{contratista.calificacion}
+											<span
+												className={cn(
+													"rounded-full px-2 py-0.5 text-xs font-medium",
+													contratista.estado === "activo"
+														? "bg-green-100 text-green-700"
+														: "bg-gray-100 text-gray-600",
+												)}
+											>
+												{contratista.estado === "activo" ? "Activo" : "Inactivo"}
 											</span>
 										</div>
-										<span className="text-muted-foreground">
-											{contratista.trabajosCompletados} trabajos
-										</span>
-									</div>
+									</CardHeader>
+									<CardContent className="space-y-3">
+										<div className="space-y-2 text-sm">
+											<div className="flex items-center gap-2 text-muted-foreground">
+												<UserCircle className="size-4" />
+												<span>{contratista.contacto}</span>
+											</div>
+											<div className="flex items-center gap-2 text-muted-foreground">
+												<EnvelopeSimple className="size-4" />
+												<span className="truncate">{contratista.email}</span>
+											</div>
+											<div className="flex items-center gap-2 text-muted-foreground">
+												<Phone className="size-4" />
+												<span>{contratista.telefono}</span>
+											</div>
+										</div>
 
-									<div className="flex items-center justify-between text-xs">
-										<span className="text-muted-foreground">
-											Contrato vigente hasta:
-										</span>
-										<span
-											className={cn(
-												"font-medium",
-												contratista.contratoVigente < new Date()
-													? "text-red-600"
-													: "text-green-600",
-											)}
-										>
-											{contratista.contratoVigente.toLocaleDateString("es-ES", {
-												day: "2-digit",
-												month: "short",
-												year: "numeric",
-											})}
-										</span>
-									</div>
+										<Separator />
 
-									<div className="flex gap-2 pt-2">
-										<Button variant="outline" size="sm" className="flex-1">
-											<PencilSimple className="mr-1 size-3" />
-											Editar
-										</Button>
-										<Button variant="ghost" size="icon-sm">
-											<Trash className="size-4" />
-										</Button>
-									</div>
-								</CardContent>
-							</Card>
-						))}
-					</div>
+										<div className="flex items-center justify-between text-sm">
+											<div className="flex items-center gap-1">
+												<Star
+													className="size-4 text-yellow-500"
+													weight="fill"
+												/>
+												<span className="font-medium">
+													{contratista.calificacion}
+												</span>
+											</div>
+											<span className="text-muted-foreground">
+												{contratista.trabajos_completados} trabajos
+											</span>
+										</div>
+
+										<div className="flex items-center justify-between text-xs">
+											<span className="text-muted-foreground">
+												Contrato vigente hasta:
+											</span>
+											<span
+												className={cn(
+													"font-medium",
+													contratista.contrato_vigente && new Date(contratista.contrato_vigente) < new Date()
+														? "text-red-600"
+														: "text-green-600",
+												)}
+											>
+												{contratista.contrato_vigente
+													? new Date(contratista.contrato_vigente).toLocaleDateString("es-ES", {
+														day: "2-digit",
+														month: "short",
+														year: "numeric",
+													})
+													: "Sin contrato"}
+											</span>
+										</div>
+
+										<div className="flex gap-2 pt-2">
+											<Button variant="outline" size="sm" className="flex-1">
+												<PencilSimple className="mr-1 size-3" />
+												Editar
+											</Button>
+											<Button
+												variant="ghost"
+												size="icon-sm"
+												onClick={() => handleDelete(contratista.id)}
+											>
+												<Trash className="size-4" />
+											</Button>
+										</div>
+									</CardContent>
+								</Card>
+							))}
+						</div>
+					)}
 				</div>
 			</SidebarInset>
 	)

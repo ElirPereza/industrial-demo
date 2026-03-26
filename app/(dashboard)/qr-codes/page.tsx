@@ -10,7 +10,7 @@ import {
 	QrCode,
 } from "@phosphor-icons/react"
 import { QRCodeSVG } from "qrcode.react"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -40,10 +40,18 @@ import {
 	SidebarInset,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { equipos, formulariosTemplate } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
+import { getEquipos, type Equipo } from "@/app/(dashboard)/equipos/actions"
+import {
+	getFormularios,
+	type FormularioTemplate,
+} from "@/app/(dashboard)/formularios/actions"
 
 type TabType = "equipos" | "formularios"
+
+type FormularioItem = FormularioTemplate & {
+	_count: { campos: number; envios: number }
+}
 
 export default function QRCodesPage() {
 	const [activeTab, setActiveTab] = useState<TabType>("equipos")
@@ -53,10 +61,29 @@ export default function QRCodesPage() {
 	const [searchFormulario, setSearchFormulario] = useState("")
 	const [filterTipo, setFilterTipo] = useState<string | null>(null)
 
-	const selectedEquipoData = equipos.find((e) => e.id === selectedEquipo)
-	const selectedFormularioData = formulariosTemplate.find((f) => f.id === selectedFormulario)
+	const [equipos, setEquipos] = useState<Equipo[]>([])
+	const [formularios, setFormularios] = useState<FormularioItem[]>([])
+	const [loading, setLoading] = useState(true)
 
-	// Filter equipment
+	const fetchData = useCallback(async () => {
+		setLoading(true)
+		const [eqResult, fmResult] = await Promise.all([
+			getEquipos(),
+			getFormularios(),
+		])
+		if (eqResult.success) setEquipos(eqResult.data)
+		if (fmResult.success) setFormularios(fmResult.data as FormularioItem[])
+		setLoading(false)
+	}, [])
+
+	useEffect(() => {
+		fetchData()
+	}, [fetchData])
+
+	const selectedEquipoData = equipos.find((e) => e.id === selectedEquipo)
+	const selectedFormularioData = formularios.find((f) => f.id === selectedFormulario)
+
+	// Filter equipment client-side
 	const equiposFiltrados = equipos.filter((e) => {
 		const matchSearch = e.nombre.toLowerCase().includes(searchEquipo.toLowerCase()) ||
 			e.ubicacion.toLowerCase().includes(searchEquipo.toLowerCase())
@@ -64,8 +91,8 @@ export default function QRCodesPage() {
 		return matchSearch && matchTipo
 	})
 
-	// Filter forms
-	const formulariosFiltrados = formulariosTemplate.filter((f) =>
+	// Filter forms client-side
+	const formulariosFiltrados = formularios.filter((f) =>
 		f.nombre.toLowerCase().includes(searchFormulario.toLowerCase())
 	)
 
@@ -116,14 +143,14 @@ export default function QRCodesPage() {
 
 	const tabs = [
 		{ id: "equipos" as TabType, label: "Equipos", icon: Cube, count: equipos.length },
-		{ id: "formularios" as TabType, label: "Formularios", icon: FileText, count: formulariosTemplate.length },
+		{ id: "formularios" as TabType, label: "Formularios", icon: FileText, count: formularios.length },
 	]
 
 	const getEquipoTipoLabel = (tipo: string) => {
 		switch (tipo) {
-			case "maquinaria-pesada":
+			case "maquinaria_pesada":
 				return "Maquinaria Pesada"
-			case "linea-produccion":
+			case "linea_produccion":
 				return "Línea de Producción"
 			case "electricos":
 				return "Eléctricos"
@@ -131,6 +158,19 @@ export default function QRCodesPage() {
 				return "HVAC"
 			default:
 				return tipo
+		}
+	}
+
+	const getEstadoLabel = (estado: string) => {
+		switch (estado) {
+			case "operativo":
+				return "Operativo"
+			case "mantenimiento":
+				return "Mantenimiento"
+			case "fuera_servicio":
+				return "Fuera de Servicio"
+			default:
+				return estado
 		}
 	}
 
@@ -197,8 +237,14 @@ export default function QRCodesPage() {
 						))}
 					</div>
 
+					{loading && (
+						<div className="flex items-center justify-center py-12">
+							<p className="text-muted-foreground">Cargando datos...</p>
+						</div>
+					)}
+
 					{/* Equipos Tab */}
-					{activeTab === "equipos" && (
+					{!loading && activeTab === "equipos" && (
 						<>
 							{/* Filters */}
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -235,7 +281,7 @@ export default function QRCodesPage() {
 							{/* Equipment Grid */}
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 								{equiposFiltrados.map((equipo) => {
-									const qrUrl = `https://industrial-portal.com/equipos/${equipo.id}`
+									const qrUrl = `${window.location.origin}/equipos/${equipo.id}`
 
 									return (
 										<Card
@@ -255,15 +301,11 @@ export default function QRCodesPage() {
 																"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
 															equipo.estado === "mantenimiento" &&
 																"bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-															equipo.estado === "fuera-servicio" &&
+															equipo.estado === "fuera_servicio" &&
 																"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 														)}
 													>
-														{equipo.estado === "operativo"
-															? "Operativo"
-															: equipo.estado === "mantenimiento"
-																? "Mantenimiento"
-																: "Fuera de Servicio"}
+														{getEstadoLabel(equipo.estado)}
 													</span>
 												</div>
 												<CardTitle className="mt-3 text-base">{equipo.nombre}</CardTitle>
@@ -311,7 +353,7 @@ export default function QRCodesPage() {
 					)}
 
 					{/* Formularios Tab */}
-					{activeTab === "formularios" && (
+					{!loading && activeTab === "formularios" && (
 						<>
 							{/* Search */}
 							<div className="relative max-w-md">
@@ -327,7 +369,7 @@ export default function QRCodesPage() {
 							{/* Forms Grid */}
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 								{formulariosFiltrados.map((formulario) => {
-									const qrUrl = `https://industrial-portal.com/formularios/llenar/${formulario.id}`
+									const qrUrl = `${window.location.origin}/formularios/llenar/${formulario.id}`
 
 									return (
 										<Card
@@ -416,7 +458,7 @@ export default function QRCodesPage() {
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
 					{selectedEquipoData && (
 						<QRCodeSVG
-							value={`https://industrial-portal.com/equipos/${selectedEquipoData.id}`}
+							value={`${window.location.origin}/equipos/${selectedEquipoData.id}`}
 							size={256}
 							level="H"
 							includeMargin
@@ -439,21 +481,19 @@ export default function QRCodesPage() {
 											"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
 										selectedEquipoData?.estado === "mantenimiento" &&
 											"bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-										selectedEquipoData?.estado === "fuera-servicio" &&
+										selectedEquipoData?.estado === "fuera_servicio" &&
 											"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 									)}
 								>
-									{selectedEquipoData?.estado === "operativo"
-										? "Operativo"
-										: selectedEquipoData?.estado === "mantenimiento"
-											? "En Mantenimiento"
-											: "Fuera de Servicio"}
+									{selectedEquipoData ? getEstadoLabel(selectedEquipoData.estado) : ""}
 								</span>
 							</div>
 					<div className="flex justify-between">
 						<span className="text-muted-foreground">Último Mant.:</span>
 						<span className="font-medium">
-							{selectedEquipoData?.ultimoMantenimiento?.toLocaleDateString("es-ES") ?? ""}
+							{selectedEquipoData?.ultimo_mantenimiento
+								? new Date(selectedEquipoData.ultimo_mantenimiento).toLocaleDateString("es-ES")
+								: "N/A"}
 						</span>
 					</div>
 						</div>
@@ -491,7 +531,7 @@ export default function QRCodesPage() {
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
 					{selectedFormularioData && (
 						<QRCodeSVG
-							value={`https://industrial-portal.com/formularios/llenar/${selectedFormularioData.id}`}
+							value={`${window.location.origin}/formularios/llenar/${selectedFormularioData.id}`}
 							size={256}
 							level="H"
 							includeMargin
@@ -502,7 +542,7 @@ export default function QRCodesPage() {
 					<div className="flex justify-between">
 						<span className="text-muted-foreground">Tipo:</span>
 						<span className="font-medium capitalize">
-							{selectedFormularioData?.tipo?.replace("-", " ") ?? ""}
+							{selectedFormularioData?.tipo?.replace(/_/g, " ") ?? ""}
 						</span>
 					</div>
 							<div className="flex justify-between">

@@ -9,7 +9,7 @@ import {
 	Sun,
 	User,
 } from "@phosphor-icons/react"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -35,12 +35,20 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import {
+	getCurrentUser,
+	updatePerfil,
+	type Perfil,
+} from "@/app/(dashboard)/usuarios/actions"
 
 export default function ConfiguracionPage() {
 	// Profile settings
-	const [nombre, setNombre] = useState("Carlos Méndez")
-	const [email, setEmail] = useState("carlos.mendez@empresa.com")
-	const [cargo, setCargo] = useState("Supervisor de Mantenimiento")
+	const [perfil, setPerfil] = useState<Perfil | null>(null)
+	const [nombre, setNombre] = useState("")
+	const [email, setEmail] = useState("")
+	const [cargo, setCargo] = useState("")
+	const [loading, setLoading] = useState(true)
+	const [saving, setSaving] = useState(false)
 
 	// Notification settings
 	const [notifEmail, setNotifEmail] = useState(true)
@@ -58,8 +66,37 @@ export default function ConfiguracionPage() {
 	const [autenticacion2FA, setAutenticacion2FA] = useState(false)
 	const [sesionActiva, setSesionActiva] = useState(true)
 
-	const handleSave = () => {
-		toast.success("Configuración guardada (simulado)")
+	const fetchUser = useCallback(async () => {
+		setLoading(true)
+		const result = await getCurrentUser()
+		if (result.success) {
+			setPerfil(result.data)
+			setNombre(result.data.nombre)
+			setEmail(result.data.email)
+			setCargo(result.data.departamento ?? "")
+		}
+		setLoading(false)
+	}, [])
+
+	useEffect(() => {
+		fetchUser()
+	}, [fetchUser])
+
+	const handleSave = async () => {
+		if (!perfil) return
+		setSaving(true)
+		const result = await updatePerfil(perfil.id, {
+			nombre,
+			departamento: cargo || undefined,
+		})
+		setSaving(false)
+
+		if (result.success) {
+			toast.success("Configuración guardada exitosamente")
+			setPerfil(result.data)
+		} else {
+			toast.error(result.error ?? "Error al guardar configuración")
+		}
 	}
 
 	return (
@@ -95,279 +132,300 @@ export default function ConfiguracionPage() {
 								Personaliza tu experiencia en el portal
 							</p>
 						</div>
-						<Button onClick={handleSave}>Guardar Cambios</Button>
+						<Button onClick={handleSave} disabled={saving || loading}>
+							{saving ? "Guardando..." : "Guardar Cambios"}
+						</Button>
 					</div>
 
-					<div className="grid gap-6 lg:grid-cols-2">
-						{/* Perfil */}
-						<Card>
-							<CardHeader>
-								<div className="flex items-center gap-3">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-										<User className="size-5" weight="duotone" />
-									</div>
-									<div>
-										<CardTitle>Perfil</CardTitle>
-										<CardDescription>
-											Información de tu cuenta
-										</CardDescription>
-									</div>
-								</div>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div>
-									<label className="mb-1.5 block text-sm font-medium">
-										Nombre Completo
-									</label>
-									<Input
-										value={nombre}
-										onChange={(e) => setNombre(e.target.value)}
-									/>
-								</div>
-								<div>
-									<label className="mb-1.5 block text-sm font-medium">
-										Correo Electrónico
-									</label>
-									<Input
-										type="email"
-										value={email}
-										onChange={(e) => setEmail(e.target.value)}
-									/>
-								</div>
-								<div>
-									<label className="mb-1.5 block text-sm font-medium">
-										Cargo
-									</label>
-									<Input
-										value={cargo}
-										onChange={(e) => setCargo(e.target.value)}
-									/>
-								</div>
-							</CardContent>
-						</Card>
+					{loading && (
+						<div className="flex items-center justify-center py-12">
+							<p className="text-muted-foreground">Cargando configuración...</p>
+						</div>
+					)}
 
-						{/* Notificaciones */}
-						<Card>
-							<CardHeader>
-								<div className="flex items-center gap-3">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
-										<Bell className="size-5" weight="duotone" />
+					{!loading && (
+						<div className="grid gap-6 lg:grid-cols-2">
+							{/* Perfil */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center gap-3">
+										<div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+											<User className="size-5" weight="duotone" />
+										</div>
+										<div>
+											<CardTitle>Perfil</CardTitle>
+											<CardDescription>
+												Información de tu cuenta
+											</CardDescription>
+										</div>
+									</div>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<div>
+										<label className="mb-1.5 block text-sm font-medium">
+											Nombre Completo
+										</label>
+										<Input
+											value={nombre}
+											onChange={(e) => setNombre(e.target.value)}
+										/>
 									</div>
 									<div>
-										<CardTitle>Notificaciones</CardTitle>
-										<CardDescription>
-											Configura cómo recibir alertas
-										</CardDescription>
+										<label className="mb-1.5 block text-sm font-medium">
+											Correo Electrónico
+										</label>
+										<Input
+											type="email"
+											value={email}
+											disabled
+										/>
 									</div>
-								</div>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div className="flex items-center justify-between">
 									<div>
-										<p className="text-sm font-medium">
-											Notificaciones por Email
-										</p>
-										<p className="text-xs text-muted-foreground">
-											Recibe alertas en tu correo
-										</p>
+										<label className="mb-1.5 block text-sm font-medium">
+											Departamento
+										</label>
+										<Input
+											value={cargo}
+											onChange={(e) => setCargo(e.target.value)}
+										/>
 									</div>
-									<Switch
-										checked={notifEmail}
-										onCheckedChange={setNotifEmail}
-									/>
-								</div>
-								<Separator />
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium">Notificaciones Push</p>
-										<p className="text-xs text-muted-foreground">
-											Alertas en el navegador
-										</p>
-									</div>
-									<Switch checked={notifPush} onCheckedChange={setNotifPush} />
-								</div>
-								<Separator />
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium">Nuevos Formularios</p>
-										<p className="text-xs text-muted-foreground">
-											Cuando se envía un formulario
-										</p>
-									</div>
-									<Switch
-										checked={notifFormularios}
-										onCheckedChange={setNotifFormularios}
-									/>
-								</div>
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium">Alertas de Equipos</p>
-										<p className="text-xs text-muted-foreground">
-											Cuando un equipo cambia de estado
-										</p>
-									</div>
-									<Switch
-										checked={notifEquipos}
-										onCheckedChange={setNotifEquipos}
-									/>
-								</div>
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium">Reportes Semanales</p>
-										<p className="text-xs text-muted-foreground">
-											Resumen de actividad semanal
-										</p>
-									</div>
-									<Switch
-										checked={notifReportes}
-										onCheckedChange={setNotifReportes}
-									/>
-								</div>
-							</CardContent>
-						</Card>
+									{perfil && (
+										<div>
+											<label className="mb-1.5 block text-sm font-medium">
+												Rol
+											</label>
+											<Input
+												value={perfil.rol === "admin" ? "Administrador" : perfil.rol === "supervisor" ? "Supervisor" : "Técnico"}
+												disabled
+											/>
+										</div>
+									)}
+								</CardContent>
+							</Card>
 
-						{/* Apariencia */}
-						<Card>
-							<CardHeader>
-								<div className="flex items-center gap-3">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
-										<Palette className="size-5" weight="duotone" />
+							{/* Notificaciones */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center gap-3">
+										<div className="flex size-10 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+											<Bell className="size-5" weight="duotone" />
+										</div>
+										<div>
+											<CardTitle>Notificaciones</CardTitle>
+											<CardDescription>
+												Configura cómo recibir alertas
+											</CardDescription>
+										</div>
 									</div>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium">
+												Notificaciones por Email
+											</p>
+											<p className="text-xs text-muted-foreground">
+												Recibe alertas en tu correo
+											</p>
+										</div>
+										<Switch
+											checked={notifEmail}
+											onCheckedChange={setNotifEmail}
+										/>
+									</div>
+									<Separator />
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium">Notificaciones Push</p>
+											<p className="text-xs text-muted-foreground">
+												Alertas en el navegador
+											</p>
+										</div>
+										<Switch checked={notifPush} onCheckedChange={setNotifPush} />
+									</div>
+									<Separator />
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium">Nuevos Formularios</p>
+											<p className="text-xs text-muted-foreground">
+												Cuando se envía un formulario
+											</p>
+										</div>
+										<Switch
+											checked={notifFormularios}
+											onCheckedChange={setNotifFormularios}
+										/>
+									</div>
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium">Alertas de Equipos</p>
+											<p className="text-xs text-muted-foreground">
+												Cuando un equipo cambia de estado
+											</p>
+										</div>
+										<Switch
+											checked={notifEquipos}
+											onCheckedChange={setNotifEquipos}
+										/>
+									</div>
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium">Reportes Semanales</p>
+											<p className="text-xs text-muted-foreground">
+												Resumen de actividad semanal
+											</p>
+										</div>
+										<Switch
+											checked={notifReportes}
+											onCheckedChange={setNotifReportes}
+										/>
+									</div>
+								</CardContent>
+							</Card>
+
+							{/* Apariencia */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center gap-3">
+										<div className="flex size-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+											<Palette className="size-5" weight="duotone" />
+										</div>
+										<div>
+											<CardTitle>Apariencia</CardTitle>
+											<CardDescription>
+												Personaliza la interfaz
+											</CardDescription>
+										</div>
+									</div>
+								</CardHeader>
+								<CardContent className="space-y-4">
 									<div>
-										<CardTitle>Apariencia</CardTitle>
-										<CardDescription>
-											Personaliza la interfaz
-										</CardDescription>
-									</div>
-								</div>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div>
-									<label className="mb-2 block text-sm font-medium">Tema</label>
-									<div className="flex gap-2">
-										{[
-											{ value: "light", label: "Claro", icon: Sun },
-											{ value: "dark", label: "Oscuro", icon: Moon },
-											{ value: "system", label: "Sistema", icon: Globe },
-										].map((option) => (
-											<button
-												key={option.value}
-												type="button"
-												onClick={() =>
-													setTema(option.value as "light" | "dark" | "system")
-												}
-												className={cn(
-													"flex flex-1 flex-col items-center gap-2 rounded-lg border p-3 transition-all",
-													tema === option.value
-														? "border-primary bg-primary/5"
-														: "hover:bg-muted",
-												)}
-											>
-												<option.icon
+										<label className="mb-2 block text-sm font-medium">Tema</label>
+										<div className="flex gap-2">
+											{[
+												{ value: "light", label: "Claro", icon: Sun },
+												{ value: "dark", label: "Oscuro", icon: Moon },
+												{ value: "system", label: "Sistema", icon: Globe },
+											].map((option) => (
+												<button
+													key={option.value}
+													type="button"
+													onClick={() =>
+														setTema(option.value as "light" | "dark" | "system")
+													}
 													className={cn(
-														"size-5",
+														"flex flex-1 flex-col items-center gap-2 rounded-lg border p-3 transition-all",
 														tema === option.value
-															? "text-primary"
-															: "text-muted-foreground",
+															? "border-primary bg-primary/5"
+															: "hover:bg-muted",
 													)}
-													weight="duotone"
-												/>
-												<span className="text-xs font-medium">
-													{option.label}
-												</span>
-											</button>
-										))}
+												>
+													<option.icon
+														className={cn(
+															"size-5",
+															tema === option.value
+																? "text-primary"
+																: "text-muted-foreground",
+														)}
+														weight="duotone"
+													/>
+													<span className="text-xs font-medium">
+														{option.label}
+													</span>
+												</button>
+											))}
+										</div>
 									</div>
-								</div>
-								<Separator />
-								<div>
-									<label className="mb-1.5 block text-sm font-medium">
-										Idioma
-									</label>
-									<select
-										value={idioma}
-										onChange={(e) => setIdioma(e.target.value)}
-										className="w-full rounded-md border bg-background p-2 text-sm"
-									>
-										<option value="es">Español</option>
-										<option value="en">English</option>
-										<option value="pt">Português</option>
-									</select>
-								</div>
-								<div>
-									<label className="mb-1.5 block text-sm font-medium">
-										Formato de Fecha
-									</label>
-									<select
-										value={formatoFecha}
-										onChange={(e) => setFormatoFecha(e.target.value)}
-										className="w-full rounded-md border bg-background p-2 text-sm"
-									>
-										<option value="DD/MM/YYYY">DD/MM/YYYY</option>
-										<option value="MM/DD/YYYY">MM/DD/YYYY</option>
-										<option value="YYYY-MM-DD">YYYY-MM-DD</option>
-									</select>
-								</div>
-							</CardContent>
-						</Card>
+									<Separator />
+									<div>
+										<label className="mb-1.5 block text-sm font-medium">
+											Idioma
+										</label>
+										<select
+											value={idioma}
+											onChange={(e) => setIdioma(e.target.value)}
+											className="w-full rounded-md border bg-background p-2 text-sm"
+										>
+											<option value="es">Español</option>
+											<option value="en">English</option>
+											<option value="pt">Português</option>
+										</select>
+									</div>
+									<div>
+										<label className="mb-1.5 block text-sm font-medium">
+											Formato de Fecha
+										</label>
+										<select
+											value={formatoFecha}
+											onChange={(e) => setFormatoFecha(e.target.value)}
+											className="w-full rounded-md border bg-background p-2 text-sm"
+										>
+											<option value="DD/MM/YYYY">DD/MM/YYYY</option>
+											<option value="MM/DD/YYYY">MM/DD/YYYY</option>
+											<option value="YYYY-MM-DD">YYYY-MM-DD</option>
+										</select>
+									</div>
+								</CardContent>
+							</Card>
 
-						{/* Seguridad */}
-						<Card>
-							<CardHeader>
-								<div className="flex items-center gap-3">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-green-100 text-green-600">
-										<Shield className="size-5" weight="duotone" />
+							{/* Seguridad */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center gap-3">
+										<div className="flex size-10 items-center justify-center rounded-lg bg-green-100 text-green-600">
+											<Shield className="size-5" weight="duotone" />
+										</div>
+										<div>
+											<CardTitle>Seguridad</CardTitle>
+											<CardDescription>
+												Protege tu cuenta
+											</CardDescription>
+										</div>
+									</div>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium">
+												Autenticación en Dos Pasos
+											</p>
+											<p className="text-xs text-muted-foreground">
+												Añade una capa extra de seguridad
+											</p>
+										</div>
+										<Switch
+											checked={autenticacion2FA}
+											onCheckedChange={setAutenticacion2FA}
+										/>
+									</div>
+									<Separator />
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium">Mantener Sesión Activa</p>
+											<p className="text-xs text-muted-foreground">
+												No cerrar sesión automáticamente
+											</p>
+										</div>
+										<Switch
+											checked={sesionActiva}
+											onCheckedChange={setSesionActiva}
+										/>
+									</div>
+									<Separator />
+									<div>
+										<Button variant="outline" className="w-full">
+											Cambiar Contraseña
+										</Button>
 									</div>
 									<div>
-										<CardTitle>Seguridad</CardTitle>
-										<CardDescription>
-											Protege tu cuenta
-										</CardDescription>
+										<Button variant="destructive" className="w-full">
+											Cerrar Todas las Sesiones
+										</Button>
 									</div>
-								</div>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium">
-											Autenticación en Dos Pasos
-										</p>
-										<p className="text-xs text-muted-foreground">
-											Añade una capa extra de seguridad
-										</p>
-									</div>
-									<Switch
-										checked={autenticacion2FA}
-										onCheckedChange={setAutenticacion2FA}
-									/>
-								</div>
-								<Separator />
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium">Mantener Sesión Activa</p>
-										<p className="text-xs text-muted-foreground">
-											No cerrar sesión automáticamente
-										</p>
-									</div>
-									<Switch
-										checked={sesionActiva}
-										onCheckedChange={setSesionActiva}
-									/>
-								</div>
-								<Separator />
-								<div>
-									<Button variant="outline" className="w-full">
-										Cambiar Contraseña
-									</Button>
-								</div>
-								<div>
-									<Button variant="destructive" className="w-full">
-										Cerrar Todas las Sesiones
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					</div>
+								</CardContent>
+							</Card>
+						</div>
+					)}
 				</div>
 			</SidebarInset>
 	)

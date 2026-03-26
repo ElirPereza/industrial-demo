@@ -8,3 +8,14 @@
 - All pages use useEffect+useState pattern with loading states
 - toast from "sonner" for mutation feedback in admin page
 - Build: PASS
+
+## [T25+T26+T27+T28 Complete] QR, Contratistas, Analytics, Config Pages
+- qr-codes: real equipos via getEquipos() + formularios via getFormularios(), QR URLs use window.location.origin, client-side filtering
+- contratistas: real CRUD with getContratistas(filters) server-side + deleteContratista() soft delete, calificacion avg computed client-side
+- contratistas/nuevo: wired to createContratista(formData) with FormData, maps especialidad value to label before sending
+- analiticas: real chart data from all 6 analytics actions (getDashboardKPIs, getFormulariosPorMes, getTendenciaFallas, getEquiposMasIntervenidos, getTiposMantenimiento, getTecnicosActivos)
+- configuracion: real user profile via getCurrentUser(), save via updatePerfil(id, data), email field disabled (read-only from auth)
+- usuarios: real user list via getUsuarios(), role filters + search client-side
+- Fixed pre-existing build error: formularios/constructor needed `export const dynamic = "force-dynamic"` for useSearchParams during prerender
+- DB field names: trabajos_completados (not trabajosCompletados), contrato_vigente (not contratoVigente), ultimo_mantenimiento (not ultimoMantenimiento)
+- Build: PASS

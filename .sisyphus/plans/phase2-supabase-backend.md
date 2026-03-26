@@ -1658,7 +1658,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 ### Wave 6 — Pages Refactor Part 2 (MAX PARALLEL after Wave 5)
 
-- [ ] 23. Formularios constructor → real form builder with persistence
+- [x] 23. Formularios constructor → real form builder with persistence
 
   **What to do**:
   - Refactor `app/(dashboard)/formularios/constructor/page.tsx`:
@@ -1720,7 +1720,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `feat(pages): implement real form builder with persistence`
 
-- [ ] 24. Formularios llenar → real submission with signature + photo
+- [x] 24. Formularios llenar → real submission with signature + photo
 
   **What to do**:
   - Refactor `app/(dashboard)/formularios/llenar/[id]/page.tsx`:
@@ -1800,7 +1800,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `feat(pages): implement real form submission with signatures`
 
-- [ ] 25. QR codes page → real data
+- [x] 25. QR codes page → real data
 
   **What to do**:
   - Refactor `app/(dashboard)/qr-codes/page.tsx`:
@@ -1849,7 +1849,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `feat(pages): refactor QR, contratistas, analytics, config pages`
 
-- [ ] 26. Contratistas pages (list + nuevo) → real CRUD
+- [x] 26. Contratistas pages (list + nuevo) → real CRUD
 
   **What to do**:
   - Refactor `app/(dashboard)/contratistas/page.tsx`:
@@ -1900,7 +1900,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
   **Commit**: YES (groups with T25, T27, T28)
 
-- [ ] 27. Analytics page → real calculated KPIs
+- [x] 27. Analytics page → real calculated KPIs
 
   **What to do**:
   - Refactor `app/(dashboard)/analiticas/page.tsx`:
@@ -1952,7 +1952,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
   **Commit**: YES (groups with T25, T26, T28)
 
-- [ ] 28. Configuración + Usuarios pages → real data
+- [x] 28. Configuración + Usuarios pages → real data
 
   **What to do**:
   - Refactor `app/(dashboard)/configuracion/page.tsx`:

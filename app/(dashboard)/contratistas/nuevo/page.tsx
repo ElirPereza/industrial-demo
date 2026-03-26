@@ -38,6 +38,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { createContratista } from "@/app/(dashboard)/contratistas/actions"
 
 const especialidades = [
 	{
@@ -107,6 +108,7 @@ export default function NuevoContratistaPage() {
 	const [documentos, setDocumentos] = useState<string[]>([])
 
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
+	const [submitting, setSubmitting] = useState(false)
 
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files
@@ -116,11 +118,7 @@ export default function NuevoContratistaPage() {
 		}
 	}
 
-	const removeDocument = (index: number) => {
-		setDocumentos(documentos.filter((_, i) => i !== index))
-	}
-
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		const newErrors: Record<string, boolean> = {}
 
 		if (!nombreEmpresa.trim()) newErrors.nombreEmpresa = true
@@ -133,8 +131,26 @@ export default function NuevoContratistaPage() {
 		setErrors(newErrors)
 
 		if (Object.keys(newErrors).length === 0) {
-			toast.success("Contratista registrado exitosamente (simulado)")
-			router.push("/contratistas")
+			setSubmitting(true)
+			const formData = new FormData()
+			formData.set("nombre", nombreEmpresa)
+			formData.set("contacto", contacto)
+			formData.set("email", email)
+			formData.set("telefono", telefono)
+			formData.set("especialidad", especialidades.find((e) => e.value === especialidad)?.label ?? especialidad)
+			formData.set("nit", nit)
+			formData.set("direccion", direccion)
+			formData.set("contrato_vigente", fechaFin)
+
+			const result = await createContratista(formData)
+			setSubmitting(false)
+
+			if (result.success) {
+				toast.success("Contratista registrado exitosamente")
+				router.push("/contratistas")
+			} else {
+				toast.error(result.error ?? "Error al registrar contratista")
+			}
 		}
 	}
 
@@ -491,9 +507,9 @@ export default function NuevoContratistaPage() {
 							{/* Actions */}
 							<Card>
 								<CardContent className="space-y-3 p-4">
-									<Button className="w-full" onClick={handleSubmit}>
+									<Button className="w-full" onClick={handleSubmit} disabled={submitting}>
 										<Check className="mr-2 size-4" weight="bold" />
-										Registrar Contratista
+										{submitting ? "Registrando..." : "Registrar Contratista"}
 									</Button>
 									<Button
 										variant="outline"
