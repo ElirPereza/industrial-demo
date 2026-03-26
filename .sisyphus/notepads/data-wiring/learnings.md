@@ -19,3 +19,31 @@
 - Fixed pre-existing build error: formularios/constructor needed `export const dynamic = "force-dynamic"` for useSearchParams during prerender
 - DB field names: trabajos_completados (not trabajosCompletados), contrato_vigente (not contratoVigente), ultimo_mantenimiento (not ultimoMantenimiento)
 - Build: PASS
+
+## [T30 Complete] Realtime Dashboard
+- hooks/use-realtime-kpis.ts: subscribes to envios_formularios (INSERT) + registros_mantenimiento (*)
+- dashboard/page.tsx: wired to auto-refresh KPIs via useRealtimeKPIs(loadData)
+- loadData extracted to useCallback for stable reference
+- Cleanup on unmount: YES (removeChannel on both channels)
+- Realtime ONLY on dashboard — no other pages affected
+- Build: PASS
+
+## [T29 Complete] Loading/Error/Empty States
+- Created: (dashboard)/loading.tsx — shared skeleton (title + 4 stat cards + content area)
+- Created: (dashboard)/error.tsx — "use client" error boundary with retry button, Spanish copy
+- Created: (dashboard)/equipos/loading.tsx — header + 6-card grid skeleton
+- Created: (dashboard)/formularios/loading.tsx — title + filter pills + 5-row list skeleton
+- Empty states: equipos already had one, added to formularios (empty table row) and contratistas (centered message + clear filters)
+- All new files use Skeleton from @/components/ui/skeleton, tabs/double quotes/no semicolons
+- Build: PASS
+
+## [T31+T32 Complete] Vitest Tests
+- vitest.config.ts: configured with @/* alias, node environment, globals true
+- Test files: 4 files, 24 tests total
+- __tests__/validations/equipos.test.ts: 10 tests (create + update schema, tipos, estados, defaults, maintenance dates)
+- __tests__/validations/formularios.test.ts: 7 tests (create schema, campos validation, all field types, defaults)
+- __tests__/validations/contratistas.test.ts: 4 tests (create schema, email validation, required fields, nullable optionals)
+- __tests__/actions/equipos.test.ts: 3 tests (validation layer: empty nombre/ubicacion messages, all estados)
+- Zod 4 safeParse API: same as v3 — { success, data/error }, error.issues[0].message works
+- __dirname works in vitest.config.ts (vitest processes via esbuild)
+- pnpm test: PASS (24/24)

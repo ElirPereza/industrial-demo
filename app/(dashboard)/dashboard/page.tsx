@@ -2,7 +2,7 @@
 
 import { ClockCounterClockwise, WarningCircle } from "@phosphor-icons/react"
 import { format } from "date-fns"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
 	getDashboardKPIs,
 	getRecentActivity,
@@ -29,6 +29,7 @@ import {
 	SidebarInset,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useRealtimeKPIs } from "@/hooks/use-realtime-kpis"
 import { cn } from "@/lib/utils"
 
 type KPIData = {
@@ -58,27 +59,31 @@ export default function DashboardPage() {
 	)
 	const [loading, setLoading] = useState(true)
 
-	useEffect(() => {
-		async function loadData() {
-			const [kpiResult, equiposResult, activityResult] = await Promise.all([
-				getDashboardKPIs(),
-				getEquipos(),
-				getRecentActivity(),
-			])
-			if (kpiResult.success) setKpis(kpiResult.data)
-			if (equiposResult.success) {
-				setEquiposCriticos(
-					equiposResult.data
-						.filter((e) => e.estado !== "operativo")
-						.slice(0, 5),
-				)
-			}
-			if (activityResult.success)
-				setActividadReciente(activityResult.data)
-			setLoading(false)
+	const loadData = useCallback(async () => {
+		const [kpiResult, equiposResult, activityResult] = await Promise.all([
+			getDashboardKPIs(),
+			getEquipos(),
+			getRecentActivity(),
+		])
+		if (kpiResult.success) setKpis(kpiResult.data)
+		if (equiposResult.success) {
+			setEquiposCriticos(
+				equiposResult.data
+					.filter((e) => e.estado !== "operativo")
+					.slice(0, 5),
+			)
 		}
-		loadData()
+		if (activityResult.success) setActividadReciente(activityResult.data)
+		setLoading(false)
 	}, [])
+
+	// Wire realtime subscriptions — auto-refresh on new submissions/records
+	useRealtimeKPIs(loadData)
+
+	// Initial load
+	useEffect(() => {
+		loadData()
+	}, [loadData])
 
 	type ChangeType = "positive" | "negative" | "neutral"
 

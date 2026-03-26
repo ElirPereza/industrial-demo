@@ -149,6 +149,16 @@ export default function FormulariosPage() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
+									{envios.length === 0 && (
+										<TableRow>
+											<TableCell
+												colSpan={6}
+												className="h-24 text-center text-muted-foreground"
+											>
+												No se encontraron formularios
+											</TableCell>
+										</TableRow>
+									)}
 									{envios.map((row) => (
 										<TableRow
 											key={row.id}

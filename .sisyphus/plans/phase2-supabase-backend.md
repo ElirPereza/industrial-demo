@@ -2013,7 +2013,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 ### Wave 7 — Polish + Realtime + Testing (after Wave 6)
 
-- [ ] 29. Loading states + error boundaries + empty states across all pages
+- [x] 29. Loading states + error boundaries + empty states across all pages
 
   **What to do**:
   - Add `loading.tsx` files in key route groups: `app/(dashboard)/loading.tsx`, `app/(dashboard)/equipos/loading.tsx`, `app/(dashboard)/formularios/loading.tsx`
@@ -2060,7 +2060,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `feat(ux): add loading, error, and empty states`
 
-- [ ] 30. Realtime subscriptions — dashboard only
+- [x] 30. Realtime subscriptions — dashboard only
 
   **What to do**:
   - Create `hooks/use-realtime-kpis.ts` custom hook:
@@ -2110,7 +2110,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `feat(realtime): add real-time dashboard updates`
 
-- [ ] 31. Test infrastructure (Vitest) + Auth/RLS tests
+- [x] 31. Test infrastructure (Vitest) + Auth/RLS tests
 
   **What to do**:
   - Install Vitest: `pnpm add -D vitest @vitejs/plugin-react`
@@ -2167,7 +2167,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `test(auth): add vitest infrastructure and auth/RLS tests`
 
-- [ ] 32. Server Actions tests + integration tests
+- [x] 32. Server Actions tests + integration tests
 
   **What to do**:
   - Write Server Action unit tests (test validation, error handling):

@@ -227,7 +227,26 @@ export default function ContratistasPage() {
 					)}
 
 					{/* Contractors Grid */}
-					{!loading && (
+					{!loading && contratistasFiltrados.length === 0 && (
+						<div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+							<p className="text-muted-foreground">
+								No se encontraron contratistas
+							</p>
+							{(filtroEstado || busqueda) && (
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => {
+										setFiltroEstado(null)
+										setBusqueda("")
+									}}
+								>
+									Limpiar filtros
+								</Button>
+							)}
+						</div>
+					)}
+					{!loading && contratistasFiltrados.length > 0 && (
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{contratistasFiltrados.map((contratista) => (
 								<Card
