@@ -3,6 +3,7 @@
 import { Factory } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -17,9 +18,10 @@ export default function LoginPage() {
 	const router = useRouter()
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
+	const [isLoading, setIsLoading] = useState(false)
 	const [errors, setErrors] = useState({ email: false, password: false })
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
 		// Visual validation
@@ -30,10 +32,27 @@ export default function LoginPage() {
 
 		setErrors(newErrors)
 
-		// If no errors, redirect to dashboard
-		if (!newErrors.email && !newErrors.password) {
-			router.push("/dashboard")
+		if (newErrors.email || newErrors.password) {
+			return
 		}
+
+		setIsLoading(true)
+
+		const { createClient } = await import("@/lib/supabase/client")
+		const supabase = createClient()
+		const { error } = await supabase.auth.signInWithPassword({
+			email,
+			password,
+		})
+
+		if (error) {
+			toast.error(error.message || "Credenciales incorrectas")
+			setIsLoading(false)
+			return
+		}
+
+		router.push("/dashboard")
+		router.refresh()
 	}
 
 	return (
@@ -102,8 +121,8 @@ export default function LoginPage() {
 							)}
 						</div>
 
-						<Button type="submit" className="w-full">
-							Iniciar Sesión
+						<Button type="submit" className="w-full" disabled={isLoading}>
+							{isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
 						</Button>
 
 						<div className="text-center">

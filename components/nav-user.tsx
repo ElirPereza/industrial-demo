@@ -8,6 +8,7 @@ import {
 	SignOutIcon,
 	SparkleIcon,
 } from "@phosphor-icons/react"
+import { signOut } from "@/app/(dashboard)/auth/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
 	DropdownMenu,
@@ -97,7 +98,7 @@ export function NavUser({
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
+						<DropdownMenuItem onClick={() => signOut()}>
 							<SignOutIcon />
 							Log out
 						</DropdownMenuItem>

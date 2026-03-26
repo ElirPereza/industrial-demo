@@ -20,6 +20,9 @@ export type EnvioFormulario = {
 	firmado: boolean
 	created_at: string
 	formulario_nombre?: string
+	formulario_tipo?: string
+	formulario_descripcion?: string | null
+	equipo_nombre?: string
 	equipo_ubicacion?: string
 	usuario_nombre?: string
 }
@@ -37,7 +40,7 @@ export async function getEnvios(filters?: {
 	let query = supabase
 		.from("envios_formularios")
 		.select(
-			`*, formularios_template(nombre), equipos(ubicacion), perfiles(nombre)`,
+			`*, formularios_template(nombre, tipo, descripcion), equipos(nombre, ubicacion), perfiles(nombre)`,
 		)
 		.order("created_at", { ascending: false })
 
@@ -53,6 +56,9 @@ export async function getEnvios(filters?: {
 	const mapped = (data ?? []).map((envio: any) => ({
 		...envio,
 		formulario_nombre: envio.formularios_template?.nombre,
+		formulario_tipo: envio.formularios_template?.tipo,
+		formulario_descripcion: envio.formularios_template?.descripcion,
+		equipo_nombre: envio.equipos?.nombre,
 		equipo_ubicacion: envio.equipos?.ubicacion,
 		usuario_nombre: envio.perfiles?.nombre,
 	}))

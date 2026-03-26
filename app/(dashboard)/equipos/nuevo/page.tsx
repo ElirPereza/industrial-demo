@@ -37,18 +37,19 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { createEquipo } from "@/app/(dashboard)/equipos/actions"
 
 const tiposEquipo = [
-	{ value: "maquinaria-pesada", label: "Maquinaria Pesada", icon: Factory },
-	{ value: "linea-produccion", label: "Línea de Producción", icon: Cube },
-	{ value: "electricos", label: "Equipos Eléctricos", icon: Hash },
-	{ value: "hvac", label: "HVAC / Climatización", icon: MapPin },
+	{ value: "maquinaria_pesada", label: "Maquinaria Pesada", icon: Factory },
+	{ value: "linea_produccion", label: "Linea de Produccion", icon: Cube },
+	{ value: "electricos", label: "Equipos Electricos", icon: Hash },
+	{ value: "hvac", label: "HVAC / Climatizacion", icon: MapPin },
 ]
 
 const estadosEquipo = [
 	{ value: "operativo", label: "Operativo", color: "bg-green-500" },
 	{ value: "mantenimiento", label: "En Mantenimiento", color: "bg-yellow-500" },
-	{ value: "fuera-servicio", label: "Fuera de Servicio", color: "bg-red-500" },
+	{ value: "fuera_servicio", label: "Fuera de Servicio", color: "bg-red-500" },
 ]
 
 export default function NuevoEquipoPage() {
@@ -64,6 +65,7 @@ export default function NuevoEquipoPage() {
 	const [fabricante, setFabricante] = useState("")
 	const [descripcion, setDescripcion] = useState("")
 	const [imagenes, setImagenes] = useState<string[]>([])
+	const [submitting, setSubmitting] = useState(false)
 
 	// Validation
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
@@ -85,7 +87,7 @@ export default function NuevoEquipoPage() {
 		setImagenes((prev) => prev.filter((_, i) => i !== index))
 	}
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		const newErrors: Record<string, boolean> = {}
 
 		if (!nombre.trim()) newErrors.nombre = true
@@ -94,10 +96,28 @@ export default function NuevoEquipoPage() {
 
 		setErrors(newErrors)
 
-		if (Object.keys(newErrors).length === 0) {
-			// Success - would save to database in real app
-			toast.success("Equipo creado exitosamente (simulado)")
-			router.push("/equipos")
+		if (Object.keys(newErrors).length > 0) return
+
+		setSubmitting(true)
+		try {
+			const formData = new FormData()
+			formData.set("nombre", nombre.trim())
+			formData.set("tipo", tipo)
+			formData.set("ubicacion", ubicacion.trim())
+			formData.set("estado", estado)
+
+			const result = await createEquipo(formData)
+
+			if (result.success) {
+				toast.success("Equipo creado exitosamente")
+				router.push("/equipos")
+			} else {
+				toast.error(result.error)
+			}
+		} catch {
+			toast.error("Error al crear el equipo")
+		} finally {
+			setSubmitting(false)
 		}
 	}
 
@@ -144,7 +164,7 @@ export default function NuevoEquipoPage() {
 					<div>
 						<h1 className="text-2xl font-semibold">Nuevo Equipo</h1>
 						<p className="text-sm text-muted-foreground">
-							Completa la información para registrar un nuevo equipo
+							Completa la informacion para registrar un nuevo equipo
 						</p>
 					</div>
 
@@ -154,7 +174,7 @@ export default function NuevoEquipoPage() {
 							{/* Basic Info */}
 							<Card>
 								<CardHeader>
-									<CardTitle>Información Básica</CardTitle>
+									<CardTitle>Informacion Basica</CardTitle>
 									<CardDescription>
 										Datos principales del equipo
 									</CardDescription>
@@ -230,7 +250,7 @@ export default function NuevoEquipoPage() {
 
 									<div>
 										<label className="mb-1.5 block text-sm font-medium">
-											Ubicación <span className="text-red-500">*</span>
+											Ubicacion <span className="text-red-500">*</span>
 										</label>
 										<Input
 											value={ubicacion}
@@ -248,7 +268,7 @@ export default function NuevoEquipoPage() {
 										/>
 										{errors.ubicacion && (
 											<p className="mt-1 text-xs text-red-500">
-												La ubicación es obligatoria
+												La ubicacion es obligatoria
 											</p>
 										)}
 									</div>
@@ -282,7 +302,7 @@ export default function NuevoEquipoPage() {
 							{/* Technical Info */}
 							<Card>
 								<CardHeader>
-									<CardTitle>Información Técnica</CardTitle>
+									<CardTitle>Informacion Tecnica</CardTitle>
 									<CardDescription>
 										Datos adicionales del equipo (opcional)
 									</CardDescription>
@@ -312,7 +332,7 @@ export default function NuevoEquipoPage() {
 									</div>
 									<div>
 										<label className="mb-1.5 block text-sm font-medium">
-											Número de Serie
+											Numero de Serie
 										</label>
 										<Input
 											value={numeroSerie}
@@ -322,14 +342,14 @@ export default function NuevoEquipoPage() {
 									</div>
 									<div>
 										<label className="mb-1.5 block text-sm font-medium">
-											Descripción / Notas
+											Descripcion / Notas
 										</label>
 										<textarea
 											value={descripcion}
 											onChange={(e) => setDescripcion(e.target.value)}
 											className="w-full rounded-md border bg-background p-3 text-sm"
 											rows={4}
-											placeholder="Información adicional sobre el equipo..."
+											placeholder="Informacion adicional sobre el equipo..."
 										/>
 									</div>
 								</CardContent>
@@ -342,7 +362,7 @@ export default function NuevoEquipoPage() {
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
 										<Camera className="size-5" weight="duotone" />
-										Imágenes del Equipo
+										Imagenes del Equipo
 									</CardTitle>
 									<CardDescription>
 										Sube fotos para identificar el equipo
@@ -359,7 +379,7 @@ export default function NuevoEquipoPage() {
 										</div>
 										<div className="text-center">
 											<p className="text-sm font-medium">
-												Arrastra imágenes aquí
+												Arrastra imagenes aqui
 											</p>
 											<p className="text-xs text-muted-foreground">
 												o haz clic para seleccionar
@@ -407,14 +427,19 @@ export default function NuevoEquipoPage() {
 							<Card>
 								<CardContent className="p-4">
 									<div className="space-y-3">
-										<Button className="w-full" onClick={handleSubmit}>
+										<Button
+											className="w-full"
+											onClick={handleSubmit}
+											disabled={submitting}
+										>
 											<Check className="mr-2 size-4" weight="bold" />
-											Crear Equipo
+											{submitting ? "Creando..." : "Crear Equipo"}
 										</Button>
 										<Button
 											variant="outline"
 											className="w-full"
 											onClick={() => router.push("/equipos")}
+											disabled={submitting}
 										>
 											Cancelar
 										</Button>

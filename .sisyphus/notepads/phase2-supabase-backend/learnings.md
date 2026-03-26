@@ -55,3 +55,16 @@
 - app/(dashboard)/formularios/envios-actions.ts: 5 actions
 - submitFormulario: validates required fields, creates envio + actividad
 - Build: PASS
+
+## [T17 Complete] Login + Auth
+- Login page: uses supabase.auth.signInWithPassword via dynamic import
+- auth/actions.ts: signOut() server action at app/(dashboard)/auth/actions.ts
+- nav-user.tsx: wired to signOut via onClick on logout DropdownMenuItem
+- Added isLoading state + disabled button + loading text for UX
+- Visual appearance unchanged (same Card/Input/Button structure)
+- Build: PASS
+
+## [T20 Complete] Equipo Detail Page
+- All 5 tabs wired to real Supabase data
+- Data loaded in parallel with Promise.all
+- Build: PASS

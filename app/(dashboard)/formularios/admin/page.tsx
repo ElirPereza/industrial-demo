@@ -1,7 +1,24 @@
 "use client"
 
-import { Cube, Globe, MapPin, PencilSimple, Target, Trash } from "@phosphor-icons/react"
-import { useState } from "react"
+import {
+	Cube,
+	Globe,
+	MapPin,
+	PencilSimple,
+	Target,
+	Trash,
+} from "@phosphor-icons/react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { getEquipos } from "@/app/(dashboard)/equipos/actions"
+import type { Equipo } from "@/app/(dashboard)/equipos/actions"
+import {
+	deleteFormulario,
+	getFormularios,
+	toggleFormularioActivo,
+	type FormularioTemplate,
+} from "@/app/(dashboard)/formularios/actions"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -34,30 +51,87 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
-import { equipos, formulariosTemplate } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 export default function FormAdminPage() {
-	const [formularios, setFormularios] = useState(formulariosTemplate)
+	const router = useRouter()
+	const [formularios, setFormularios] = useState<FormularioTemplate[]>([])
+	const [equiposMap, setEquiposMap] = useState<Map<string, string>>(new Map())
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(
 		null,
 	)
+	const [loading, setLoading] = useState(true)
 
-	const handleToggleActivo = (id: string) => {
+	useEffect(() => {
+		async function loadData() {
+			const [formsResult, equiposResult] = await Promise.all([
+				getFormularios(),
+				getEquipos(),
+			])
+			if (formsResult.success) {
+				setFormularios(formsResult.data)
+			} else {
+				toast.error(formsResult.error)
+			}
+			if (equiposResult.success) {
+				const map = new Map<string, string>()
+				for (const eq of equiposResult.data) {
+					map.set(eq.id, eq.nombre)
+				}
+				setEquiposMap(map)
+			}
+			setLoading(false)
+		}
+		loadData()
+	}, [])
+
+	const handleToggleActivo = async (id: string) => {
 		setFormularios((prev) =>
 			prev.map((f) => (f.id === id ? { ...f, activo: !f.activo } : f)),
 		)
+		const result = await toggleFormularioActivo(id)
+		if (!result.success) {
+			setFormularios((prev) =>
+				prev.map((f) => (f.id === id ? { ...f, activo: !f.activo } : f)),
+			)
+			toast.error(result.error)
+		} else {
+			toast.success(
+				`Formulario ${result.data.activo ? "activado" : "desactivado"}`,
+			)
+		}
 	}
 
-	const handleDelete = () => {
-		setFormularios((prev) => prev.filter((f) => f.id !== selectedFormulario))
+	const handleDelete = async () => {
+		if (!selectedFormulario) return
+		const result = await deleteFormulario(selectedFormulario)
+		if (result.success) {
+			setFormularios((prev) =>
+				prev.filter((f) => f.id !== selectedFormulario),
+			)
+			toast.success("Formulario eliminado")
+		} else {
+			toast.error(result.error)
+		}
 		setDeleteDialogOpen(false)
 		setSelectedFormulario(null)
 	}
 
+	if (loading) {
 		return (
-			<>
+			<SidebarInset>
+				<div className="flex h-full items-center justify-center p-8">
+					<p className="animate-pulse text-sm text-muted-foreground">
+						Cargando formularios...
+					</p>
+				</div>
+			</SidebarInset>
+		)
+	}
+
+	return (
+		<>
 			<SidebarInset>
 				<header className="flex h-16 shrink-0 items-center gap-2">
 					<div className="flex items-center gap-2 px-4">
@@ -115,27 +189,37 @@ export default function FormAdminPage() {
 								<TableBody>
 									{formularios.map((formulario) => {
 										const getAsociacionInfo = () => {
-											switch (formulario.asociacion.tipo) {
+											switch (formulario.asociacion_tipo) {
 												case "equipo": {
-													const eq = equipos.find((e) => e.id === formulario.asociacion.valor)
+													const eqName =
+														equiposMap.get(
+															formulario.asociacion_valor ?? "",
+														) ?? "Equipo"
 													return {
 														icon: Target,
-														label: eq?.nombre || "Equipo",
-														color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+														label: eqName,
+														color:
+															"bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
 													}
 												}
-												case "tipo-equipo": {
+												case "tipo_equipo": {
 													return {
 														icon: Cube,
-														label: formulario.asociacion.valor?.replace("-", " ") || "Tipo",
-														color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+														label:
+															formulario.asociacion_valor?.replace(
+																/_/g,
+																" ",
+															) ?? "Tipo",
+														color:
+															"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
 													}
 												}
 												case "area": {
 													return {
 														icon: MapPin,
-														label: formulario.asociacion.valor || "Área",
-														color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+														label: formulario.asociacion_valor ?? "Área",
+														color:
+															"bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
 													}
 												}
 												case "general":
@@ -143,7 +227,8 @@ export default function FormAdminPage() {
 													return {
 														icon: Globe,
 														label: "Todos los equipos",
-														color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+														color:
+															"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
 													}
 												}
 											}
@@ -158,13 +243,23 @@ export default function FormAdminPage() {
 												</TableCell>
 												<TableCell>
 													<span className="capitalize">
-														{formulario.tipo.replace("-", " ")}
+														{formulario.tipo.replace(/_/g, " ")}
 													</span>
 												</TableCell>
 												<TableCell>
-													<div className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", asociacion.color)}>
-														<AsociacionIcon className="size-3.5" weight="duotone" />
-														<span className="capitalize">{asociacion.label}</span>
+													<div
+														className={cn(
+															"inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+															asociacion.color,
+														)}
+													>
+														<AsociacionIcon
+															className="size-3.5"
+															weight="duotone"
+														/>
+														<span className="capitalize">
+															{asociacion.label}
+														</span>
 													</div>
 												</TableCell>
 												<TableCell>
@@ -173,7 +268,9 @@ export default function FormAdminPage() {
 															{formulario.frecuencia}
 														</span>
 													) : (
-														<span className="text-xs text-muted-foreground">—</span>
+														<span className="text-xs text-muted-foreground">
+															—
+														</span>
 													)}
 												</TableCell>
 												<TableCell>
@@ -207,10 +304,15 @@ export default function FormAdminPage() {
 															variant="ghost"
 															size="icon-sm"
 															onClick={() => {
-																// Visual only
+																router.push(
+																	`/formularios/constructor?id=${formulario.id}`,
+																)
 															}}
 														>
-															<PencilSimple className="size-4" weight="duotone" />
+															<PencilSimple
+																className="size-4"
+																weight="duotone"
+															/>
 														</Button>
 														<Button
 															variant="ghost"
@@ -232,10 +334,10 @@ export default function FormAdminPage() {
 						</CardContent>
 					</Card>
 				</div>
-				</SidebarInset>
+			</SidebarInset>
 
-				{/* Delete Confirmation Dialog */}
-				<Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+			{/* Delete Confirmation Dialog */}
+			<Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>¿Eliminar formulario?</DialogTitle>
@@ -255,8 +357,8 @@ export default function FormAdminPage() {
 							Eliminar
 						</Button>
 					</DialogFooter>
-					</DialogContent>
-				</Dialog>
-			</>
-			)
-		}
+				</DialogContent>
+			</Dialog>
+		</>
+	)
+}

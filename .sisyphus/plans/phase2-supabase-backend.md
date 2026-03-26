@@ -1309,7 +1309,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 ### Wave 5 — Pages Refactor Part 1 (MAX PARALLEL after Wave 4)
 
-- [ ] 17. Login page → Supabase Auth (email/password)
+- [x] 17. Login page → Supabase Auth (email/password)
 
   **What to do**:
   - Refactor `app/login/page.tsx` to use Supabase Auth:
@@ -1382,7 +1382,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Files: `app/login/page.tsx`, `app/(dashboard)/auth/actions.ts`, `components/nav-user.tsx`
   - Pre-commit: `pnpm build`
 
-- [ ] 18. Dashboard page → real KPIs + activity feed
+- [x] 18. Dashboard page → real KPIs + activity feed
 
   **What to do**:
   - Refactor `app/(dashboard)/dashboard/page.tsx` to fetch real data:
@@ -1439,7 +1439,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Files: `app/(dashboard)/dashboard/page.tsx`
   - Pre-commit: `pnpm build`
 
-- [ ] 19. Equipos list + nuevo pages → real CRUD
+- [x] 19. Equipos list + nuevo pages → real CRUD
 
   **What to do**:
   - Refactor `app/(dashboard)/equipos/page.tsx`:
@@ -1495,7 +1495,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Message: `feat(pages): refactor equipos pages to use real data`
   - Files: `app/(dashboard)/equipos/page.tsx`, `app/(dashboard)/equipos/nuevo/page.tsx`
 
-- [ ] 20. Equipo detail page — 5 tabs with real data
+- [x] 20. Equipo detail page — 5 tabs with real data
 
   **What to do**:
   - Refactor `app/(dashboard)/equipos/[id]/page.tsx`:
@@ -1554,7 +1554,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `feat(pages): refactor equipment detail page with real data`
 
-- [ ] 21. Formularios list page → real submissions data
+- [x] 21. Formularios list page → real submissions data
 
   **What to do**:
   - Refactor `app/(dashboard)/formularios/page.tsx`:
@@ -1602,7 +1602,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES
   - Message: `feat(pages): refactor formularios list with real data`
 
-- [ ] 22. Formularios admin page → real management
+- [x] 22. Formularios admin page → real management
 
   **What to do**:
   - Refactor `app/(dashboard)/formularios/admin/page.tsx`:

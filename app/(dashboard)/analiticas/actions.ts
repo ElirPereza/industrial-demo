@@ -217,6 +217,52 @@ export async function getTiposMantenimiento(): Promise<
 	}
 }
 
+export async function getRecentActivity(): Promise<
+	ActionResult<
+		Array<{
+			id: string
+			tipo: string
+			descripcion: string
+			estado: string
+			fecha_inicio: string
+			equipo_nombre: string
+			tecnico_nombre: string
+		}>
+	>
+> {
+	const user = await getUser()
+	if (!user) return { success: false, error: "No autorizado" }
+
+	const supabase = await createClient()
+	const { data, error } = await supabase
+		.from("registros_mantenimiento")
+		.select(
+			"id, tipo, descripcion, estado, fecha_inicio, equipos(nombre), perfiles!registros_mantenimiento_tecnico_id_fkey(nombre)",
+		)
+		.order("fecha_inicio", { ascending: false })
+		.limit(5)
+
+	if (error) return { success: false, error: error.message }
+
+	const mapped = (data ?? []).map((r: Record<string, unknown>) => ({
+		id: r.id as string,
+		tipo: r.tipo as string,
+		descripcion: r.descripcion as string,
+		estado: r.estado as string,
+		fecha_inicio: r.fecha_inicio as string,
+		equipo_nombre:
+			(
+				r.equipos as Record<string, unknown> | null
+			)?.nombre as string ?? "Equipo",
+		tecnico_nombre:
+			(
+				r.perfiles as Record<string, unknown> | null
+			)?.nombre as string ?? "Técnico",
+	}))
+
+	return { success: true, data: mapped }
+}
+
 export async function getTecnicosActivos(): Promise<
 	ActionResult<Array<{ nombre: string; formularios: number }>>
 > {
