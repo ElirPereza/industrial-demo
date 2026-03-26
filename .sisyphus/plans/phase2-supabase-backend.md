@@ -955,7 +955,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 ### Wave 4 — Server Actions (MAX PARALLEL after Wave 3)
 
-- [ ] 11. Server Actions: equipos CRUD
+- [x] 11. Server Actions: equipos CRUD
 
   **What to do**:
   - Create `app/(dashboard)/equipos/actions.ts` with `"use server"` directive
@@ -1022,7 +1022,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Files: `app/(dashboard)/equipos/actions.ts`
   - Pre-commit: `pnpm build`
 
-- [ ] 12. Server Actions: formularios_template + campos_formulario
+- [x] 12. Server Actions: formularios_template + campos_formulario
 
   **What to do**:
   - Create `app/(dashboard)/formularios/actions.ts` with `"use server"` directive
@@ -1092,7 +1092,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Message: `feat(actions): implement server actions for all modules`
   - Files: `app/(dashboard)/formularios/actions.ts`
 
-- [ ] 13. Server Actions: envios_formularios + respuestas
+- [x] 13. Server Actions: envios_formularios + respuestas
 
   **What to do**:
   - Create `app/(dashboard)/formularios/envios-actions.ts` with `"use server"` directive
@@ -1155,7 +1155,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   **Commit**: YES (groups with T11, T12, T14-T16)
   - Message: `feat(actions): implement server actions for all modules`
 
-- [ ] 14. Server Actions: registros_mantenimiento + actividades_equipo
+- [x] 14. Server Actions: registros_mantenimiento + actividades_equipo
 
   **What to do**:
   - Create `app/(dashboard)/equipos/maintenance-actions.ts`
@@ -1202,7 +1202,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
   **Commit**: YES (groups with T11-T13, T15, T16)
 
-- [ ] 15. Server Actions: contratistas CRUD
+- [x] 15. Server Actions: contratistas CRUD
 
   **What to do**:
   - Create `app/(dashboard)/contratistas/actions.ts`
@@ -1248,7 +1248,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
   **Commit**: YES (groups with T11-T14, T16)
 
-- [ ] 16. Server Actions: usuarios + analytics queries
+- [x] 16. Server Actions: usuarios + analytics queries
 
   **What to do**:
   - Create `app/(dashboard)/usuarios/actions.ts`:

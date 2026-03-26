@@ -24,3 +24,34 @@
 - Sonner toast: installed and added to layout
 - alert() replaced in 6 files: app/(dashboard)/usuarios/nuevo/page.tsx, app/(dashboard)/formularios/llenar/[id]/page.tsx, app/(dashboard)/equipos/nuevo/page.tsx, app/(dashboard)/formularios/constructor/page.tsx, app/(dashboard)/configuracion/page.tsx, app/(dashboard)/contratistas/nuevo/page.tsx
 - Build: PASS
+
+## [T11 Complete] Equipos Server Actions
+- app/(dashboard)/equipos/actions.ts: 6 actions (getEquipos, getEquipoById, createEquipo, updateEquipo, deleteEquipo, getEquipoStats)
+- lib/validations/equipos.ts: createEquipoSchema, updateEquipoSchema
+- CRITICAL: Next.js 16 revalidateTag requires 2nd arg — use revalidateTag(tag, "max") for stale-while-revalidate
+- Zod 4.3.6 uses `.issues` not `.errors` on parse error objects
+- Used `unknown[]` instead of `any[]` for Biome compliance (documentos, imagenes)
+- DB types use underscores (maquinaria_pesada) vs UI mock-data uses hyphens (maquinaria-pesada)
+- Build: PASS
+
+## [T12 Complete] Formularios Server Actions
+- app/(dashboard)/formularios/actions.ts: 7 actions including polymorphic filter
+- lib/validations/formularios.ts: createFormularioSchema, updateFormularioSchema
+- Build: PASS
+
+## [T14+T15+T16 Complete] Maintenance, Contratistas, Usuarios, Analytics Actions
+- maintenance-actions.ts: 5 actions (getRegistrosPorEquipo, createRegistro, updateRegistroEstado, getActividadesPorEquipo, getMaintenanceStats)
+- contratistas/actions.ts: 5 actions (getContratistas, getContratistaById, createContratista, updateContratista, deleteContratista)
+- usuarios/actions.ts: 4 actions (getUsuarios, getCurrentUser, getUsuarioById, updatePerfil)
+- analiticas/actions.ts: 6 analytics queries (getDashboardKPIs, getFormulariosPorMes, getTendenciaFallas, getEquiposMasIntervenidos, getTiposMantenimiento, getTecnicosActivos)
+- lib/validations/contratistas.ts: createContratistaSchema, updateContratistaSchema
+- Supabase joins (equipos(nombre), perfiles(nombre)) need cast through unknown for TS compliance
+- Soft delete pattern: contratistas uses estado='inactivo' not actual DELETE
+- JS aggregation OK for now; SQL views planned for T8
+- Build: PASS
+
+## [T13 Complete] Envios Server Actions
+- lib/supabase/storage.ts: upload/download/delete utilities
+- app/(dashboard)/formularios/envios-actions.ts: 5 actions
+- submitFormulario: validates required fields, creates envio + actividad
+- Build: PASS
