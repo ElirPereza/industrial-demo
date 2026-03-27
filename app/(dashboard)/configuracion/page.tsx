@@ -2,6 +2,7 @@
 
 import {
 	Bell,
+	Camera,
 	Globe,
 	Moon,
 	Palette,
@@ -9,8 +10,9 @@ import {
 	Sun,
 	User,
 } from "@phosphor-icons/react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import { uploadAvatar } from "@/app/(dashboard)/usuarios/upload-actions"
 import {
 	getCurrentUser,
 	type Perfil,
@@ -58,6 +60,24 @@ export default function ConfiguracionPage() {
 	const [tema, setTema] = useState<"light" | "dark" | "system">("system")
 	const [idioma, setIdioma] = useState("es")
 	const [formatoFecha, setFormatoFecha] = useState("DD/MM/YYYY")
+
+	// Avatar
+	const avatarInputRef = useRef<HTMLInputElement>(null)
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+
+	async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0]
+		if (!file) return
+		const formData = new FormData()
+		formData.append("file", file)
+		const result = await uploadAvatar(formData)
+		if (result.success) {
+			setAvatarUrl(result.data.url)
+			toast.success("Foto de perfil actualizada")
+		} else {
+			toast.error(result.error)
+		}
+	}
 
 	// Security settings
 	const [autenticacion2FA, setAutenticacion2FA] = useState(false)
@@ -145,15 +165,28 @@ export default function ConfiguracionPage() {
 						{/* Perfil */}
 						<Card>
 							<CardHeader>
-								<div className="flex items-center gap-3">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-										<User className="size-5" weight="duotone" />
+							<div className="flex items-center gap-3">
+								<div
+									className="relative cursor-pointer"
+									onClick={() => avatarInputRef.current?.click()}
+								>
+									<div className="flex size-14 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-blue-600">
+										{avatarUrl ? (
+											<img src={avatarUrl} alt="Avatar" className="size-full object-cover" />
+										) : (
+											<User className="size-7" weight="duotone" />
+										)}
 									</div>
-									<div>
-										<CardTitle>Perfil</CardTitle>
-										<CardDescription>Información de tu cuenta</CardDescription>
+									<div className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+										<Camera className="size-3" />
 									</div>
+									<input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
 								</div>
+								<div>
+									<CardTitle>Perfil</CardTitle>
+									<CardDescription>Haz clic en la foto para cambiarla</CardDescription>
+								</div>
+							</div>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div>

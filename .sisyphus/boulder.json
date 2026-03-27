@@ -1,54 +1,6 @@
 {
-  "active_plan": "C:\\Users\\Don777\\Desktop\\proyecto nuevo\\industrial-demo\\.sisyphus\\plans\\phase2-supabase-backend.md",
-  "started_at": "2026-03-26T21:41:53.296Z",
-  "session_ids": [
-    "ses_2d401923bffe4HD2gDCEoXRWKc",
-    "ses_2d3e44876ffe1TQHsyMLYoMWhE",
-    "ses_2d3e1711effe6ZPVImRGVM8BdQ",
-    "ses_2d3e12c06ffeiW281L9Eo9oiKK",
-    "ses_2d3e0e36bffeHqhTVQT66DgaBr",
-    "ses_2d3e09936ffed1nQ1YndLNgiUq",
-    "ses_2d3cae6acffe3hsc10UDKBHNCY",
-    "ses_2d3cb86a4ffeDRV5tP5HN2qRui",
-    "ses_2d3c9dfb7ffev7QIKFvUmb6lzp",
-    "ses_2d3c4ca51ffe4Ngw6fRS4o5Ybo",
-    "ses_2d3bd77beffexyglE8CKaIjpyK",
-    "ses_2d3bcd004ffeQAvUqgi0927x4q",
-    "ses_2d3bc769cffeTKqA6hirfbJCVf",
-    "ses_2d3bd0f16ffez4JYGLxcPc3hki",
-    "ses_2d3b2d206ffet3VCOLbH2rQFR9",
-    "ses_2d3b26c8bffeWtmNfYG8Qdr54I",
-    "ses_2d3a7b541ffeQl86v1Wq4Uyhm0",
-    "ses_2d3a803cdffeshGveC6TOK1HI5",
-    "ses_2d3a72ac5ffeWNGbIrmEBDuGfS",
-    "ses_2d3a1f123ffe7OLFSDo3aojnp8",
-    "ses_2d38ec8abffeksZdsJ0QvVL7lM",
-    "ses_2d38e7413ffelKhxqbqZkrQilA",
-    "ses_2d38ba8f6ffeYMauzfX0pfklYZ",
-    "ses_2d37bec7effeDK1UuedpeB3n3P",
-    "ses_2d35279d0ffe29fXXseqa93EhT",
-    "ses_2d33db27cffe9vAuEkoUIiElTc"
-  ],
-  "plan_name": "phase2-supabase-backend",
-  "agent": "atlas",
-  "task_sessions": {
-    "todo:1": {
-      "task_key": "todo:1",
-      "task_label": "1",
-      "task_title": "Install dependencies + environment config + verify Supabase",
-      "session_id": "ses_2d3e44876ffe1TQHsyMLYoMWhE",
-      "agent": "Sisyphus-Junior",
-      "category": "quick",
-      "updated_at": "2026-03-26T21:46:59.549Z"
-    },
-    "todo:2": {
-      "task_key": "todo:2",
-      "task_label": "2",
-      "task_title": "Database schema migration — all 11 tables with enums, indexes, triggers",
-      "session_id": "ses_2d35279d0ffe29fXXseqa93EhT",
-      "agent": "Sisyphus-Junior",
-      "category": "deep",
-      "updated_at": "2026-03-27T00:28:29.318Z"
-    }
-  }
+  "active_plan": "C:\\Users\\Don777\\Desktop\\proyecto nuevo\\industrial-demo\\.sisyphus\\plans\\uploads-and-improvements.md",
+  "started_at": "2026-03-27T19:43:21.449Z",
+  "session_ids": ["ses_2d401923bffe4HD2gDCEoXRWKc"],
+  "plan_name": "uploads-and-improvements"
 }

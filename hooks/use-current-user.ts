@@ -12,11 +12,20 @@ export type UserProfile = {
 	departamento: string | null
 }
 
+// Cache in memory so sidebar doesn't flicker between navigations
+let cachedUser: UserProfile | null = null
+
 export function useCurrentUser() {
-	const [user, setUser] = useState<UserProfile | null>(null)
-	const [loading, setLoading] = useState(true)
+	const [user, setUser] = useState<UserProfile | null>(cachedUser)
+	const [loading, setLoading] = useState(!cachedUser)
 
 	useEffect(() => {
+		if (cachedUser) {
+			setUser(cachedUser)
+			setLoading(false)
+			return
+		}
+
 		async function fetchUser() {
 			const supabase = createClient()
 			const {
@@ -33,11 +42,18 @@ export function useCurrentUser() {
 				.eq("user_id", authUser.id)
 				.single()
 
-			if (data) setUser(data as UserProfile)
+			if (data) {
+				cachedUser = data as UserProfile
+				setUser(cachedUser)
+			}
 			setLoading(false)
 		}
 		fetchUser()
 	}, [])
 
 	return { user, loading }
+}
+
+export function clearUserCache() {
+	cachedUser = null
 }

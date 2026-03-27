@@ -16,12 +16,21 @@ import {
 	PencilSimple,
 	QrCode,
 	Timer,
+	Trash,
+	Upload,
 	Wrench,
 } from "@phosphor-icons/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { QRCodeSVG } from "qrcode.react"
-import { use, useEffect, useMemo, useState } from "react"
+import { use, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
+import {
+	deleteEquipoDocument,
+	deleteEquipoImage,
+	uploadEquipoDocument,
+	uploadEquipoImage,
+} from "../upload-actions"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -227,6 +236,69 @@ export default function EquipoDetailPage({
 
 	const documentos = useMemo(() => equipo?.documentos ?? [], [equipo])
 	const imagenes = useMemo(() => equipo?.imagenes ?? [], [equipo])
+
+	const imageInputRef = useRef<HTMLInputElement>(null)
+	const docInputRef = useRef<HTMLInputElement>(null)
+	const [uploadingImage, setUploadingImage] = useState(false)
+	const [uploadingDoc, setUploadingDoc] = useState(false)
+
+	async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0]
+		if (!file) return
+		setUploadingImage(true)
+		const formData = new FormData()
+		formData.append("file", file)
+		const result = await uploadEquipoImage(equipoId, formData)
+		if (result.success) {
+			toast.success("Imagen subida exitosamente")
+			const equipoResult = await getEquipoById(equipoId)
+			if (equipoResult.success) setEquipo(equipoResult.data as EquipoDetail)
+		} else {
+			toast.error(result.error)
+		}
+		setUploadingImage(false)
+		if (imageInputRef.current) imageInputRef.current.value = ""
+	}
+
+	async function handleDocUpload(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0]
+		if (!file) return
+		setUploadingDoc(true)
+		const formData = new FormData()
+		formData.append("file", file)
+		const result = await uploadEquipoDocument(equipoId, formData)
+		if (result.success) {
+			toast.success("Documento subido exitosamente")
+			const equipoResult = await getEquipoById(equipoId)
+			if (equipoResult.success) setEquipo(equipoResult.data as EquipoDetail)
+		} else {
+			toast.error(result.error)
+		}
+		setUploadingDoc(false)
+		if (docInputRef.current) docInputRef.current.value = ""
+	}
+
+	async function handleDeleteImage(imageId: string) {
+		const result = await deleteEquipoImage(imageId)
+		if (result.success) {
+			toast.success("Imagen eliminada")
+			const equipoResult = await getEquipoById(equipoId)
+			if (equipoResult.success) setEquipo(equipoResult.data as EquipoDetail)
+		} else {
+			toast.error(result.error)
+		}
+	}
+
+	async function handleDeleteDocument(docId: string) {
+		const result = await deleteEquipoDocument(docId)
+		if (result.success) {
+			toast.success("Documento eliminado")
+			const equipoResult = await getEquipoById(equipoId)
+			if (equipoResult.success) setEquipo(equipoResult.data as EquipoDetail)
+		} else {
+			toast.error(result.error)
+		}
+	}
 
 	const timelineCompleto = useMemo(
 		() =>
@@ -729,23 +801,26 @@ export default function EquipoDetailPage({
 										Manuales, certificados y documentación técnica
 									</CardDescription>
 								</div>
-								<Button>
-									<FileText className="mr-2 size-4" />
-									Subir Documento
+							<>
+								<input ref={docInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" className="hidden" onChange={handleDocUpload} />
+								<Button onClick={() => docInputRef.current?.click()} disabled={uploadingDoc}>
+									<Upload className="mr-2 size-4" />
+									{uploadingDoc ? "Subiendo..." : "Subir Documento"}
+								</Button>
+							</>
+						</div>
+					</CardHeader>
+					<CardContent>
+						{documentos.length === 0 ? (
+							<div className="flex flex-col items-center justify-center py-12 text-center">
+								<FileText className="mb-4 size-12 text-muted-foreground" />
+								<p className="text-muted-foreground">
+									No hay documentos disponibles para este equipo
+								</p>
+								<Button variant="outline" className="mt-4" onClick={() => docInputRef.current?.click()} disabled={uploadingDoc}>
+									{uploadingDoc ? "Subiendo..." : "Subir primer documento"}
 								</Button>
 							</div>
-						</CardHeader>
-						<CardContent>
-							{documentos.length === 0 ? (
-								<div className="flex flex-col items-center justify-center py-12 text-center">
-									<FileText className="mb-4 size-12 text-muted-foreground" />
-									<p className="text-muted-foreground">
-										No hay documentos disponibles para este equipo
-									</p>
-									<Button variant="outline" className="mt-4">
-										Subir primer documento
-									</Button>
-								</div>
 							) : (
 								<div className="space-y-2">
 									{documentos.map((doc) => {
@@ -791,21 +866,28 @@ export default function EquipoDetailPage({
 													>
 														<Eye className="size-4" />
 													</Button>
-													<Button
-														variant="ghost"
-														size="icon-sm"
-														onClick={() => {
-															if (doc.url)
-																window.open(
-																	doc.url,
-																	"_blank",
-																	"noopener,noreferrer",
-																)
-														}}
-													>
-														<Download className="size-4" />
-													</Button>
-												</div>
+												<Button
+													variant="ghost"
+													size="icon-sm"
+													onClick={() => {
+														if (doc.url)
+															window.open(
+																doc.url,
+																"_blank",
+																"noopener,noreferrer",
+															)
+													}}
+												>
+													<Download className="size-4" />
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon-sm"
+													onClick={() => handleDeleteDocument(doc.id)}
+												>
+													<Trash className="size-4 text-red-500" />
+												</Button>
+											</div>
 											</div>
 										)
 									})}
@@ -825,23 +907,26 @@ export default function EquipoDetailPage({
 										Fotos del equipo, inspecciones y reparaciones
 									</CardDescription>
 								</div>
-								<Button>
-									<Images className="mr-2 size-4" />
-									Subir Imagen
+							<>
+								<input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+								<Button onClick={() => imageInputRef.current?.click()} disabled={uploadingImage}>
+									<Upload className="mr-2 size-4" />
+									{uploadingImage ? "Subiendo..." : "Subir Imagen"}
+								</Button>
+							</>
+						</div>
+					</CardHeader>
+					<CardContent>
+						{imagenes.length === 0 ? (
+							<div className="flex flex-col items-center justify-center py-12 text-center">
+								<Images className="mb-4 size-12 text-muted-foreground" />
+								<p className="text-muted-foreground">
+									No hay imágenes disponibles para este equipo
+								</p>
+								<Button variant="outline" className="mt-4" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage}>
+									{uploadingImage ? "Subiendo..." : "Subir primera imagen"}
 								</Button>
 							</div>
-						</CardHeader>
-						<CardContent>
-							{imagenes.length === 0 ? (
-								<div className="flex flex-col items-center justify-center py-12 text-center">
-									<Images className="mb-4 size-12 text-muted-foreground" />
-									<p className="text-muted-foreground">
-										No hay imágenes disponibles para este equipo
-									</p>
-									<Button variant="outline" className="mt-4">
-										Subir primera imagen
-									</Button>
-								</div>
 							) : (
 								<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 									{imagenes.map((img) => (
@@ -862,14 +947,17 @@ export default function EquipoDetailPage({
 													<Images className="size-12" />
 												</div>
 											)}
-											<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
-												<p className="text-sm font-medium text-white">
-													{img.titulo ?? "Imagen"}
-												</p>
-												<p className="text-xs text-white/80">
-													{formatDate(img.fecha ?? img.created_at)}
-												</p>
-											</div>
+										<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+											<Button size="icon-sm" variant="destructive" className="absolute right-2 top-2" onClick={() => handleDeleteImage(img.id)}>
+												<Trash className="size-4" />
+											</Button>
+											<p className="text-sm font-medium text-white">
+												{img.titulo ?? "Imagen"}
+											</p>
+											<p className="text-xs text-white/80">
+												{formatDate(img.fecha ?? img.created_at)}
+											</p>
+										</div>
 										</div>
 									))}
 								</div>
