@@ -20,3 +20,15 @@ Packages installed: @supabase/supabase-js, @supabase/ssr, zod
 Removed: lucide-react
 Build status: PASS
 .env.local: Created (anon key placeholder — needs real key from dashboard)
+
+## [2026-03-26] DB Audit Residual Warnings
+
+**Issue**: Security advisor still reports `auth_leaked_password_protection`.
+**Cause**: This is a Supabase Auth project setting, not a SQL schema/policy issue.
+**Impact**: Security warning remains until toggled in Auth settings.
+**Resolution**: Enable leaked password protection in Supabase Dashboard → Auth → Password Security.
+
+**Issue**: Performance advisor reports `multiple_permissive_policies` for tables with `ALL` admin + separate `SELECT` policies.
+**Cause**: Existing policy design uses overlapping permissive policies.
+**Impact**: Extra policy evaluation overhead on SELECT.
+**Resolution**: Requires controlled policy refactor (drop/recreate policy commands) to eliminate overlap; deferred to avoid changing authorization behavior during this audit pass.

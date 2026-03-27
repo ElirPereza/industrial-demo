@@ -21,7 +21,13 @@
     "ses_2d3a7b541ffeQl86v1Wq4Uyhm0",
     "ses_2d3a803cdffeshGveC6TOK1HI5",
     "ses_2d3a72ac5ffeWNGbIrmEBDuGfS",
-    "ses_2d3a1f123ffe7OLFSDo3aojnp8"
+    "ses_2d3a1f123ffe7OLFSDo3aojnp8",
+    "ses_2d38ec8abffeksZdsJ0QvVL7lM",
+    "ses_2d38e7413ffelKhxqbqZkrQilA",
+    "ses_2d38ba8f6ffeYMauzfX0pfklYZ",
+    "ses_2d37bec7effeDK1UuedpeB3n3P",
+    "ses_2d35279d0ffe29fXXseqa93EhT",
+    "ses_2d33db27cffe9vAuEkoUIiElTc"
   ],
   "plan_name": "phase2-supabase-backend",
   "agent": "atlas",
@@ -39,10 +45,10 @@
       "task_key": "todo:2",
       "task_label": "2",
       "task_title": "Database schema migration — all 11 tables with enums, indexes, triggers",
-      "session_id": "ses_2d3a1f123ffe7OLFSDo3aojnp8",
+      "session_id": "ses_2d35279d0ffe29fXXseqa93EhT",
       "agent": "Sisyphus-Junior",
-      "category": "quick",
-      "updated_at": "2026-03-26T23:17:13.829Z"
+      "category": "deep",
+      "updated_at": "2026-03-27T00:28:29.318Z"
     }
   }
 }

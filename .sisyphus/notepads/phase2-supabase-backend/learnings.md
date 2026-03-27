@@ -73,3 +73,10 @@
 - constructor: CREATE/EDIT modes, added metadata fields, wired to actions
 - llenar: dynamic field rendering, required validation, wired to submitFormulario
 - Build: PASS
+
+## [2026-03-26] DB Audit — Supabase/Postgres Best Practices
+- Security hardening: added explicit `search_path` on security-sensitive functions (`handle_new_user`, `user_role`, `is_admin`, `is_admin_or_supervisor`, trigger helpers) to remove mutable-search-path lint.
+- Performance hardening: added missing FK indexes for `actividades_equipo.usuario_id`, `formularios_template.created_by`, `formularios_version.created_by`, `registros_mantenimiento.tecnico_id`.
+- RLS performance tuning: updated policies to use `(select auth.uid())` instead of direct `auth.uid()` calls to avoid per-row re-evaluation warnings.
+- Additional query indexes added for expected filters/time windows: `equipos(estado,tipo,created_at)`, `envios_formularios(estado)`, `registros_mantenimiento(estado)`, `actividades_equipo(created_at)`.
+- Post-fix advisor state: no critical security/performance findings; remaining warnings are operational (`auth leaked password protection`) and policy-structure optimization (`multiple permissive policies`).

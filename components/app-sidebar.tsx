@@ -26,42 +26,71 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import type { UserProfile } from "@/hooks/use-current-user"
 
-const data = {
-	user: {
-		name: "Administrador",
-		email: "admin@industrial.local",
-		avatar: "/avatars/admin.jpg",
-	},
-	navMain: [
+type Role = UserProfile["rol"]
+
+function getNavMainForRole(rol: Role) {
+	const allNav = [
 		{
 			title: "Dashboard",
 			url: "/dashboard",
 			icon: <ChartLineIcon />,
 			isActive: true,
+			roles: ["admin", "supervisor", "tecnico"] as Role[],
 		},
 		{
 			title: "Formularios",
 			url: "/formularios",
 			icon: <FileTextIcon />,
+			roles: ["admin", "supervisor", "tecnico"] as Role[],
 			items: [
-				{ title: "Envíos", url: "/formularios" },
-				{ title: "Constructor", url: "/formularios/constructor" },
-				{ title: "Administración", url: "/formularios/admin" },
-			],
+				{
+					title: "Envíos",
+					url: "/formularios",
+					roles: ["admin", "supervisor", "tecnico"] as Role[],
+				},
+				{
+					title: "Constructor",
+					url: "/formularios/constructor",
+					roles: ["admin"] as Role[],
+				},
+				{
+					title: "Administración",
+					url: "/formularios/admin",
+					roles: ["admin"] as Role[],
+				},
+			].filter((item) => item.roles.includes(rol)),
 		},
 		{
 			title: "Equipos",
 			url: "/equipos",
 			icon: <CubeIcon />,
+			roles: ["admin", "supervisor", "tecnico"] as Role[],
 		},
 		{
 			title: "Analíticas",
 			url: "/analiticas",
 			icon: <ChartBarIcon />,
+			roles: ["admin", "supervisor"] as Role[],
 		},
-	],
-	administracion: [
+	]
+
+	return allNav
+		.filter((item) => item.roles.includes(rol))
+		.map(({ roles: _roles, items, ...rest }) => ({
+			...rest,
+			...(items
+				? {
+						items: items.map(({ roles: _itemRoles, ...subRest }) => subRest),
+					}
+				: {}),
+		}))
+}
+
+function getAdminNavForRole(rol: Role) {
+	if (rol !== "admin") return []
+	return [
 		{
 			title: "Usuarios",
 			url: "/usuarios",
@@ -72,24 +101,46 @@ const data = {
 			url: "/contratistas",
 			icon: <Buildings />,
 		},
-	],
-	herramientas: [
+	]
+}
+
+function getHerramientasForRole(rol: Role) {
+	const all = [
 		{
 			name: "Códigos QR",
 			url: "/qr-codes",
 			icon: <QrCodeIcon />,
+			roles: ["admin", "supervisor"] as Role[],
 		},
-	],
-	navSecondary: [
-		{
-			title: "Configuración",
-			url: "/configuracion",
-			icon: <SlidersIcon />,
-		},
-	],
+	]
+	return all
+		.filter((item) => item.roles.includes(rol))
+		.map(({ roles: _roles, ...rest }) => rest)
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+const navSecondary = [
+	{
+		title: "Configuración",
+		url: "/configuracion",
+		icon: <SlidersIcon />,
+	},
+]
+
+export function AppSidebar({
+	user,
+	...props
+}: React.ComponentProps<typeof Sidebar> & { user: UserProfile | null }) {
+	const rol: Role = user?.rol ?? "tecnico"
+	const navMain = getNavMainForRole(rol)
+	const adminNav = getAdminNavForRole(rol)
+	const herramientas = getHerramientasForRole(rol)
+
+	const userData = {
+		name: user?.nombre ?? "Usuario",
+		email: user?.email ?? "",
+		avatar: "",
+	}
+
 	return (
 		<Sidebar variant="inset" {...props}>
 			<SidebarHeader>
@@ -112,13 +163,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
-				<NavAdmin items={data.administracion} />
-				<NavProjects projects={data.herramientas} />
-				<NavSecondary items={data.navSecondary} className="mt-auto" />
+				<NavMain items={navMain} />
+				{adminNav.length > 0 && <NavAdmin items={adminNav} />}
+				{herramientas.length > 0 && <NavProjects projects={herramientas} />}
+				<NavSecondary items={navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={data.user} />
+				<NavUser user={userData} />
 			</SidebarFooter>
 		</Sidebar>
 	)

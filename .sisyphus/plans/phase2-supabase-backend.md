@@ -2294,19 +2294,19 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 > 4 review agents run in PARALLEL. ALL must APPROVE. Present consolidated results to user and get explicit "okay" before completing.
 
-- [ ] F1. **Plan Compliance Audit** — `oracle`
+- [x] F1. **Plan Compliance Audit** — `oracle`
   Read the plan end-to-end. For each "Must Have": verify implementation exists via `mcp_supabase_execute_sql` (tables, RLS), file reads (server actions, pages), and `pnpm build`. For each "Must NOT Have": search codebase for forbidden patterns (OAuth, middleware.ts, revalidatePath, service role key exposure, thrown errors in server actions). Check evidence files exist in `.sisyphus/evidence/`. Compare deliverables against plan.
   Output: `Must Have [N/N] | Must NOT Have [N/N] | Tasks [N/N] | VERDICT: APPROVE/REJECT`
 
-- [ ] F2. **Code Quality Review** — `unspecified-high`
+- [x] F2. **Code Quality Review** — `unspecified-high`
   Run `pnpm build && pnpm lint`. Review all changed files for: `as any`/`@ts-ignore`, empty catches, `console.log` in prod, commented-out code, unused imports, `alert()` calls remaining, `middleware.ts` instead of `proxy.ts`, `revalidatePath` usage. Check AI slop: excessive comments, over-abstraction, generic variable names. Verify all Supabase queries use proper error handling (`ActionResult<T>` pattern).
   Output: `Build [PASS/FAIL] | Lint [PASS/FAIL] | Tests [N pass/N fail] | Files [N clean/N issues] | VERDICT`
 
-- [ ] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill)
+- [x] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill)
   Start from clean state. Full end-to-end flow: Login as admin → Dashboard loads with real KPIs → Navigate to Equipos → Create new equipment → View detail (all 5 tabs) → Navigate to Formularios → Create form template in constructor → Activate form in admin → Fill form with signature + photo → Verify submission appears in list → Check QR code page → View Analytics → Manage Contratistas → Update Configuración → Logout → Verify redirect. Test as Técnico: verify restricted access. Save evidence screenshots.
   Output: `Scenarios [N/N pass] | Integration [N/N] | Edge Cases [N tested] | VERDICT`
 
-- [ ] F4. **Scope Fidelity Check** — `deep`
+- [x] F4. **Scope Fidelity Check** — `deep`
   For each task: read "What to do", read actual diff (`git log`/`git diff`). Verify 1:1 — everything in spec was built, nothing beyond spec was built. Check "Must NOT do" compliance per task. Verify no visual changes to existing pages (compare screenshots). Detect cross-task contamination. Verify `mock-data.ts` and `lucide-react` removed. Flag unaccounted changes.
   Output: `Tasks [N/N compliant] | Contamination [CLEAN/N issues] | Unaccounted [CLEAN/N files] | VERDICT`
 

@@ -4,9 +4,7 @@ import {
 	BellIcon,
 	CaretUpDownIcon,
 	CheckCircleIcon,
-	CreditCardIcon,
 	SignOutIcon,
-	SparkleIcon,
 } from "@phosphor-icons/react"
 import { signOut } from "@/app/(dashboard)/auth/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -25,6 +23,15 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar"
+
+function getInitials(name: string): string {
+	return name
+		.split(" ")
+		.map((n) => n[0])
+		.join("")
+		.substring(0, 2)
+		.toUpperCase()
+}
 
 export function NavUser({
 	user,
@@ -48,7 +55,9 @@ export function NavUser({
 						>
 							<Avatar className="h-8 w-8 rounded-lg">
 								<AvatarImage src={user.avatar} alt={user.name} />
-								<AvatarFallback className="rounded-lg">CN</AvatarFallback>
+								<AvatarFallback className="rounded-lg">
+									{getInitials(user.name)}
+								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-medium">{user.name}</span>
@@ -67,7 +76,9 @@ export function NavUser({
 							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 								<Avatar className="h-8 w-8 rounded-lg">
 									<AvatarImage src={user.avatar} alt={user.name} />
-									<AvatarFallback className="rounded-lg">CN</AvatarFallback>
+									<AvatarFallback className="rounded-lg">
+										{getInitials(user.name)}
+									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
 									<span className="truncate font-medium">{user.name}</span>
@@ -78,29 +89,18 @@ export function NavUser({
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem>
-								<SparkleIcon />
-								Upgrade to Pro
-							</DropdownMenuItem>
-						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
-						<DropdownMenuGroup>
-							<DropdownMenuItem>
 								<CheckCircleIcon />
-								Account
-							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<CreditCardIcon />
-								Billing
+								Mi Cuenta
 							</DropdownMenuItem>
 							<DropdownMenuItem>
 								<BellIcon />
-								Notifications
+								Notificaciones
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => signOut()}>
 							<SignOutIcon />
-							Log out
+							Cerrar Sesión
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
