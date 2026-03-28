@@ -46,6 +46,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
+import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
 type CampoTemplate = NonNullable<FormularioTemplate["campos"]>[number]
@@ -274,23 +275,41 @@ function FormFillPageContent() {
 		}
 
 		if (campo.tipo === "foto") {
+			const photoUrl =
+				typeof value === "string" && value.startsWith("http") ? value : null
 			return (
 				<div>
-					<Input
+					<input
 						type="file"
 						accept="image/*"
-						onChange={(e) => {
-							const file = e.target.files?.[0]
-							updateFieldValue(campo.id, file ? file.name : null)
-						}}
 						className={cn(
+							"block w-full cursor-pointer text-sm file:mr-4 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90",
 							errors[campo.id] && "border-red-500 ring-1 ring-red-500/20",
 						)}
+						onChange={async (e) => {
+							const file = e.target.files?.[0]
+							if (!file) return
+							const supabase = createClient()
+							const path = `${Date.now()}-${file.name}`
+							const { error } = await supabase.storage
+								.from("form-photos")
+								.upload(path, file)
+							if (!error) {
+								const { data } = supabase.storage
+									.from("form-photos")
+									.getPublicUrl(path)
+								updateFieldValue(campo.id, data.publicUrl)
+							} else {
+								toast.error("Error al subir foto")
+							}
+						}}
 					/>
-					{typeof value === "string" && value.length > 0 && (
-						<p className="mt-2 text-xs text-muted-foreground">
-							Archivo: {value}
-						</p>
+					{photoUrl && (
+						<img
+							src={photoUrl}
+							alt="Foto subida"
+							className="mt-2 max-h-40 rounded border object-cover"
+						/>
 					)}
 				</div>
 			)
@@ -325,9 +344,31 @@ function FormFillPageContent() {
 
 		setSubmitting(true)
 
+		// Upload signatures to Storage before submit
+		const uploadedValues = { ...formData }
+		const supabase = createClient()
+		for (const campo of formulario.campos ?? []) {
+			const val = uploadedValues[campo.id]
+			if (typeof val === "string" && val.startsWith("data:image/")) {
+				// Convert base64 to Blob
+				const response = await fetch(val)
+				const blob = await response.blob()
+				const fileName = `${campo.id}-${Date.now()}.png`
+				const { error: uploadErr } = await supabase.storage
+					.from("form-signatures")
+					.upload(fileName, blob)
+				if (!uploadErr) {
+					const { data: urlData } = supabase.storage
+						.from("form-signatures")
+						.getPublicUrl(fileName)
+					uploadedValues[campo.id] = urlData.publicUrl
+				}
+			}
+		}
+
 		const respuestas: CampoRespuesta[] = (formulario.campos ?? []).map(
 			(campo) => {
-				const rawValue = formData[campo.id] ?? null
+				const rawValue = uploadedValues[campo.id] ?? null
 
 				if (campo.tipo === "numerico") {
 					if (rawValue === null || rawValue === "") {

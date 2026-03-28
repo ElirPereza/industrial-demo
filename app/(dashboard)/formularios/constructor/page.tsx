@@ -137,10 +137,12 @@ function DraggablePaletteItem({
 	tipo,
 	label,
 	icon,
+	onAdd,
 }: {
 	tipo: FieldType
 	label: string
 	icon: React.ReactNode
+	onAdd: () => void
 }) {
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id: `palette-${tipo}`,
@@ -162,7 +164,15 @@ function DraggablePaletteItem({
 					{icon}
 				</div>
 				<span className="text-sm font-medium">{label}</span>
-				<Plus className="ml-auto size-4 text-muted-foreground" weight="bold" />
+				<button
+					type="button"
+					onPointerDown={(e) => e.stopPropagation()}
+					onClick={(e) => { e.stopPropagation(); onAdd() }}
+					className="ml-auto rounded p-0.5 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+					aria-label={`Agregar ${label}`}
+				>
+					<Plus className="size-4" weight="bold" />
+				</button>
 			</CardContent>
 		</Card>
 	)
@@ -732,15 +742,30 @@ function FormBuilderPageContent() {
 						<h3 className="mb-4 text-sm font-semibold text-muted-foreground">
 							Arrastra los campos
 						</h3>
-						<div className="space-y-2">
-							{fieldTypes.map((fieldType) => (
-								<DraggablePaletteItem
-									key={fieldType.tipo}
-									tipo={fieldType.tipo}
-									label={fieldType.label}
-									icon={fieldType.icon}
-								/>
-							))}
+					<div className="space-y-2">
+						{fieldTypes.map((fieldType) => (
+							<DraggablePaletteItem
+								key={fieldType.tipo}
+								tipo={fieldType.tipo}
+								label={fieldType.label}
+								icon={fieldType.icon}
+								onAdd={() => {
+									const newField: FormField = {
+										id: `field-${Date.now()}`,
+										tipo: fieldType.tipo,
+										label: fieldType.label,
+										placeholder: "",
+										requerido: false,
+										opciones:
+											fieldType.tipo === "seleccion_unica" || fieldType.tipo === "seleccion_multiple"
+												? ["Opción 1", "Opción 2", "Opción 3"]
+												: undefined,
+									}
+									setFields((prev) => [...prev, newField])
+									setSelectedField(newField)
+								}}
+							/>
+						))}
 						</div>
 					</div>
 
