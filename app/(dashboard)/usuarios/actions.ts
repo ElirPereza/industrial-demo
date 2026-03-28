@@ -83,3 +83,47 @@ export async function updatePerfil(
 	revalidateTag("perfil", "max")
 	return { success: true, data: data as Perfil }
 }
+
+export type UserPreferences = {
+	notifEmail: boolean
+	notifPush: boolean
+	notifFormularios: boolean
+	notifEquipos: boolean
+	notifReportes: boolean
+	tema: "light" | "dark" | "system"
+	idioma: string
+	formatoFecha: string
+	keepSessionActive: boolean
+}
+
+const DEFAULT_PREFERENCES: UserPreferences = {
+	notifEmail: true,
+	notifPush: true,
+	notifFormularios: true,
+	notifEquipos: false,
+	notifReportes: true,
+	tema: "system",
+	idioma: "es",
+	formatoFecha: "DD/MM/YYYY",
+	keepSessionActive: true,
+}
+
+export async function getPreferences(): Promise<ActionResult<UserPreferences>> {
+	const user = await getUser()
+	if (!user) return { success: false, error: "No autorizado" }
+	const prefs = user.user_metadata?.preferences as UserPreferences | undefined
+	return { success: true, data: { ...DEFAULT_PREFERENCES, ...prefs } }
+}
+
+export async function savePreferences(
+	prefs: UserPreferences,
+): Promise<ActionResult<UserPreferences>> {
+	const user = await getUser()
+	if (!user) return { success: false, error: "No autorizado" }
+	const supabase = await createClient()
+	const { error } = await supabase.auth.updateUser({
+		data: { preferences: prefs },
+	})
+	if (error) return { success: false, error: error.message }
+	return { success: true, data: prefs }
+}
