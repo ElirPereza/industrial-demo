@@ -1,6 +1,12 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import {
+	createContext,
+	type ReactNode,
+	useContext,
+	useEffect,
+	useState,
+} from "react"
 import { createClient } from "@/lib/supabase/client"
 
 export type UserProfile = {
