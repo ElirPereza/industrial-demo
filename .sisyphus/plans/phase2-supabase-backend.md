@@ -335,7 +335,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 ### Wave 2 — Infrastructure (parallel after Wave 1)
 
-- [ ] 2. Database schema migration — all 11 tables with enums, indexes, triggers
+- [x] 2. Database schema migration — all 11 tables with enums, indexes, triggers
 
   **What to do**:
   - Create PostgreSQL enums: `app_role` (admin, supervisor, tecnico), `estado_equipo` (operativo, mantenimiento, fuera_servicio), `tipo_equipo` (maquinaria_pesada, linea_produccion, electricos, hvac), `tipo_formulario` (inspeccion, reporte_fallas, preventivo, correctivo), `tipo_campo` (texto_corto, texto_largo, numerico, fecha, seleccion_unica, seleccion_multiple, firma, foto), `estado_envio` (completado, pendiente, rechazado), `estado_mantenimiento` (completado, en_progreso, pendiente), `tipo_asociacion` (equipo, tipo_equipo, area, general), `frecuencia_form` (diario, semanal, mensual, trimestral, eventual), `tipo_actividad` (mantenimiento, inspeccion, falla, documento, modificacion), `tipo_documento` (pdf, doc, img)
@@ -692,7 +692,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
 
 ### Wave 3 — Security + Types + Storage (parallel after Wave 2)
 
-- [ ] 7. RLS policies for ALL 11 tables
+- [x] 7. RLS policies for ALL 11 tables
 
   **What to do**:
   - Enable RLS on EVERY table: `ALTER TABLE {table} ENABLE ROW LEVEL SECURITY`
@@ -763,7 +763,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Message: `feat(security): add RLS policies for all tables`
   - Pre-commit: `mcp_supabase_get_advisors(type="security")`
 
-- [ ] 8. TypeScript types generation + domain Zod validation schemas
+- [x] 8. TypeScript types generation + domain Zod validation schemas
 
   **What to do**:
   - Run `mcp_supabase_generate_typescript_types` to generate Database type from Supabase schema
@@ -821,7 +821,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Files: `types/supabase.ts`, `types/database.ts`, `lib/validations/*.ts`
   - Pre-commit: `pnpm build`
 
-- [ ] 9. Storage buckets + upload utility functions
+- [x] 9. Storage buckets + upload utility functions
 
   **What to do**:
   - Create 4 storage buckets via SQL: `equipment-images` (public), `equipment-documents` (private), `form-signatures` (private), `form-photos` (private)
@@ -878,7 +878,7 @@ Max Concurrent: 6 (Waves 2, 4, 5, 6)
   - Files: `lib/supabase/storage.ts`, migration files
   - Pre-commit: `pnpm build`
 
-- [ ] 10. Seed data migration — demo data from mock-data.ts
+- [x] 10. Seed data migration — demo data from mock-data.ts
 
   **What to do**:
   - Create seed script that inserts demo data matching existing mock data:

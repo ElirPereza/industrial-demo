@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync } from "fs"
-import { resolve, dirname } from "path"
+import { readdirSync, readFileSync } from "fs"
+import { dirname, resolve } from "path"
 import { fileURLToPath } from "url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -29,7 +29,11 @@ function getProjectRef(url) {
 }
 
 function extractTableNames(sql) {
-	const matches = [...sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-zA-Z0-9_]+)"?/gi)]
+	const matches = [
+		...sql.matchAll(
+			/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-zA-Z0-9_]+)"?/gi,
+		),
+	]
 	return [...new Set(matches.map((match) => match[1]))]
 }
 
@@ -95,9 +99,12 @@ if (allTables.length === 0) {
 	console.log("   No CREATE TABLE statements found in migration files.")
 } else {
 	for (const table of allTables) {
-		const { response } = await fetchJson(`${restBase}/${table}?select=*&limit=1`, {
-			headers,
-		})
+		const { response } = await fetchJson(
+			`${restBase}/${table}?select=*&limit=1`,
+			{
+				headers,
+			},
+		)
 		const status = response.ok ? "present" : "missing or inaccessible"
 		console.log(`   - ${table}: ${status} (${response.status})`)
 	}
@@ -112,9 +119,12 @@ for (const migration of migrations) {
 
 	const checks = await Promise.all(
 		migration.tables.map(async (table) => {
-			const { response } = await fetchJson(`${restBase}/${table}?select=*&limit=1`, {
-				headers,
-			})
+			const { response } = await fetchJson(
+				`${restBase}/${table}?select=*&limit=1`,
+				{
+					headers,
+				},
+			)
 			return response.ok
 		}),
 	)

@@ -1,6 +1,15 @@
 {
-  "active_plan": "C:\\Users\\Don777\\Desktop\\proyecto nuevo\\industrial-demo\\.sisyphus\\plans\\uploads-and-improvements.md",
-  "started_at": "2026-03-27T19:43:21.449Z",
-  "session_ids": ["ses_2d401923bffe4HD2gDCEoXRWKc"],
-  "plan_name": "uploads-and-improvements"
+  "active_plan": null,
+  "started_at": null,
+  "session_ids": [
+    "ses_2c9a94a40ffevQLep7VioTiRJJ"
+  ],
+  "plan_name": null,
+  "task_sessions": {},
+  "completed_plans": [
+    "uploads-and-improvements",
+    "notifications-and-preferences",
+    "phase2-supabase-backend",
+    "security-settings"
+  ]
 }

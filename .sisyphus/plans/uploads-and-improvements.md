@@ -57,7 +57,7 @@
 
 ## TODOs
 
-- [ ] 1. Create equipment upload server actions
+- [x] 1. Create equipment upload server actions
 
   **What to do**:
   - Create `app/(dashboard)/equipos/upload-actions.ts` with `"use server"` directive
@@ -102,7 +102,7 @@
 
 ---
 
-- [ ] 2. Connect upload buttons in equipment detail page — Galería tab
+- [x] 2. Connect upload buttons in equipment detail page — Galería tab
 
   **What to do**:
   - Edit `app/(dashboard)/equipos/[id]/page.tsx`
@@ -195,7 +195,7 @@
 
 ---
 
-- [ ] 3. Connect upload buttons in equipment detail page — Documentos tab
+- [x] 3. Connect upload buttons in equipment detail page — Documentos tab
 
   **What to do**:
   - Same file: `app/(dashboard)/equipos/[id]/page.tsx`
@@ -240,7 +240,7 @@
 
 ---
 
-- [ ] 4. Create avatar upload action and connect to configuración page
+- [x] 4. Create avatar upload action and connect to configuración page
 
   **What to do**:
   - Create `app/(dashboard)/usuarios/upload-actions.ts`:
@@ -313,7 +313,7 @@
 
 ---
 
-- [ ] 5. Connect firma digital in formulario llenar to Storage
+- [x] 5. Connect firma digital in formulario llenar to Storage
 
   **What to do**:
   - Edit `app/(dashboard)/formularios/llenar/[id]/page.tsx`
@@ -349,7 +349,7 @@
 
 ---
 
-- [ ] 6. Add photo upload field in formulario llenar
+- [x] 6. Add photo upload field in formulario llenar
 
   **What to do**:
   - In `app/(dashboard)/formularios/llenar/[id]/page.tsx`, find where field types are rendered
