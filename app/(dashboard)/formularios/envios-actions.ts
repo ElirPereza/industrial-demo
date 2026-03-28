@@ -170,6 +170,30 @@ export async function submitFormulario(input: {
 		detalles: { envio_id: envio.id, formulario_id: input.formulario_id },
 	})
 
+	// Notificar a admins y supervisores (fire-and-forget)
+	try {
+		const { getPerfilesConRol, createNotificacion } = await import(
+			"@/app/(dashboard)/notificaciones/actions"
+		)
+		const userIds = await getPerfilesConRol(["admin", "supervisor"])
+		const targetIds = userIds.filter((uid) => uid !== user.id)
+		if (targetIds.length > 0) {
+			await createNotificacion({
+				userIds: targetIds,
+				tipo: "nuevo_formulario",
+				titulo: "Nuevo formulario enviado",
+				mensaje: `Formulario completado con ${input.respuestas.length} campos`,
+				metadata: {
+					formulario_id: input.formulario_id,
+					equipo_id: input.equipo_id,
+					envio_id: envio.id,
+				},
+			})
+		}
+	} catch {
+		// No fallar el submit si la notificación falla
+	}
+
 	revalidateTag("envios", "max")
 	revalidateTag(`equipo-${input.equipo_id}`, "max")
 	return { success: true, data: envio as EnvioFormulario }

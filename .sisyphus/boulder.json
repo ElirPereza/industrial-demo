@@ -1,11 +1,23 @@
 {
-  "active_plan": null,
-  "started_at": null,
+  "active_plan": "C:\\Users\\Don777\\Desktop\\proyecto nuevo\\industrial-demo\\.sisyphus\\plans\\notifications-system.md",
+  "started_at": "2026-03-28T22:12:32.258Z",
   "session_ids": [
-    "ses_2c9a94a40ffevQLep7VioTiRJJ"
+    "ses_2c9a94a40ffevQLep7VioTiRJJ",
+    "ses_2c97c3d47ffe6XpCiG2jij8vbh"
   ],
-  "plan_name": null,
-  "task_sessions": {},
+  "plan_name": "notifications-system",
+  "worktree_path": null,
+  "task_sessions": {
+    "todo:2": {
+      "task_key": "todo:2",
+      "task_label": "2",
+      "task_title": "Create notification server actions",
+      "session_id": "ses_2c97c3d47ffe6XpCiG2jij8vbh",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-03-28T22:17:43.719Z"
+    }
+  },
   "completed_plans": [
     "uploads-and-improvements",
     "notifications-and-preferences",

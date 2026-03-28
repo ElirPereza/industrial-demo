@@ -12,6 +12,7 @@ import {
 	Users,
 } from "@phosphor-icons/react"
 import type * as React from "react"
+import { NotificacionesBell } from "@/components/notificaciones-bell"
 import { NavAdmin } from "@/components/nav-admin"
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
@@ -146,19 +147,22 @@ export function AppSidebar({
 			<SidebarHeader>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton size="lg" asChild>
-							<a href="/dashboard">
-								<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-									<FactoryIcon className="size-4" />
-								</div>
-								<div className="grid flex-1 text-left text-sm leading-tight">
-									<span className="truncate font-medium">
-										Industrial Portal
-									</span>
-									<span className="truncate text-xs">Gestión Industrial</span>
-								</div>
-							</a>
-						</SidebarMenuButton>
+						<div className="flex items-center">
+							<SidebarMenuButton size="lg" asChild className="flex-1">
+								<a href="/dashboard">
+									<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+										<FactoryIcon className="size-4" />
+									</div>
+									<div className="grid flex-1 text-left text-sm leading-tight">
+										<span className="truncate font-medium">
+											Industrial Portal
+										</span>
+										<span className="truncate text-xs">Gestión Industrial</span>
+									</div>
+								</a>
+							</SidebarMenuButton>
+							<NotificacionesBell />
+						</div>
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarHeader>

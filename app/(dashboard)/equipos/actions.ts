@@ -143,6 +143,14 @@ export async function updateEquipo(
 	}
 
 	const supabase = await createClient()
+
+	// Obtener estado actual antes del update para detectar cambio
+	const { data: currentEquipo } = await supabase
+		.from("equipos")
+		.select("estado, nombre")
+		.eq("id", id)
+		.single()
+
 	const { data, error } = await supabase
 		.from("equipos")
 		.update(parsed.data)
@@ -151,6 +159,37 @@ export async function updateEquipo(
 		.single()
 
 	if (error) return { success: false, error: error.message }
+
+	// Notificar si el estado cambió (fire-and-forget)
+	if (currentEquipo && currentEquipo.estado !== parsed.data.estado) {
+		try {
+			const { getPerfilesConRol, createNotificacion } = await import(
+				"@/app/(dashboard)/notificaciones/actions"
+			)
+			const estadoLabels: Record<string, string> = {
+				operativo: "Operativo",
+				mantenimiento: "En Mantenimiento",
+				fuera_servicio: "Fuera de Servicio",
+			}
+			const userIds = await getPerfilesConRol(["admin", "supervisor"])
+			const targetIds = userIds.filter((uid) => uid !== user.id)
+			if (targetIds.length > 0) {
+				await createNotificacion({
+					userIds: targetIds,
+					tipo: "alerta_equipo",
+					titulo: "Cambio de estado de equipo",
+					mensaje: `${data.nombre} → ${estadoLabels[parsed.data.estado ?? ""] ?? parsed.data.estado}`,
+					metadata: {
+						equipo_id: id,
+						estado_anterior: currentEquipo.estado,
+						estado_nuevo: parsed.data.estado,
+					},
+				})
+			}
+		} catch {
+			// No fallar el update si la notificación falla
+		}
+	}
 
 	revalidateTag("equipos", "max")
 	revalidateTag(`equipo-${id}`, "max")
