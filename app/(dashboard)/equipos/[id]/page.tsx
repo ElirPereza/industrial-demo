@@ -26,12 +26,6 @@ import { QRCodeSVG } from "qrcode.react"
 import { use, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
-	deleteEquipoDocument,
-	deleteEquipoImage,
-	uploadEquipoDocument,
-	uploadEquipoImage,
-} from "../upload-actions"
-import {
 	Breadcrumb,
 	BreadcrumbItem,
 	BreadcrumbLink,
@@ -63,6 +57,12 @@ import {
 	type ActividadEquipo,
 	getActividadesPorEquipo,
 } from "../maintenance-actions"
+import {
+	deleteEquipoDocument,
+	deleteEquipoImage,
+	uploadEquipoDocument,
+	uploadEquipoImage,
+} from "../upload-actions"
 
 type TabType = "info" | "formularios" | "documentos" | "galeria" | "historial"
 
@@ -801,26 +801,40 @@ export default function EquipoDetailPage({
 										Manuales, certificados y documentación técnica
 									</CardDescription>
 								</div>
-							<>
-								<input ref={docInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" className="hidden" onChange={handleDocUpload} />
-								<Button onClick={() => docInputRef.current?.click()} disabled={uploadingDoc}>
-									<Upload className="mr-2 size-4" />
-									{uploadingDoc ? "Subiendo..." : "Subir Documento"}
-								</Button>
-							</>
-						</div>
-					</CardHeader>
-					<CardContent>
-						{documentos.length === 0 ? (
-							<div className="flex flex-col items-center justify-center py-12 text-center">
-								<FileText className="mb-4 size-12 text-muted-foreground" />
-								<p className="text-muted-foreground">
-									No hay documentos disponibles para este equipo
-								</p>
-								<Button variant="outline" className="mt-4" onClick={() => docInputRef.current?.click()} disabled={uploadingDoc}>
-									{uploadingDoc ? "Subiendo..." : "Subir primer documento"}
-								</Button>
+								<>
+									<input
+										ref={docInputRef}
+										type="file"
+										accept=".pdf,.doc,.docx,.xls,.xlsx"
+										className="hidden"
+										onChange={handleDocUpload}
+									/>
+									<Button
+										onClick={() => docInputRef.current?.click()}
+										disabled={uploadingDoc}
+									>
+										<Upload className="mr-2 size-4" />
+										{uploadingDoc ? "Subiendo..." : "Subir Documento"}
+									</Button>
+								</>
 							</div>
+						</CardHeader>
+						<CardContent>
+							{documentos.length === 0 ? (
+								<div className="flex flex-col items-center justify-center py-12 text-center">
+									<FileText className="mb-4 size-12 text-muted-foreground" />
+									<p className="text-muted-foreground">
+										No hay documentos disponibles para este equipo
+									</p>
+									<Button
+										variant="outline"
+										className="mt-4"
+										onClick={() => docInputRef.current?.click()}
+										disabled={uploadingDoc}
+									>
+										{uploadingDoc ? "Subiendo..." : "Subir primer documento"}
+									</Button>
+								</div>
 							) : (
 								<div className="space-y-2">
 									{documentos.map((doc) => {
@@ -866,28 +880,28 @@ export default function EquipoDetailPage({
 													>
 														<Eye className="size-4" />
 													</Button>
-												<Button
-													variant="ghost"
-													size="icon-sm"
-													onClick={() => {
-														if (doc.url)
-															window.open(
-																doc.url,
-																"_blank",
-																"noopener,noreferrer",
-															)
-													}}
-												>
-													<Download className="size-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="icon-sm"
-													onClick={() => handleDeleteDocument(doc.id)}
-												>
-													<Trash className="size-4 text-red-500" />
-												</Button>
-											</div>
+													<Button
+														variant="ghost"
+														size="icon-sm"
+														onClick={() => {
+															if (doc.url)
+																window.open(
+																	doc.url,
+																	"_blank",
+																	"noopener,noreferrer",
+																)
+														}}
+													>
+														<Download className="size-4" />
+													</Button>
+													<Button
+														variant="ghost"
+														size="icon-sm"
+														onClick={() => handleDeleteDocument(doc.id)}
+													>
+														<Trash className="size-4 text-red-500" />
+													</Button>
+												</div>
 											</div>
 										)
 									})}
@@ -907,26 +921,40 @@ export default function EquipoDetailPage({
 										Fotos del equipo, inspecciones y reparaciones
 									</CardDescription>
 								</div>
-							<>
-								<input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-								<Button onClick={() => imageInputRef.current?.click()} disabled={uploadingImage}>
-									<Upload className="mr-2 size-4" />
-									{uploadingImage ? "Subiendo..." : "Subir Imagen"}
-								</Button>
-							</>
-						</div>
-					</CardHeader>
-					<CardContent>
-						{imagenes.length === 0 ? (
-							<div className="flex flex-col items-center justify-center py-12 text-center">
-								<Images className="mb-4 size-12 text-muted-foreground" />
-								<p className="text-muted-foreground">
-									No hay imágenes disponibles para este equipo
-								</p>
-								<Button variant="outline" className="mt-4" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage}>
-									{uploadingImage ? "Subiendo..." : "Subir primera imagen"}
-								</Button>
+								<>
+									<input
+										ref={imageInputRef}
+										type="file"
+										accept="image/*"
+										className="hidden"
+										onChange={handleImageUpload}
+									/>
+									<Button
+										onClick={() => imageInputRef.current?.click()}
+										disabled={uploadingImage}
+									>
+										<Upload className="mr-2 size-4" />
+										{uploadingImage ? "Subiendo..." : "Subir Imagen"}
+									</Button>
+								</>
 							</div>
+						</CardHeader>
+						<CardContent>
+							{imagenes.length === 0 ? (
+								<div className="flex flex-col items-center justify-center py-12 text-center">
+									<Images className="mb-4 size-12 text-muted-foreground" />
+									<p className="text-muted-foreground">
+										No hay imágenes disponibles para este equipo
+									</p>
+									<Button
+										variant="outline"
+										className="mt-4"
+										onClick={() => imageInputRef.current?.click()}
+										disabled={uploadingImage}
+									>
+										{uploadingImage ? "Subiendo..." : "Subir primera imagen"}
+									</Button>
+								</div>
 							) : (
 								<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 									{imagenes.map((img) => (
@@ -947,17 +975,22 @@ export default function EquipoDetailPage({
 													<Images className="size-12" />
 												</div>
 											)}
-										<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
-											<Button size="icon-sm" variant="destructive" className="absolute right-2 top-2" onClick={() => handleDeleteImage(img.id)}>
-												<Trash className="size-4" />
-											</Button>
-											<p className="text-sm font-medium text-white">
-												{img.titulo ?? "Imagen"}
-											</p>
-											<p className="text-xs text-white/80">
-												{formatDate(img.fecha ?? img.created_at)}
-											</p>
-										</div>
+											<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+												<Button
+													size="icon-sm"
+													variant="destructive"
+													className="absolute right-2 top-2"
+													onClick={() => handleDeleteImage(img.id)}
+												>
+													<Trash className="size-4" />
+												</Button>
+												<p className="text-sm font-medium text-white">
+													{img.titulo ?? "Imagen"}
+												</p>
+												<p className="text-xs text-white/80">
+													{formatDate(img.fecha ?? img.created_at)}
+												</p>
+											</div>
 										</div>
 									))}
 								</div>

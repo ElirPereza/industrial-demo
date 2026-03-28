@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { createEquipo } from "@/app/(dashboard)/equipos/actions"
+import { uploadEquipoImage } from "@/app/(dashboard)/equipos/upload-actions"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -63,6 +64,7 @@ export default function NuevoEquipoPage() {
 	const [fabricante, setFabricante] = useState("")
 	const [descripcion, setDescripcion] = useState("")
 	const [imagenes, setImagenes] = useState<string[]>([])
+	const [imageFiles, setImageFiles] = useState<File[]>([])
 	const [submitting, setSubmitting] = useState(false)
 
 	// Validation
@@ -71,18 +73,23 @@ export default function NuevoEquipoPage() {
 	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files
 		if (files) {
-			Array.from(files).forEach((file) => {
+			const fileArray = Array.from(files)
+			// Store actual File objects for upload
+			setImageFiles((prev) => [...prev, ...fileArray])
+			// Store base64 for preview
+			for (const file of fileArray) {
 				const reader = new FileReader()
 				reader.onload = (ev) => {
 					setImagenes((prev) => [...prev, ev.target?.result as string])
 				}
 				reader.readAsDataURL(file)
-			})
+			}
 		}
 	}
 
 	const handleRemoveImage = (index: number) => {
 		setImagenes((prev) => prev.filter((_, i) => i !== index))
+		setImageFiles((prev) => prev.filter((_, i) => i !== index))
 	}
 
 	const handleSubmit = async () => {
@@ -107,8 +114,18 @@ export default function NuevoEquipoPage() {
 			const result = await createEquipo(formData)
 
 			if (result.success) {
+				// Upload images if any were selected
+				if (imageFiles.length > 0) {
+					toast.loading("Subiendo imágenes...", { id: "uploading-images" })
+					for (const file of imageFiles) {
+						const fd = new FormData()
+						fd.append("file", file)
+						await uploadEquipoImage(result.data.id, fd)
+					}
+					toast.dismiss("uploading-images")
+				}
 				toast.success("Equipo creado exitosamente")
-				router.push("/equipos")
+				router.push(`/equipos/${result.data.id}`)
 			} else {
 				toast.error(result.error)
 			}

@@ -238,7 +238,7 @@ export async function getRecentActivity(): Promise<
 	const { data, error } = await supabase
 		.from("registros_mantenimiento")
 		.select(
-			"id, tipo, descripcion, estado, fecha_inicio, equipos(nombre), perfiles!registros_mantenimiento_tecnico_id_fkey(nombre)",
+			"id, tipo, descripcion, estado, fecha_inicio, equipos(nombre), perfiles!registros_mantenimiento_tecnico_perfil_fkey(nombre)",
 		)
 		.order("fecha_inicio", { ascending: false })
 		.limit(5)
