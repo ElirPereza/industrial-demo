@@ -49,6 +49,13 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
+const TIPO_FORMULARIO_LABEL: Record<string, string> = {
+	inspeccion: "Inspección",
+	preventivo: "Preventivo",
+	correctivo: "Correctivo",
+	reporte_fallas: "Reporte de Fallas",
+}
+
 export default function FormAdminPage() {
 	const router = useRouter()
 	const [formularios, setFormularios] = useState<FormularioTemplate[]>([])
@@ -232,8 +239,9 @@ export default function FormAdminPage() {
 													{formulario.nombre}
 												</TableCell>
 												<TableCell>
-													<span className="capitalize">
-														{formulario.tipo.replace(/_/g, " ")}
+													<span>
+														{TIPO_FORMULARIO_LABEL[formulario.tipo] ??
+															formulario.tipo.replace(/_/g, " ")}
 													</span>
 												</TableCell>
 												<TableCell>

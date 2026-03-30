@@ -164,8 +164,19 @@ export default function FormulariosPage() {
 												{row.formulario_nombre ?? "N/A"}
 											</TableCell>
 											<TableCell>
-												<span className="capitalize">
-													{(row.formulario_tipo ?? "N/A").replace(/_/g, " ")}
+												<span>
+													{({
+														inspeccion: "Inspección",
+														preventivo: "Preventivo",
+														correctivo: "Correctivo",
+														reporte_fallas: "Reporte de Fallas",
+													} as Record<string, string>)[
+														row.formulario_tipo ?? ""
+													] ??
+														(row.formulario_tipo ?? "N/A").replace(
+															/_/g,
+															" ",
+														)}
 												</span>
 											</TableCell>
 											<TableCell>{row.equipo_ubicacion ?? "N/A"}</TableCell>

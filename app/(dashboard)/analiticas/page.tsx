@@ -54,7 +54,16 @@ const TIPO_COLORS: Record<string, string> = {
 	preventivo: "#3b82f6",
 	correctivo: "#f97316",
 	inspeccion: "#22c55e",
+	reporte_fallas: "#ef4444",
 	emergencia: "#ef4444",
+}
+
+const TIPO_MANT_LABEL: Record<string, string> = {
+	inspeccion: "Inspección",
+	preventivo: "Preventivo",
+	correctivo: "Correctivo",
+	reporte_fallas: "Reporte de Fallas",
+	emergencia: "Emergencia",
 }
 
 type KPIData = {
@@ -367,7 +376,9 @@ export default function AnaliticasPage() {
 															TIPO_COLORS[item.tipo] ?? "#94a3b8",
 													}}
 												/>
-												<span className="text-xs capitalize">{item.tipo}</span>
+												<span className="text-xs">
+									{TIPO_MANT_LABEL[item.tipo] ?? item.tipo}
+								</span>
 											</div>
 										))}
 									</div>
