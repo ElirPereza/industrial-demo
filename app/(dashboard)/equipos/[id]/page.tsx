@@ -1,5 +1,4 @@
 "use client"
-
 import {
 	ArrowLeft,
 	CheckCircle,
@@ -14,6 +13,7 @@ import {
 	Info,
 	MapPin,
 	PencilSimple,
+	Plus,
 	QrCode,
 	Timer,
 	Trash,
@@ -43,6 +43,24 @@ import {
 } from "../../../../components/ui/card"
 import { Separator } from "../../../../components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "../../../../components/ui/sidebar"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "../../../../components/ui/dialog"
+import { Input } from "../../../../components/ui/input"
+import { Label } from "../../../../components/ui/label"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../../../../components/ui/select"
+import { Textarea } from "../../../../components/ui/textarea"
 import { cn } from "../../../../lib/utils"
 import {
 	type FormularioTemplate,
@@ -52,9 +70,10 @@ import {
 	type EnvioFormulario,
 	getEnviosPorEquipo,
 } from "../../formularios/envios-actions"
-import { type Equipo, getEquipoById, getEquipoStats } from "../actions"
+import { type Equipo, getEquipoById, getEquipoStats, updateEquipo } from "../actions"
 import {
 	type ActividadEquipo,
+	createRegistro,
 	getActividadesPorEquipo,
 } from "../maintenance-actions"
 import {
@@ -185,6 +204,38 @@ export default function EquipoDetailPage({
 	const [actividades, setActividades] = useState<ActividadEquipo[]>([])
 	const [loading, setLoading] = useState(true)
 
+	// Modal "Nuevo Registro"
+	const [showNuevoRegistro, setShowNuevoRegistro] = useState(false)
+	const [savingRegistro, setSavingRegistro] = useState(false)
+	const [registroForm, setRegistroForm] = useState({
+		tipo: "inspeccion" as
+			| "inspeccion"
+			| "reporte_fallas"
+			| "preventivo"
+			| "correctivo",
+		descripcion: "",
+		fecha_inicio: new Date().toISOString().split("T")[0],
+		horas_empleadas: 0,
+		costo: 0,
+		estado: "completado" as "completado" | "en_progreso" | "pendiente",
+	})
+
+	// Modal "Editar Equipo"
+	const [showEditEquipo, setShowEditEquipo] = useState(false)
+	const [savingEquipo, setSavingEquipo] = useState(false)
+	const [editForm, setEditForm] = useState({
+		nombre: "",
+		tipo: "" as
+			| "maquinaria_pesada"
+			| "linea_produccion"
+			| "electricos"
+			| "hvac",
+		ubicacion: "",
+		estado: "" as "operativo" | "mantenimiento" | "fuera_servicio",
+		ultimo_mantenimiento: "",
+		proximo_mantenimiento: "",
+	})
+
 	useEffect(() => {
 		let mounted = true
 
@@ -297,6 +348,68 @@ export default function EquipoDetailPage({
 			if (equipoResult.success) setEquipo(equipoResult.data as EquipoDetail)
 		} else {
 			toast.error(result.error)
+		}
+	}
+
+	async function handleCreateRegistro() {
+		setSavingRegistro(true)
+		const result = await createRegistro({
+			equipo_id: equipoId,
+			...registroForm,
+			horas_empleadas: Number(registroForm.horas_empleadas),
+			costo: Number(registroForm.costo),
+		})
+		setSavingRegistro(false)
+		if (result.success) {
+			toast.success("Registro creado exitosamente")
+			setShowNuevoRegistro(false)
+			setRegistroForm({
+				tipo: "inspeccion",
+				descripcion: "",
+				fecha_inicio: new Date().toISOString().split("T")[0],
+				horas_empleadas: 0,
+				costo: 0,
+				estado: "completado",
+			})
+			// Refresh data
+			const [actividadesResult, statsResult] = await Promise.all([
+				getActividadesPorEquipo(equipoId),
+				getEquipoStats(equipoId),
+			])
+			if (actividadesResult.success) setActividades(actividadesResult.data)
+			if (statsResult.success) setStats(statsResult.data)
+		} else {
+			toast.error(result.error ?? "Error al crear registro")
+		}
+	}
+
+	async function handleUpdateEquipo() {
+		if (!equipo) return
+		setSavingEquipo(true)
+		const formData = new FormData()
+		formData.append("nombre", editForm.nombre)
+		formData.append("tipo", editForm.tipo)
+		formData.append("ubicacion", editForm.ubicacion)
+		formData.append("estado", editForm.estado)
+		if (editForm.ultimo_mantenimiento)
+			formData.append(
+				"ultimo_mantenimiento",
+				new Date(editForm.ultimo_mantenimiento).toISOString(),
+			)
+		if (editForm.proximo_mantenimiento)
+			formData.append(
+				"proximo_mantenimiento",
+				new Date(editForm.proximo_mantenimiento).toISOString(),
+			)
+		const result = await updateEquipo(equipoId, formData)
+		setSavingEquipo(false)
+		if (result.success) {
+			toast.success("Equipo actualizado")
+			setShowEditEquipo(false)
+			const equipoResult = await getEquipoById(equipoId)
+			if (equipoResult.success) setEquipo(equipoResult.data as EquipoDetail)
+		} else {
+			toast.error(result.error ?? "Error al actualizar")
 		}
 	}
 
@@ -467,10 +580,37 @@ export default function EquipoDetailPage({
 							<span>{equipo.ubicacion}</span>
 						</div>
 					</div>
+				<div className="flex gap-2">
 					<Button variant="outline" onClick={() => router.push("/qr-codes")}>
 						<QrCode className="mr-2 size-4" />
 						Ver Código QR
 					</Button>
+					<Button
+						variant="outline"
+						onClick={() => {
+							setEditForm({
+								nombre: equipo.nombre,
+								tipo: equipo.tipo,
+								ubicacion: equipo.ubicacion,
+								estado: equipo.estado,
+								ultimo_mantenimiento: equipo.ultimo_mantenimiento
+									? new Date(equipo.ultimo_mantenimiento)
+											.toISOString()
+											.split("T")[0]
+									: "",
+								proximo_mantenimiento: equipo.proximo_mantenimiento
+									? new Date(equipo.proximo_mantenimiento)
+											.toISOString()
+											.split("T")[0]
+									: "",
+							})
+							setShowEditEquipo(true)
+						}}
+					>
+						<PencilSimple className="mr-2 size-4" />
+						Editar
+					</Button>
+				</div>
 				</div>
 
 				<div className="flex gap-1 rounded-lg bg-muted p-1">
@@ -1000,13 +1140,21 @@ export default function EquipoDetailPage({
 				)}
 
 				{activeTab === "historial" && (
-					<Card>
-						<CardHeader>
-							<CardTitle>Historial Completo</CardTitle>
-							<CardDescription>
-								Todas las actividades realizadas en este equipo
-							</CardDescription>
-						</CardHeader>
+				<Card>
+					<CardHeader>
+						<div className="flex items-center justify-between">
+							<div>
+								<CardTitle>Historial Completo</CardTitle>
+								<CardDescription>
+									Todas las actividades realizadas en este equipo
+								</CardDescription>
+							</div>
+							<Button onClick={() => setShowNuevoRegistro(true)}>
+								<Plus className="mr-2 size-4" />
+								Nuevo Registro
+							</Button>
+						</div>
+					</CardHeader>
 						<CardContent>
 							{timelineCompleto.length === 0 ? (
 								<p className="py-8 text-center text-muted-foreground">
@@ -1045,7 +1193,19 @@ export default function EquipoDetailPage({
 													<div className="flex items-start justify-between">
 														<div>
 															<h3 className="font-semibold">
-																{actividad.titulo}
+																{actividad.titulo.replace(
+																	/^Registro de (\S+)$/,
+																	(_, t) =>
+																		`Registro de ${
+																			({
+																				inspeccion: "Inspección",
+																				preventivo: "Preventivo",
+																				correctivo: "Correctivo",
+																				reporte_fallas: "Reporte de Fallas",
+																			} as Record<string, string>)[t] ??
+																			t.replaceAll("_", " ")
+																		}`,
+																)}
 															</h3>
 															<p className="text-sm text-muted-foreground">
 																{formatDate(actividad.created_at, true)}
@@ -1057,7 +1217,17 @@ export default function EquipoDetailPage({
 																getActividadColor(actividad.tipo),
 															)}
 														>
-															{actividad.tipo.replaceAll("_", " ")}
+															{({
+									inspeccion: "Inspección",
+									preventivo: "Preventivo",
+									correctivo: "Correctivo",
+									reporte_fallas: "Reporte de Fallas",
+									mantenimiento: "Mantenimiento",
+									formulario: "Formulario",
+									imagen: "Imagen",
+									documento: "Documento",
+								} as Record<string, string>)[actividad.tipo] ??
+									actividad.tipo.replaceAll("_", " ")}
 														</span>
 													</div>
 													<p className="text-sm">{actividad.descripcion}</p>
@@ -1090,6 +1260,273 @@ export default function EquipoDetailPage({
 					</Card>
 				)}
 			</div>
+			{/* Dialog: Nuevo Registro de Mantenimiento */}
+			<Dialog open={showNuevoRegistro} onOpenChange={setShowNuevoRegistro}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Nuevo Registro de Mantenimiento</DialogTitle>
+						<DialogDescription>
+							Registra una intervención realizada en este equipo
+						</DialogDescription>
+					</DialogHeader>
+					<div className="grid gap-4 py-4">
+						<div className="grid gap-2">
+							<Label htmlFor="reg-tipo">Tipo</Label>
+							<Select
+								value={registroForm.tipo}
+								onValueChange={(v) =>
+									setRegistroForm((p) => ({
+										...p,
+										tipo: v as typeof registroForm.tipo,
+									}))
+								}
+							>
+								<SelectTrigger id="reg-tipo">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="inspeccion">Inspección</SelectItem>
+									<SelectItem value="preventivo">Preventivo</SelectItem>
+									<SelectItem value="correctivo">Correctivo</SelectItem>
+									<SelectItem value="reporte_fallas">
+										Reporte de Fallas
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="grid gap-2">
+							<Label htmlFor="reg-desc">Descripción</Label>
+							<Textarea
+								id="reg-desc"
+								rows={3}
+								value={registroForm.descripcion}
+								onChange={(e) =>
+									setRegistroForm((p) => ({
+										...p,
+										descripcion: e.target.value,
+									}))
+								}
+								placeholder="Describe la intervención..."
+							/>
+						</div>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="grid gap-2">
+								<Label htmlFor="reg-fecha">Fecha</Label>
+								<Input
+									id="reg-fecha"
+									type="date"
+									value={registroForm.fecha_inicio}
+									onChange={(e) =>
+										setRegistroForm((p) => ({
+											...p,
+											fecha_inicio: e.target.value,
+										}))
+									}
+								/>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="reg-estado">Estado</Label>
+								<Select
+									value={registroForm.estado}
+									onValueChange={(v) =>
+										setRegistroForm((p) => ({
+											...p,
+											estado: v as typeof registroForm.estado,
+										}))
+									}
+								>
+									<SelectTrigger id="reg-estado">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="completado">Completado</SelectItem>
+										<SelectItem value="en_progreso">En Progreso</SelectItem>
+										<SelectItem value="pendiente">Pendiente</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+						</div>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="grid gap-2">
+								<Label htmlFor="reg-horas">Horas empleadas</Label>
+								<Input
+									id="reg-horas"
+									type="number"
+									min="0"
+									step="0.5"
+									value={registroForm.horas_empleadas}
+									onChange={(e) =>
+										setRegistroForm((p) => ({
+											...p,
+											horas_empleadas: Number(e.target.value),
+										}))
+									}
+								/>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="reg-costo">Costo (COP)</Label>
+								<Input
+									id="reg-costo"
+									type="number"
+									min="0"
+									value={registroForm.costo}
+									onChange={(e) =>
+										setRegistroForm((p) => ({
+											...p,
+											costo: Number(e.target.value),
+										}))
+									}
+								/>
+							</div>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => setShowNuevoRegistro(false)}
+						>
+							Cancelar
+						</Button>
+						<Button
+							onClick={handleCreateRegistro}
+							disabled={savingRegistro || !registroForm.descripcion}
+						>
+							{savingRegistro ? "Guardando..." : "Guardar Registro"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* Dialog: Editar Equipo */}
+			<Dialog open={showEditEquipo} onOpenChange={setShowEditEquipo}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Editar Equipo</DialogTitle>
+						<DialogDescription>
+							Actualiza la información del equipo
+						</DialogDescription>
+					</DialogHeader>
+					<div className="grid gap-4 py-4">
+						<div className="grid gap-2">
+							<Label htmlFor="edit-nombre">Nombre</Label>
+							<Input
+								id="edit-nombre"
+								value={editForm.nombre}
+								onChange={(e) =>
+									setEditForm((p) => ({ ...p, nombre: e.target.value }))
+								}
+							/>
+						</div>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="grid gap-2">
+								<Label htmlFor="edit-tipo">Tipo</Label>
+								<Select
+									value={editForm.tipo}
+									onValueChange={(v) =>
+										setEditForm((p) => ({
+											...p,
+											tipo: v as typeof editForm.tipo,
+										}))
+									}
+								>
+									<SelectTrigger id="edit-tipo">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="maquinaria_pesada">
+											Maquinaria Pesada
+										</SelectItem>
+										<SelectItem value="linea_produccion">
+											Línea de Producción
+										</SelectItem>
+										<SelectItem value="electricos">Eléctricos</SelectItem>
+										<SelectItem value="hvac">HVAC</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="edit-estado">Estado</Label>
+								<Select
+									value={editForm.estado}
+									onValueChange={(v) =>
+										setEditForm((p) => ({
+											...p,
+											estado: v as typeof editForm.estado,
+										}))
+									}
+								>
+									<SelectTrigger id="edit-estado">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="operativo">Operativo</SelectItem>
+										<SelectItem value="mantenimiento">
+											En Mantenimiento
+										</SelectItem>
+										<SelectItem value="fuera_servicio">
+											Fuera de Servicio
+										</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+						</div>
+						<div className="grid gap-2">
+							<Label htmlFor="edit-ubicacion">Ubicación</Label>
+							<Input
+								id="edit-ubicacion"
+								value={editForm.ubicacion}
+								onChange={(e) =>
+									setEditForm((p) => ({ ...p, ubicacion: e.target.value }))
+								}
+							/>
+						</div>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="grid gap-2">
+								<Label htmlFor="edit-ultimo">Último Mantenimiento</Label>
+								<Input
+									id="edit-ultimo"
+									type="date"
+									value={editForm.ultimo_mantenimiento}
+									onChange={(e) =>
+										setEditForm((p) => ({
+											...p,
+											ultimo_mantenimiento: e.target.value,
+										}))
+									}
+								/>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="edit-proximo">Próximo Mantenimiento</Label>
+								<Input
+									id="edit-proximo"
+									type="date"
+									value={editForm.proximo_mantenimiento}
+									onChange={(e) =>
+										setEditForm((p) => ({
+											...p,
+											proximo_mantenimiento: e.target.value,
+										}))
+									}
+								/>
+							</div>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => setShowEditEquipo(false)}
+						>
+							Cancelar
+						</Button>
+						<Button
+							onClick={handleUpdateEquipo}
+							disabled={savingEquipo || !editForm.nombre}
+						>
+							{savingEquipo ? "Guardando..." : "Actualizar Equipo"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</SidebarInset>
 	)
 }
