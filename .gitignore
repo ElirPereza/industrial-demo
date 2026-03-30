@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# IDE / AI assistant config (may contain API keys)
+.claude/
