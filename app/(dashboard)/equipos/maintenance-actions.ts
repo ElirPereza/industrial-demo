@@ -68,11 +68,18 @@ export async function createRegistro(input: {
 
 	if (error) return { success: false, error: error.message }
 
+	const TIPO_LABEL_MANT: Record<string, string> = {
+		inspeccion: "Inspección",
+		preventivo: "Preventivo",
+		correctivo: "Correctivo",
+		reporte_fallas: "Reporte de Fallas",
+	}
+
 	// Auto-create actividad_equipo entry
 	await supabase.from("actividades_equipo").insert({
 		equipo_id: input.equipo_id,
 		tipo: "mantenimiento",
-		titulo: `Registro de ${input.tipo}`,
+		titulo: `Registro de ${TIPO_LABEL_MANT[input.tipo] ?? input.tipo}`,
 		descripcion: input.descripcion,
 		usuario_id: user.id,
 		detalles: {
@@ -87,6 +94,46 @@ export async function createRegistro(input: {
 		.from("equipos")
 		.update({ ultimo_mantenimiento: input.fecha_inicio })
 		.eq("id", input.equipo_id)
+
+	// Notificar a admins y supervisores ANTES de revalidateTag (fire-and-forget)
+	const esFalla = input.tipo === "reporte_fallas"
+	const { data: equipoInfo } = await supabase
+		.from("equipos")
+		.select("nombre")
+		.eq("id", input.equipo_id)
+		.single()
+	const equipoNombre = equipoInfo?.nombre ?? "Equipo"
+	const tipoLabel: Record<string, string> = {
+		inspeccion: "Inspección",
+		preventivo: "Preventivo",
+		correctivo: "Correctivo",
+		reporte_fallas: "Falla reportada",
+	}
+	const { data: perfilesTarget } = await supabase
+		.from("perfiles")
+		.select("user_id")
+		.in("rol", ["admin", "supervisor"])
+		.neq("user_id", user.id)
+	const targetIds = (perfilesTarget ?? []).map(
+		(p: { user_id: string }) => p.user_id,
+	)
+	if (targetIds.length > 0) {
+		await supabase.from("notificaciones").insert(
+			targetIds.map((userId) => ({
+				user_id: userId,
+				tipo: esFalla ? "alerta_equipo" : "nuevo_formulario",
+				titulo: esFalla
+					? "⚠️ Falla reportada en equipo"
+					: "Nuevo registro de mantenimiento",
+				mensaje: `${equipoNombre} — ${tipoLabel[input.tipo] ?? input.tipo}: ${input.descripcion.slice(0, 80)}`,
+				metadata: {
+					equipo_id: input.equipo_id,
+					registro_id: data.id,
+					tipo: input.tipo,
+				},
+			})),
+		)
+	}
 
 	revalidateTag(`equipo-${input.equipo_id}`, "max")
 	return { success: true, data: data as RegistroMantenimiento }
@@ -110,6 +157,45 @@ export async function updateRegistroEstado(
 
 	if (error) return { success: false, error: error.message }
 	revalidateTag("registros", "max")
+
+	// Notificar cuando se completa un mantenimiento (fire-and-forget)
+	if (estado === "completado") {
+		try {
+			const { data: registro } = await supabase
+				.from("registros_mantenimiento")
+				.select("equipo_id, equipos(nombre)")
+				.eq("id", id)
+				.single()
+			const equipoNombre =
+				(registro as { equipo_id?: string; equipos?: { nombre?: string } | null } | null)
+					?.equipos?.nombre ?? "Equipo"
+			const { data: perfilesTarget } = await supabase
+				.from("perfiles")
+				.select("user_id")
+				.in("rol", ["admin", "supervisor"])
+				.neq("user_id", user.id)
+			const targetIds = (perfilesTarget ?? []).map(
+				(p: { user_id: string }) => p.user_id,
+			)
+			if (targetIds.length > 0) {
+				await supabase.from("notificaciones").insert(
+					targetIds.map((userId) => ({
+						user_id: userId,
+						tipo: "nuevo_formulario",
+						titulo: "Mantenimiento completado",
+						mensaje: `${equipoNombre} — trabajo finalizado y cerrado`,
+						metadata: {
+							equipo_id: (registro as { equipo_id?: string } | null)?.equipo_id,
+							registro_id: id,
+						},
+					})),
+				)
+			}
+		} catch {
+			// fire-and-forget
+		}
+	}
+
 	return { success: true, data: undefined }
 }
 

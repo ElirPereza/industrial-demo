@@ -132,7 +132,7 @@ export async function submitFormulario(input: {
 
 	const { data: template, error: templateError } = await supabase
 		.from("formularios_template")
-		.select("version, activo")
+		.select("version, activo, nombre")
 		.eq("id", input.formulario_id)
 		.single()
 
@@ -140,6 +140,12 @@ export async function submitFormulario(input: {
 	if (!template.activo) {
 		return { success: false, error: "Este formulario no está activo" }
 	}
+
+	const { data: equipoData } = await supabase
+		.from("equipos")
+		.select("nombre")
+		.eq("id", input.equipo_id)
+		.single()
 
 	const hasFirma = input.respuestas.some(
 		(r) => typeof r.valor === "string" && r.valor.startsWith("data:image/"),
@@ -182,7 +188,7 @@ export async function submitFormulario(input: {
 				userIds: targetIds,
 				tipo: "nuevo_formulario",
 				titulo: "Nuevo formulario enviado",
-				mensaje: `Formulario completado con ${input.respuestas.length} campos`,
+				mensaje: `${(template as { version: number; activo: boolean; nombre?: string }).nombre ?? "Formulario"} — ${equipoData?.nombre ?? "equipo desconocido"}`,
 				metadata: {
 					formulario_id: input.formulario_id,
 					equipo_id: input.equipo_id,
