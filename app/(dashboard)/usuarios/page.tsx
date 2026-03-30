@@ -14,7 +14,12 @@ import {
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { getUsuarios, type Perfil } from "@/app/(dashboard)/usuarios/actions"
+import { toast } from "sonner"
+import {
+	getUsuarios,
+	type Perfil,
+	updatePerfil,
+} from "@/app/(dashboard)/usuarios/actions"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -31,7 +36,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -82,6 +96,12 @@ export default function UsuariosPage() {
 	const [usuarios, setUsuarios] = useState<Perfil[]>([])
 	const [loading, setLoading] = useState(true)
 
+	// Edit modal
+	const [editingUsuario, setEditingUsuario] = useState<Perfil | null>(null)
+	const [saving, setSaving] = useState(false)
+	const [editNombre, setEditNombre] = useState("")
+	const [editDepartamento, setEditDepartamento] = useState("")
+
 	const fetchUsuarios = useCallback(async () => {
 		setLoading(true)
 		const result = await getUsuarios()
@@ -94,6 +114,29 @@ export default function UsuariosPage() {
 	useEffect(() => {
 		fetchUsuarios()
 	}, [fetchUsuarios])
+
+	const openEdit = (u: Perfil) => {
+		setEditNombre(u.nombre)
+		setEditDepartamento(u.departamento ?? "")
+		setEditingUsuario(u)
+	}
+
+	const handleSaveEdit = async () => {
+		if (!editingUsuario) return
+		setSaving(true)
+		const result = await updatePerfil(editingUsuario.id, {
+			nombre: editNombre,
+			departamento: editDepartamento || undefined,
+		})
+		setSaving(false)
+		if (result.success) {
+			toast.success("Usuario actualizado")
+			setEditingUsuario(null)
+			fetchUsuarios()
+		} else {
+			toast.error(result.error ?? "Error al actualizar")
+		}
+	}
 
 	const usuariosFiltrados = usuarios.filter((u) => {
 		const matchBusqueda =
@@ -110,6 +153,7 @@ export default function UsuariosPage() {
 	}
 
 	return (
+		<>
 		<SidebarInset>
 			<header className="flex h-16 shrink-0 items-center gap-2">
 				<div className="flex items-center gap-2 px-4">
@@ -263,7 +307,11 @@ export default function UsuariosPage() {
 											</p>
 										</div>
 										<div className="flex gap-1">
-											<Button variant="ghost" size="icon-sm">
+											<Button
+												variant="ghost"
+												size="icon-sm"
+												onClick={() => openEdit(usuario)}
+											>
 												<PencilSimple className="size-4" weight="duotone" />
 											</Button>
 											<Button variant="ghost" size="icon-sm">
@@ -285,5 +333,57 @@ export default function UsuariosPage() {
 				)}
 			</div>
 		</SidebarInset>
+
+		{/* Edit Usuario Dialog */}
+		<Dialog
+			open={!!editingUsuario}
+			onOpenChange={(open) => !open && setEditingUsuario(null)}
+		>
+			<DialogContent className="sm:max-w-sm">
+				<DialogHeader>
+					<DialogTitle>Editar Usuario</DialogTitle>
+					<DialogDescription>
+						Actualiza el nombre y departamento del usuario
+					</DialogDescription>
+				</DialogHeader>
+				<div className="grid gap-4 py-4">
+					<div className="grid gap-2">
+						<Label htmlFor="u-nombre">Nombre completo</Label>
+						<Input
+							id="u-nombre"
+							value={editNombre}
+							onChange={(e) => setEditNombre(e.target.value)}
+						/>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="u-dpto">Departamento</Label>
+						<Input
+							id="u-dpto"
+							value={editDepartamento}
+							onChange={(e) => setEditDepartamento(e.target.value)}
+							placeholder="Ej: Producción, Mantenimiento..."
+						/>
+					</div>
+					{editingUsuario && (
+						<div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+							<span className="font-medium">Rol: </span>
+							{getRolLabel(editingUsuario.rol)} — no se puede cambiar desde aquí
+						</div>
+					)}
+				</div>
+				<DialogFooter>
+					<Button
+						variant="outline"
+						onClick={() => setEditingUsuario(null)}
+					>
+						Cancelar
+					</Button>
+					<Button onClick={handleSaveEdit} disabled={saving || !editNombre}>
+						{saving ? "Guardando..." : "Guardar Cambios"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+		</>
 	)
 }
