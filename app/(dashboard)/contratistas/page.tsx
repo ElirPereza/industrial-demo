@@ -19,6 +19,7 @@ import {
 	type Contratista,
 	deleteContratista,
 	getContratistas,
+	updateContratista,
 } from "@/app/(dashboard)/contratistas/actions"
 import {
 	Breadcrumb,
@@ -36,7 +37,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -47,6 +57,18 @@ export default function ContratistasPage() {
 	const [filtroEstado, setFiltroEstado] = useState<string | null>(null)
 	const [contratistas, setContratistas] = useState<Contratista[]>([])
 	const [loading, setLoading] = useState(true)
+
+	// Edit modal
+	const [editingContratista, setEditingContratista] =
+		useState<Contratista | null>(null)
+	const [saving, setSaving] = useState(false)
+	const [editForm, setEditForm] = useState({
+		nombre: "",
+		contacto: "",
+		email: "",
+		telefono: "",
+		especialidad: "",
+	})
 
 	const fetchContratistas = useCallback(async () => {
 		setLoading(true)
@@ -75,6 +97,37 @@ export default function ContratistasPage() {
 		}
 	}
 
+	const openEdit = (c: Contratista) => {
+		setEditForm({
+			nombre: c.nombre,
+			contacto: c.contacto,
+			email: c.email,
+			telefono: c.telefono,
+			especialidad: c.especialidad,
+		})
+		setEditingContratista(c)
+	}
+
+	const handleSaveEdit = async () => {
+		if (!editingContratista) return
+		setSaving(true)
+		const fd = new FormData()
+		fd.append("nombre", editForm.nombre)
+		fd.append("contacto", editForm.contacto)
+		fd.append("email", editForm.email)
+		fd.append("telefono", editForm.telefono)
+		fd.append("especialidad", editForm.especialidad)
+		const result = await updateContratista(editingContratista.id, fd)
+		setSaving(false)
+		if (result.success) {
+			toast.success("Contratista actualizado")
+			setEditingContratista(null)
+			fetchContratistas()
+		} else {
+			toast.error(result.error ?? "Error al actualizar")
+		}
+	}
+
 	// Client-side filter for specialty search (server handles estado + name search)
 	const contratistasFiltrados = contratistas.filter((c) => {
 		if (!busqueda.trim()) return true
@@ -99,6 +152,7 @@ export default function ContratistasPage() {
 			: 0
 
 	return (
+		<>
 		<SidebarInset>
 			<header className="flex h-16 shrink-0 items-center gap-2">
 				<div className="flex items-center gap-2 px-4">
@@ -337,7 +391,12 @@ export default function ContratistasPage() {
 									</div>
 
 									<div className="flex gap-2 pt-2">
-										<Button variant="outline" size="sm" className="flex-1">
+										<Button
+											variant="outline"
+											size="sm"
+											className="flex-1"
+											onClick={() => openEdit(contratista)}
+										>
 											<PencilSimple className="mr-1 size-3" />
 											Editar
 										</Button>
@@ -356,5 +415,88 @@ export default function ContratistasPage() {
 				)}
 			</div>
 		</SidebarInset>
+
+		{/* Edit Contratista Dialog */}
+		<Dialog
+			open={!!editingContratista}
+			onOpenChange={(open) => !open && setEditingContratista(null)}
+		>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>Editar Contratista</DialogTitle>
+					<DialogDescription>
+						Actualiza la información de contacto y especialidad
+					</DialogDescription>
+				</DialogHeader>
+				<div className="grid gap-4 py-4">
+					<div className="grid gap-2">
+						<Label htmlFor="c-nombre">Nombre de la empresa</Label>
+						<Input
+							id="c-nombre"
+							value={editForm.nombre}
+							onChange={(e) =>
+								setEditForm((p) => ({ ...p, nombre: e.target.value }))
+							}
+						/>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="c-contacto">Persona de contacto</Label>
+						<Input
+							id="c-contacto"
+							value={editForm.contacto}
+							onChange={(e) =>
+								setEditForm((p) => ({ ...p, contacto: e.target.value }))
+							}
+						/>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="c-email">Correo electrónico</Label>
+						<Input
+							id="c-email"
+							type="email"
+							value={editForm.email}
+							onChange={(e) =>
+								setEditForm((p) => ({ ...p, email: e.target.value }))
+							}
+						/>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="c-telefono">Teléfono</Label>
+						<Input
+							id="c-telefono"
+							value={editForm.telefono}
+							onChange={(e) =>
+								setEditForm((p) => ({ ...p, telefono: e.target.value }))
+							}
+						/>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="c-especialidad">Especialidad</Label>
+						<Input
+							id="c-especialidad"
+							value={editForm.especialidad}
+							onChange={(e) =>
+								setEditForm((p) => ({ ...p, especialidad: e.target.value }))
+							}
+						/>
+					</div>
+				</div>
+				<DialogFooter>
+					<Button
+						variant="outline"
+						onClick={() => setEditingContratista(null)}
+					>
+						Cancelar
+					</Button>
+					<Button
+						onClick={handleSaveEdit}
+						disabled={saving || !editForm.nombre}
+					>
+						{saving ? "Guardando..." : "Guardar Cambios"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+		</>
 	)
 }
