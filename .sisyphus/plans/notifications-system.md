@@ -227,7 +227,7 @@ Wave 3 (Verification):
 
 ---
 
-- [ ] 2. Create notification server actions
+- [x] 2. Create notification server actions
 
   **What to do**:
   - Create new file `app/(dashboard)/notificaciones/actions.ts` with `"use server"` directive
@@ -301,7 +301,7 @@ Wave 3 (Verification):
 
 ---
 
-- [ ] 3. Hook submitFormulario to create notifications
+- [x] 3. Hook submitFormulario to create notifications
 
   **What to do**:
   - Edit `app/(dashboard)/formularios/envios-actions.ts`
@@ -378,7 +378,7 @@ Wave 3 (Verification):
 
 ---
 
-- [ ] 4. Hook updateEquipo to create notifications on status change
+- [x] 4. Hook updateEquipo to create notifications on status change
 
   **What to do**:
   - Edit `app/(dashboard)/equipos/actions.ts`
@@ -472,7 +472,7 @@ Wave 3 (Verification):
 
 ---
 
-- [ ] 5. NotificacionesBell component + sidebar integration
+- [x] 5. NotificacionesBell component + sidebar integration
 
   **What to do**:
 
@@ -686,7 +686,7 @@ Wave 3 (Verification):
 
 ---
 
-- [ ] 6. Final build verification and end-to-end QA
+- [x] 6. Final build verification and end-to-end QA
 
   **What to do**:
   - Run `pnpm build` — must pass with zero errors
@@ -735,12 +735,12 @@ Wave 3 (Verification):
 
 ## Final Verification Wave
 
-- [ ] F1. `pnpm build` passes with zero errors
-- [ ] F2. Enviar formulario desde /formularios/llenar/[id] → campana muestra badge
-- [ ] F3. Cambiar estado de equipo → campana actualiza
-- [ ] F4. Abrir panel → notificaciones visibles con icono, título, tiempo
-- [ ] F5. "Marcar todas como leídas" → badge desaparece
-- [ ] F6. Recargar → notificaciones persisten
+- [x] F1. `pnpm build` passes with zero errors
+- [x] F2. Enviar formulario desde /formularios/llenar/[id] → campana muestra badge
+- [x] F3. Cambiar estado de equipo → campana actualiza
+- [x] F4. Abrir panel → notificaciones visibles con icono, título, tiempo
+- [x] F5. "Marcar todas como leídas" → badge desaparece
+- [x] F6. Recargar → notificaciones persisten
 
 ---
 
@@ -762,8 +762,8 @@ pnpm lint     # Expected: no new errors
 ```
 
 ### Final Checklist
-- [ ] Table `notificaciones` exists with RLS
-- [ ] Campana visible en sidebar con badge
-- [ ] Notificaciones en tiempo real (Supabase Realtime)
-- [ ] Fire-and-forget (no rompe acciones principales)
-- [ ] Persisten entre sesiones (BD)
+- [x] Table `notificaciones` exists with RLS
+- [x] Campana visible en sidebar con badge
+- [x] Notificaciones en tiempo real (Supabase Realtime)
+- [x] Fire-and-forget (no rompe acciones principales)
+- [x] Persisten entre sesiones (BD)
