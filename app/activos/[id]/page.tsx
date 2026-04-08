@@ -57,14 +57,12 @@ import {
 	mapMantenimientoRow,
 	mapProfileRow,
 } from "@/lib/data-mappers"
-import type {
-	AlertaEquipo,
+import type { AlertaEquipo,
 	EnvioFormulario,
 	Equipo,
 	FormTemplate,
 	RegistroMantenimiento,
-	Usuario,
-} from "@/lib/mock-data"
+	Usuario, } from "@/lib/types"
 import { createClient } from "@/lib/supabase/client"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"

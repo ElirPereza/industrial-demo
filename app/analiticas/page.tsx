@@ -53,12 +53,10 @@ import {
 	mapOrdenRow,
 } from "@/lib/data-mappers"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
-import type {
-	AlertaEquipo,
+import type { AlertaEquipo,
 	Equipo,
 	OrdenTrabajo,
-	RegistroMantenimiento,
-} from "@/lib/mock-data"
+	RegistroMantenimiento, } from "@/lib/types"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 

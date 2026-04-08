@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/sidebar"
 import { mapAlertaRow, mapEquipoRow, mapProfileRow } from "@/lib/data-mappers"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
-import type { PrioridadOT, TipoOT } from "@/lib/mock-data"
+import type { PrioridadOT, TipoOT } from "@/lib/types"
 import { useRole } from "@/lib/role-provider"
 import { createClient } from "@/lib/supabase/client"
 import type { Tables } from "@/lib/supabase/types"

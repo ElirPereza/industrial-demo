@@ -10,7 +10,7 @@ import {
 	useMemo,
 	useState,
 } from "react"
-import type { RolUsuario } from "@/lib/mock-data"
+import type { RolUsuario } from "@/lib/types"
 import { createClient } from "@/lib/supabase/client"
 
 type ProfileSummary = {

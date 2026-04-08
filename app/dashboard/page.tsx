@@ -52,16 +52,14 @@ import {
 	mapOrdenRow,
 	mapProfileRow,
 } from "@/lib/data-mappers"
-import type {
-	AlertaEquipo,
+import type { AlertaEquipo,
 	EnvioFormulario,
 	Equipo,
 	FormTemplate,
 	KPI,
 	OrdenTrabajo,
 	RegistroMantenimiento,
-	Usuario,
-} from "@/lib/mock-data"
+	Usuario, } from "@/lib/types"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
 import { useRole } from "@/lib/role-provider"
 import type { Tables } from "@/lib/supabase/types"

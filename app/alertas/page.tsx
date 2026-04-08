@@ -41,7 +41,7 @@ import { PageError } from "@/components/page-error"
 import { PageLoading } from "@/components/page-loading"
 import { mapAlertaRow, mapEquipoRow } from "@/lib/data-mappers"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
-import type { SeveridadAlerta } from "@/lib/mock-data"
+import type { SeveridadAlerta } from "@/lib/types"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 

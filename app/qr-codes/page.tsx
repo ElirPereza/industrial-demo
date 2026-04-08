@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/sidebar"
 import { mapEquipoRow, mapFormTemplateRow } from "@/lib/data-mappers"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
-import type { Equipo, FormTemplate } from "@/lib/mock-data"
+import type { Equipo, FormTemplate } from "@/lib/types"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 

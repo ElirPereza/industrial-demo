@@ -28,7 +28,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import type { RolUsuario } from "@/lib/mock-data"
+import type { RolUsuario } from "@/lib/types"
 import { useRole } from "@/lib/role-provider"
 
 const ROLE_LABELS: Record<RolUsuario, string> = {

@@ -13,7 +13,7 @@ import type {
 	OrdenTrabajo,
 	RegistroMantenimiento,
 	Usuario,
-} from "@/lib/mock-data"
+} from "@/lib/types"
 import type { Tables } from "@/lib/supabase/types"
 
 export function mapEquipoRow(row: Tables<"equipos">): Equipo {

@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/sidebar"
 import { mapProfileRow } from "@/lib/data-mappers"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
-import type { Usuario } from "@/lib/mock-data"
+import type { Usuario } from "@/lib/types"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 

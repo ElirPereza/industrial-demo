@@ -20,7 +20,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import type { RolUsuario } from "@/lib/mock-data"
+import type { RolUsuario } from "@/lib/types"
 import { useRole } from "@/lib/role-provider"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"

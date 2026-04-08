@@ -15,14 +15,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import type {
-	AlertaEquipo,
+import type { AlertaEquipo,
 	Equipo,
 	KPI,
 	OrdenTrabajo,
 	RegistroMantenimiento,
-	Usuario,
-} from "@/lib/mock-data"
+	Usuario, } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 interface SupervisorViewProps {

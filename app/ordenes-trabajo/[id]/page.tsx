@@ -48,7 +48,7 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { mapAlertaRow, mapEquipoRow, mapOrdenRow } from "@/lib/data-mappers"
-import type { EstadoOrdenTrabajo, PrioridadOT } from "@/lib/mock-data"
+import type { EstadoOrdenTrabajo, PrioridadOT } from "@/lib/types"
 import { createClient } from "@/lib/supabase/client"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"

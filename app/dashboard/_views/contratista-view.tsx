@@ -14,7 +14,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import type { Equipo, OrdenTrabajo } from "@/lib/mock-data"
+import type { Equipo, OrdenTrabajo } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 const CONTRATISTA = {

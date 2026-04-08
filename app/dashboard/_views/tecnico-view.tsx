@@ -14,12 +14,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import type {
-	Equipo,
+import type { Equipo,
 	FormTemplate,
 	OrdenTrabajo,
-	RegistroMantenimiento,
-} from "@/lib/mock-data"
+	RegistroMantenimiento, } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 const TECNICO_NOMBRE = "María García"
