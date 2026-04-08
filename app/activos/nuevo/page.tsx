@@ -32,12 +32,23 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { mapAreaRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import { createClient } from "@/lib/supabase/client"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 const tiposEquipo = [
@@ -60,6 +71,7 @@ export default function NuevoEquipoPage() {
 	const [nombre, setNombre] = useState("")
 	const [tipo, setTipo] = useState("")
 	const [ubicacion, setUbicacion] = useState("")
+	const [idArea, setIdArea] = useState("")
 	const [estado, setEstado] = useState("operativo")
 	const [modelo, setModelo] = useState("")
 	const [numeroSerie, setNumeroSerie] = useState("")
@@ -69,6 +81,12 @@ export default function NuevoEquipoPage() {
 
 	// Validation
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
+	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [submitError, setSubmitError] = useState<string | null>(null)
+
+	const { data: areasData } = useSupabaseQuery("areas_produccion", (row) =>
+		mapAreaRow(row as unknown as Tables<"areas_produccion">),
+	)
 
 	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files
@@ -87,7 +105,7 @@ export default function NuevoEquipoPage() {
 		setImagenes((prev) => prev.filter((_, i) => i !== index))
 	}
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		const newErrors: Record<string, boolean> = {}
 
 		if (!nombre.trim()) newErrors.nombre = true
@@ -96,11 +114,29 @@ export default function NuevoEquipoPage() {
 
 		setErrors(newErrors)
 
-		if (Object.keys(newErrors).length === 0) {
-			// Success - would save to database in real app
-			alert("Equipo creado exitosamente (simulado)")
-			router.push("/activos")
+		if (Object.keys(newErrors).length > 0) return
+
+		setIsSubmitting(true)
+		setSubmitError(null)
+
+		const supabase = createClient()
+		const { error } = await supabase.from("equipos").insert({
+			nombre,
+			id_area: idArea || null,
+			tipo,
+			ubicacion,
+			estado: "operativo",
+			tiene_iot: false,
+		})
+
+		setIsSubmitting(false)
+
+		if (error) {
+			setSubmitError(error.message)
+			return
 		}
+
+		router.push("/activos")
 	}
 
 	return (
@@ -264,6 +300,27 @@ export default function NuevoEquipoPage() {
 												La ubicación es obligatoria
 											</p>
 										)}
+									</div>
+
+									<div>
+										<label
+											htmlFor="idArea"
+											className="mb-1.5 block text-sm font-medium"
+										>
+											Área de Producción
+										</label>
+										<Select value={idArea} onValueChange={setIdArea}>
+											<SelectTrigger id="idArea" className="w-full">
+												<SelectValue placeholder="Seleccionar área (opcional)" />
+											</SelectTrigger>
+											<SelectContent>
+												{(areasData ?? []).map((area) => (
+													<SelectItem key={area.id} value={area.id}>
+														{area.nombre} — {area.ubicacion}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 									</div>
 
 									<div>
@@ -440,14 +497,22 @@ export default function NuevoEquipoPage() {
 							<Card>
 								<CardContent className="p-4">
 									<div className="space-y-3">
-										<Button className="w-full" onClick={handleSubmit}>
+										{submitError && (
+											<p className="text-xs text-red-500">{submitError}</p>
+										)}
+										<Button
+											className="w-full"
+											onClick={handleSubmit}
+											disabled={isSubmitting}
+										>
 											<Check className="mr-2 size-4" weight="bold" />
-											Crear Equipo
+											{isSubmitting ? "Creando..." : "Crear Equipo"}
 										</Button>
 										<Button
 											variant="outline"
 											className="w-full"
 											onClick={() => router.push("/activos")}
+											disabled={isSubmitting}
 										>
 											Cancelar
 										</Button>

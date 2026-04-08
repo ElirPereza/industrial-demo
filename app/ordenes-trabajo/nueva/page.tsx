@@ -47,13 +47,12 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import {
-	alertasEquipos,
-	equipos,
-	type PrioridadOT,
-	type TipoOT,
-	usuarios,
-} from "@/lib/mock-data"
+import { mapAlertaRow, mapEquipoRow, mapProfileRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { PrioridadOT, TipoOT } from "@/lib/mock-data"
+import { useRole } from "@/lib/role-provider"
+import { createClient } from "@/lib/supabase/client"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 interface ChecklistItem {
@@ -187,6 +186,7 @@ let nextChecklistId = 100
 
 export default function NuevaOrdenTrabajoPage() {
 	const router = useRouter()
+	const { profile } = useRole()
 
 	const [titulo, setTitulo] = useState("")
 	const [descripcion, setDescripcion] = useState("")
@@ -199,9 +199,22 @@ export default function NuevaOrdenTrabajoPage() {
 	const [tiempoEstimado, setTiempoEstimado] = useState("")
 	const [checklist, setChecklist] = useState<ChecklistItem[]>([])
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
+	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [submitError, setSubmitError] = useState<string | null>(null)
 
-	const tecnicos = usuarios.filter((u) => u.rol === "tecnico")
-	const alertasActivas = alertasEquipos.filter(
+	const { data: equiposData } = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+	const { data: profilesData } = useSupabaseQuery("profiles", (row) =>
+		mapProfileRow(row as unknown as Tables<"profiles">),
+	)
+	const { data: alertasData } = useSupabaseQuery("alertas_equipos", (row) =>
+		mapAlertaRow(row as unknown as Tables<"alertas_equipos">),
+	)
+
+	const equipos = equiposData ?? []
+	const tecnicos = (profilesData ?? []).filter((u) => u.rol === "tecnico")
+	const alertasActivas = (alertasData ?? []).filter(
 		(a) => a.estado === "activa" || a.estado === "reconocida",
 	)
 
@@ -243,7 +256,7 @@ export default function NuevaOrdenTrabajoPage() {
 		)
 	}
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		const newErrors: Record<string, boolean> = {}
 
 		if (!titulo.trim()) newErrors.titulo = true
@@ -255,10 +268,32 @@ export default function NuevaOrdenTrabajoPage() {
 
 		setErrors(newErrors)
 
-		if (Object.keys(newErrors).length === 0) {
-			alert("Orden de trabajo creada exitosamente (simulado)")
-			router.push("/ordenes-trabajo")
+		if (Object.keys(newErrors).length > 0) return
+
+		setIsSubmitting(true)
+		setSubmitError(null)
+
+		const supabase = createClient()
+		const { error } = await supabase.from("ordenes_trabajo").insert({
+			titulo,
+			descripcion,
+			tipo: tipo as string,
+			prioridad: prioridad as string,
+			id_equipo: idEquipo,
+			tecnico_asignado: tecnico,
+			solicitante: profile?.nombre ?? "",
+			tiempo_estimado_horas: tiempoEstimado ? parseFloat(tiempoEstimado) : null,
+			checklist: [],
+		})
+
+		setIsSubmitting(false)
+
+		if (error) {
+			setSubmitError(error.message)
+			return
 		}
+
+		router.push("/ordenes-trabajo")
 	}
 
 	return (
@@ -709,15 +744,19 @@ export default function NuevaOrdenTrabajoPage() {
 						</Card>
 
 						<div className="flex items-center justify-end gap-3 pb-6">
+							{submitError && (
+								<p className="text-xs text-red-500">{submitError}</p>
+							)}
 							<Button
 								variant="outline"
 								onClick={() => router.push("/ordenes-trabajo")}
+								disabled={isSubmitting}
 							>
 								Cancelar
 							</Button>
-							<Button onClick={handleSubmit}>
+							<Button onClick={handleSubmit} disabled={isSubmitting}>
 								<Check className="mr-2 size-4" weight="bold" />
-								Crear Orden de Trabajo
+								{isSubmitting ? "Creando..." : "Crear Orden de Trabajo"}
 							</Button>
 						</div>
 					</div>
