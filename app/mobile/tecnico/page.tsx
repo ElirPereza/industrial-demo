@@ -14,13 +14,15 @@ import {
 	mapMantenimientoRow,
 	mapOrdenRow,
 } from "@/lib/data-mappers"
+import { useRole } from "@/lib/role-provider"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
-const TECNICO_NOMBRE = "María García"
-
 export default function MobileTecnicoPage() {
+	const { profile } = useRole()
+	const tecnicoNombre = profile?.nombre ?? "Técnico"
+
 	const {
 		data: equiposData,
 		isLoading: loadingEquipos,
@@ -60,7 +62,7 @@ export default function MobileTecnicoPage() {
 	const registrosMantenimiento = registrosData ?? []
 
 	const misOrdenes = ordenesTrabajo.filter(
-		(ot) => ot.tecnicoAsignado === TECNICO_NOMBRE,
+		(ot) => ot.tecnicoAsignado === tecnicoNombre,
 	)
 	const otsPendientes = misOrdenes.filter(
 		(ot) =>
@@ -74,7 +76,7 @@ export default function MobileTecnicoPage() {
 	)
 
 	const tareasCompletadas = registrosMantenimiento.filter(
-		(r) => r.tecnico === TECNICO_NOMBRE && r.estado === "completado",
+		(r) => r.tecnico === tecnicoNombre && r.estado === "completado",
 	).length
 
 	if (isLoading) {
@@ -104,7 +106,7 @@ export default function MobileTecnicoPage() {
 					<div className="flex items-center gap-2.5">
 						<Sun className="size-7 text-amber-500" weight="fill" />
 						<h1 className="text-xl font-bold tracking-tight text-foreground">
-							Buenos d&iacute;as, Mar&iacute;a
+							Buenos días, {tecnicoNombre}
 						</h1>
 					</div>
 					<p className="mt-1 pl-[38px] text-[13px] text-muted-foreground">

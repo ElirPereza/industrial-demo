@@ -205,6 +205,19 @@ export default function EquiposPage() {
 		}
 	}
 
+	if (cargando) {
+		return (
+			<SidebarProvider>
+				<AppSidebar />
+				<SidebarInset>
+					<div className="flex flex-1 items-center justify-center p-8">
+						<div className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+					</div>
+				</SidebarInset>
+			</SidebarProvider>
+		)
+	}
+
 	return (
 		<SidebarProvider>
 			<AppSidebar />
