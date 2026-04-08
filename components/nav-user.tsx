@@ -8,6 +8,7 @@ import {
 	SignOutIcon,
 	SparkleIcon,
 } from "@phosphor-icons/react"
+import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
 	DropdownMenu,
@@ -27,14 +28,17 @@ import {
 
 export function NavUser({
 	user,
+	onSignOut,
 }: {
 	user: {
 		name: string
 		email: string
 		avatar: string
 	}
+	onSignOut?: () => void
 }) {
 	const { isMobile } = useSidebar()
+	const router = useRouter()
 
 	return (
 		<SidebarMenu>
@@ -97,7 +101,13 @@ export function NavUser({
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={async () => {
+								onSignOut?.()
+								router.push("/login")
+								router.refresh()
+							}}
+						>
 							<SignOutIcon />
 							Log out
 						</DropdownMenuItem>

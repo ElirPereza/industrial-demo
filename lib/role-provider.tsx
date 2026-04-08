@@ -26,6 +26,7 @@ interface RoleContextValue {
 	user: User | null
 	profile: ProfileSummary | null
 	signOut: () => Promise<void>
+	isLoading: boolean
 }
 
 const RoleContext = createContext<RoleContextValue | null>(null)
@@ -62,7 +63,7 @@ function buildFallbackProfile(
 
 export function RoleProvider({
 	children,
-	defaultRole = "admin",
+	defaultRole = "tecnico",
 }: {
 	children: ReactNode
 	defaultRole?: RolUsuario
@@ -71,6 +72,7 @@ export function RoleProvider({
 	const [role, setRoleState] = useState<RolUsuario>(defaultRole)
 	const [user, setUser] = useState<User | null>(null)
 	const [profile, setProfile] = useState<ProfileSummary | null>(null)
+	const [isLoading, setIsLoading] = useState(true)
 
 	const syncSessionState = useCallback(
 		async (currentUser: User | null) => {
@@ -78,6 +80,7 @@ export function RoleProvider({
 				setUser(null)
 				setProfile(null)
 				setRoleState(defaultRole)
+				setIsLoading(false)
 				return
 			}
 
@@ -93,6 +96,7 @@ export function RoleProvider({
 				const fallbackProfile = buildFallbackProfile(currentUser, defaultRole)
 				setProfile(fallbackProfile)
 				setRoleState(fallbackProfile.rol)
+				setIsLoading(false)
 				return
 			}
 
@@ -104,6 +108,7 @@ export function RoleProvider({
 				departamento: data.departamento,
 			})
 			setRoleState(nextRole)
+			setIsLoading(false)
 		},
 		[defaultRole, supabase],
 	)
@@ -157,9 +162,17 @@ export function RoleProvider({
 	}, [defaultRole, supabase])
 
 	const value = useMemo(
-		() => ({ role, setRole, user, profile, signOut }),
-		[profile, role, setRole, signOut, user],
+		() => ({ role, setRole, user, profile, signOut, isLoading }),
+		[profile, role, setRole, signOut, user, isLoading],
 	)
+
+	if (isLoading) {
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+			</div>
+		)
+	}
 
 	return <RoleContext.Provider value={value}>{children}</RoleContext.Provider>
 }

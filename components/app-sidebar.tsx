@@ -29,7 +29,6 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import type { RolUsuario } from "@/lib/mock-data"
-import { usuarios } from "@/lib/mock-data"
 import { useRole } from "@/lib/role-provider"
 
 const ROLE_LABELS: Record<RolUsuario, string> = {
@@ -136,14 +135,14 @@ function getNavSecondary(role: RolUsuario) {
 	]
 }
 
-const userData = {
-	name: usuarios[0].nombre,
-	email: usuarios[0].email,
-	avatar: "",
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const { role } = useRole()
+	const { role, profile, signOut } = useRole()
+
+	const userData = {
+		name: profile?.nombre ?? "Cargando...",
+		email: profile?.email ?? "",
+		avatar: "",
+	}
 
 	const navMain = getNavMain(role)
 	const administracion = getNavAdmin(role)
@@ -180,7 +179,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				)}
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={userData} />
+				<NavUser user={userData} onSignOut={signOut} />
 			</SidebarFooter>
 		</Sidebar>
 	)
