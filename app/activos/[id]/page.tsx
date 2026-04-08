@@ -186,7 +186,7 @@ export default function EquipoDetailPage({
 }) {
 	const { id: equipoId } = use(params)
 	const router = useRouter()
-	const { user } = useRole()
+	const { user, profile } = useRole()
 	const [activeTab, setActiveTab] = useState<TabType>("info")
 	const [equipo, setEquipo] = useState<Equipo | null>(null)
 	const [registrosMantenimiento, setRegistrosMantenimiento] = useState<
@@ -345,6 +345,7 @@ export default function EquipoDetailPage({
 				mime_type: file.type || "application/octet-stream",
 				tamano_bytes: file.size,
 				subido_por: user?.id ?? null,
+				id_organizacion: profile?.id_organizacion,
 			}
 
 			const { error: insertError } = await supabase

@@ -18,6 +18,7 @@ type ProfileSummary = {
 	email: string
 	rol: RolUsuario
 	departamento: string
+	id_organizacion: string | null
 }
 
 interface RoleContextValue {
@@ -58,6 +59,7 @@ function buildFallbackProfile(
 		email: user.email ?? "",
 		rol: fallbackRole,
 		departamento: "Sin departamento",
+		id_organizacion: null,
 	}
 }
 
@@ -88,7 +90,7 @@ export function RoleProvider({
 
 			const { data, error } = await supabase
 				.from("profiles")
-				.select("nombre, email, rol, departamento")
+				.select("nombre, email, rol, departamento, id_organizacion")
 				.eq("id", currentUser.id)
 				.maybeSingle()
 
@@ -106,6 +108,7 @@ export function RoleProvider({
 				email: data.email,
 				rol: nextRole,
 				departamento: data.departamento,
+				id_organizacion: data.id_organizacion,
 			})
 			setRoleState(nextRole)
 			setIsLoading(false)

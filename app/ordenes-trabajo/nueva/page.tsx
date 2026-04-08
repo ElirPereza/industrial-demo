@@ -284,6 +284,7 @@ export default function NuevaOrdenTrabajoPage() {
 			solicitante: profile?.nombre ?? "",
 			tiempo_estimado_horas: tiempoEstimado ? parseFloat(tiempoEstimado) : null,
 			checklist: [],
+			id_organizacion: profile?.id_organizacion,
 		})
 
 		setIsSubmitting(false)

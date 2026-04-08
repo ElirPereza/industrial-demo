@@ -23,6 +23,7 @@ export type Database = {
 					fecha_resolucion: string | null
 					id: string
 					id_equipo: string
+					id_organizacion: string | null
 					marca: string
 					modelo: string
 					parametros: Json | null
@@ -38,6 +39,7 @@ export type Database = {
 					fecha_resolucion?: string | null
 					id?: string
 					id_equipo: string
+					id_organizacion?: string | null
 					marca: string
 					modelo: string
 					parametros?: Json | null
@@ -53,6 +55,7 @@ export type Database = {
 					fecha_resolucion?: string | null
 					id?: string
 					id_equipo?: string
+					id_organizacion?: string | null
 					marca?: string
 					modelo?: string
 					parametros?: Json | null
@@ -66,6 +69,13 @@ export type Database = {
 						referencedRelation: "equipos"
 						referencedColumns: ["id"]
 					},
+					{
+						foreignKeyName: "alertas_equipos_id_organizacion_fkey"
+						columns: ["id_organizacion"]
+						isOneToOne: false
+						referencedRelation: "organizaciones"
+						referencedColumns: ["id"]
+					},
 				]
 			}
 			areas_produccion: {
@@ -73,6 +83,7 @@ export type Database = {
 					created_at: string
 					descripcion: string | null
 					id: string
+					id_organizacion: string | null
 					nombre: string
 					tipo: string
 					ubicacion: string
@@ -81,6 +92,7 @@ export type Database = {
 					created_at?: string
 					descripcion?: string | null
 					id?: string
+					id_organizacion?: string | null
 					nombre: string
 					tipo: string
 					ubicacion: string
@@ -89,6 +101,7 @@ export type Database = {
 					created_at?: string
 					descripcion?: string | null
 					id?: string
+					id_organizacion?: string | null
 					nombre?: string
 					tipo?: string
 					ubicacion?: string
@@ -103,6 +116,7 @@ export type Database = {
 					id: string
 					id_equipo: string | null
 					id_formulario: string
+					id_organizacion: string | null
 					id_usuario: string
 					respuestas: Json
 					version_formulario: number
@@ -114,6 +128,7 @@ export type Database = {
 					id?: string
 					id_equipo?: string | null
 					id_formulario: string
+					id_organizacion?: string | null
 					id_usuario: string
 					respuestas?: Json
 					version_formulario?: number
@@ -125,33 +140,54 @@ export type Database = {
 					id?: string
 					id_equipo?: string | null
 					id_formulario?: string
+					id_organizacion?: string | null
 					id_usuario?: string
 					respuestas?: Json
 					version_formulario?: number
 				}
-				Relationships: [
-					{
-						foreignKeyName: "envios_formularios_id_equipo_fkey"
-						columns: ["id_equipo"]
-						isOneToOne: false
-						referencedRelation: "equipos"
-						referencedColumns: ["id"]
-					},
-					{
-						foreignKeyName: "envios_formularios_id_formulario_fkey"
-						columns: ["id_formulario"]
-						isOneToOne: false
-						referencedRelation: "form_templates"
-						referencedColumns: ["id"]
-					},
-					{
-						foreignKeyName: "envios_formularios_id_usuario_fkey"
-						columns: ["id_usuario"]
-						isOneToOne: false
-						referencedRelation: "profiles"
-						referencedColumns: ["id"]
-					},
-				]
+				Relationships: []
+			}
+			equipo_archivos: {
+				Row: {
+					created_at: string
+					id: string
+					id_equipo: string
+					id_organizacion: string | null
+					mime_type: string
+					nombre: string
+					nombre_archivo: string
+					storage_path: string
+					subido_por: string | null
+					tamano_bytes: number | null
+					tipo: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					id_equipo: string
+					id_organizacion?: string | null
+					mime_type: string
+					nombre: string
+					nombre_archivo: string
+					storage_path: string
+					subido_por?: string | null
+					tamano_bytes?: number | null
+					tipo: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					id_equipo?: string
+					id_organizacion?: string | null
+					mime_type?: string
+					nombre?: string
+					nombre_archivo?: string
+					storage_path?: string
+					subido_por?: string | null
+					tamano_bytes?: number | null
+					tipo?: string
+				}
+				Relationships: []
 			}
 			equipos: {
 				Row: {
@@ -160,6 +196,7 @@ export type Database = {
 					estado: string
 					id: string
 					id_area: string | null
+					id_organizacion: string | null
 					nombre: string
 					proximo_mantenimiento: string | null
 					tiene_iot: boolean
@@ -174,6 +211,7 @@ export type Database = {
 					estado?: string
 					id?: string
 					id_area?: string | null
+					id_organizacion?: string | null
 					nombre: string
 					proximo_mantenimiento?: string | null
 					tiene_iot?: boolean
@@ -188,6 +226,7 @@ export type Database = {
 					estado?: string
 					id?: string
 					id_area?: string | null
+					id_organizacion?: string | null
 					nombre?: string
 					proximo_mantenimiento?: string | null
 					tiene_iot?: boolean
@@ -196,15 +235,7 @@ export type Database = {
 					ultimo_mantenimiento?: string | null
 					updated_at?: string
 				}
-				Relationships: [
-					{
-						foreignKeyName: "equipos_id_area_fkey"
-						columns: ["id_area"]
-						isOneToOne: false
-						referencedRelation: "areas_produccion"
-						referencedColumns: ["id"]
-					},
-				]
+				Relationships: []
 			}
 			form_templates: {
 				Row: {
@@ -215,6 +246,7 @@ export type Database = {
 					descripcion: string
 					frecuencia: string | null
 					id: string
+					id_organizacion: string | null
 					nombre: string
 					tipo: string
 					updated_at: string
@@ -228,6 +260,7 @@ export type Database = {
 					descripcion?: string
 					frecuencia?: string | null
 					id?: string
+					id_organizacion?: string | null
 					nombre: string
 					tipo: string
 					updated_at?: string
@@ -241,6 +274,7 @@ export type Database = {
 					descripcion?: string
 					frecuencia?: string | null
 					id?: string
+					id_organizacion?: string | null
 					nombre?: string
 					tipo?: string
 					updated_at?: string
@@ -252,6 +286,7 @@ export type Database = {
 				Row: {
 					created_at: string
 					id: string
+					id_organizacion: string | null
 					nombre: string
 					periodo: string
 					tendencia: string
@@ -261,6 +296,7 @@ export type Database = {
 				Insert: {
 					created_at?: string
 					id?: string
+					id_organizacion?: string | null
 					nombre: string
 					periodo: string
 					tendencia: string
@@ -270,6 +306,7 @@ export type Database = {
 				Update: {
 					created_at?: string
 					id?: string
+					id_organizacion?: string | null
 					nombre?: string
 					periodo?: string
 					tendencia?: string
@@ -291,6 +328,7 @@ export type Database = {
 					id: string
 					id_alerta: string | null
 					id_equipo: string
+					id_organizacion: string | null
 					notas: string | null
 					prioridad: string
 					solicitante: string
@@ -313,6 +351,7 @@ export type Database = {
 					id?: string
 					id_alerta?: string | null
 					id_equipo: string
+					id_organizacion?: string | null
 					notas?: string | null
 					prioridad: string
 					solicitante: string
@@ -335,6 +374,7 @@ export type Database = {
 					id?: string
 					id_alerta?: string | null
 					id_equipo?: string
+					id_organizacion?: string | null
 					notas?: string | null
 					prioridad?: string
 					solicitante?: string
@@ -345,22 +385,37 @@ export type Database = {
 					titulo?: string
 					updated_at?: string
 				}
-				Relationships: [
-					{
-						foreignKeyName: "ordenes_trabajo_id_alerta_fkey"
-						columns: ["id_alerta"]
-						isOneToOne: false
-						referencedRelation: "alertas_equipos"
-						referencedColumns: ["id"]
-					},
-					{
-						foreignKeyName: "ordenes_trabajo_id_equipo_fkey"
-						columns: ["id_equipo"]
-						isOneToOne: false
-						referencedRelation: "equipos"
-						referencedColumns: ["id"]
-					},
-				]
+				Relationships: []
+			}
+			organizaciones: {
+				Row: {
+					created_at: string
+					id: string
+					logo_url: string | null
+					nombre: string
+					plan: string
+					slug: string
+					updated_at: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					logo_url?: string | null
+					nombre: string
+					plan?: string
+					slug: string
+					updated_at?: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					logo_url?: string | null
+					nombre?: string
+					plan?: string
+					slug?: string
+					updated_at?: string
+				}
+				Relationships: []
 			}
 			profiles: {
 				Row: {
@@ -368,6 +423,7 @@ export type Database = {
 					departamento: string
 					email: string
 					id: string
+					id_organizacion: string | null
 					nombre: string
 					rol: string
 					updated_at: string
@@ -377,6 +433,7 @@ export type Database = {
 					departamento?: string
 					email: string
 					id: string
+					id_organizacion?: string | null
 					nombre: string
 					rol: string
 					updated_at?: string
@@ -386,6 +443,7 @@ export type Database = {
 					departamento?: string
 					email?: string
 					id?: string
+					id_organizacion?: string | null
 					nombre?: string
 					rol?: string
 					updated_at?: string
@@ -403,6 +461,7 @@ export type Database = {
 					horas_empleadas: number | null
 					id: string
 					id_equipo: string
+					id_organizacion: string | null
 					tecnico: string
 					tipo: string
 				}
@@ -416,6 +475,7 @@ export type Database = {
 					horas_empleadas?: number | null
 					id?: string
 					id_equipo: string
+					id_organizacion?: string | null
 					tecnico: string
 					tipo: string
 				}
@@ -429,24 +489,18 @@ export type Database = {
 					horas_empleadas?: number | null
 					id?: string
 					id_equipo?: string
+					id_organizacion?: string | null
 					tecnico?: string
 					tipo?: string
 				}
-				Relationships: [
-					{
-						foreignKeyName: "registros_mantenimiento_id_equipo_fkey"
-						columns: ["id_equipo"]
-						isOneToOne: false
-						referencedRelation: "equipos"
-						referencedColumns: ["id"]
-					},
-				]
+				Relationships: []
 			}
 		}
 		Views: {
 			[_ in never]: never
 		}
 		Functions: {
+			get_user_org: { Args: never; Returns: string }
 			get_user_role: { Args: never; Returns: string }
 		}
 		Enums: {
@@ -556,21 +610,4 @@ export type Enums<
 	? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
 	: DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
 		? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-		: never
-
-export type CompositeTypes<
-	PublicCompositeTypeNameOrOptions extends
-		| keyof DefaultSchema["CompositeTypes"]
-		| { schema: keyof DatabaseWithoutInternals },
-	CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-		schema: keyof DatabaseWithoutInternals
-	}
-		? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-		: never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals
-}
-	? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-	: PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-		? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
 		: never

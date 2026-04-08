@@ -191,6 +191,7 @@ export default function FormFillPage({
 				respuestas:
 					respuestas as unknown as Tables<"envios_formularios">["respuestas"],
 				estado: "completado",
+				id_organizacion: profile?.id_organizacion,
 			})
 
 		setIsSubmitting(false)

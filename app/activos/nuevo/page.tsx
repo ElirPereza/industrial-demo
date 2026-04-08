@@ -75,7 +75,7 @@ const estadosEquipo = [
 
 export default function NuevoEquipoPage() {
 	const router = useRouter()
-	const { user } = useRole()
+	const { user, profile } = useRole()
 
 	// Form state
 	const [nombre, setNombre] = useState("")
@@ -176,6 +176,7 @@ export default function NuevoEquipoPage() {
 				ubicacion,
 				estado,
 				tiene_iot: false,
+				id_organizacion: profile?.id_organizacion,
 			})
 			.select("id")
 			.single()
@@ -199,6 +200,7 @@ export default function NuevoEquipoPage() {
 						mime_type: image.mimeType,
 						tamano_bytes: image.size,
 						subido_por: user?.id ?? null,
+						id_organizacion: profile?.id_organizacion,
 					})),
 				)
 
