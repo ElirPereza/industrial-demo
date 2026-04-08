@@ -20,8 +20,10 @@ import {
 } from "@phosphor-icons/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { use, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -45,13 +47,10 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import {
-	alertasEquipos,
-	type EstadoOrdenTrabajo,
-	equipos,
-	ordenesTrabajo,
-	type PrioridadOT,
-} from "@/lib/mock-data"
+import { mapAlertaRow, mapEquipoRow, mapOrdenRow } from "@/lib/data-mappers"
+import type { EstadoOrdenTrabajo, PrioridadOT } from "@/lib/mock-data"
+import { createClient } from "@/lib/supabase/client"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 const PRIORIDAD_CONFIG: Record<
@@ -188,6 +187,29 @@ function getEstadoIndex(estado: EstadoOrdenTrabajo): number {
 	return TIMELINE_ESTADOS.indexOf(estado)
 }
 
+type OrdenDetalle = ReturnType<typeof mapOrdenRow>
+type EquipoDetalle = ReturnType<typeof mapEquipoRow>
+type AlertaDetalle = ReturnType<typeof mapAlertaRow>
+
+function buildChecklistState(
+	checklist: OrdenDetalle["checklist"],
+): Record<string, boolean> {
+	const initial: Record<string, boolean> = {}
+
+	for (const item of checklist) {
+		initial[item.id] = item.completado
+	}
+
+	return initial
+}
+
+function getNextEstado(estado: EstadoOrdenTrabajo): EstadoOrdenTrabajo | null {
+	if (estado === "cancelada") return null
+
+	const currentIndex = getEstadoIndex(estado)
+	return TIMELINE_ESTADOS[currentIndex + 1] ?? null
+}
+
 export default function OrdenTrabajoDetailPage({
 	params,
 }: {
@@ -195,19 +217,131 @@ export default function OrdenTrabajoDetailPage({
 }) {
 	const { id: otId } = use(params)
 	const router = useRouter()
-
-	const ot = ordenesTrabajo.find((o) => o.id === otId)
-
+	const [orden, setOrden] = useState<OrdenDetalle | null>(null)
+	const [equiposData, setEquiposData] = useState<EquipoDetalle[]>([])
+	const [alertasData, setAlertasData] = useState<AlertaDetalle[]>([])
 	const [checklistState, setChecklistState] = useState<Record<string, boolean>>(
-		() => {
-			if (!ot) return {}
-			const initial: Record<string, boolean> = {}
-			for (const item of ot.checklist) {
-				initial[item.id] = item.completado
-			}
-			return initial
-		},
+		{},
 	)
+	const [isLoading, setIsLoading] = useState(true)
+	const [error, setError] = useState<string | null>(null)
+	const [reloadKey, setReloadKey] = useState(0)
+
+	useEffect(() => {
+		let isActive = true
+
+		const fetchOrdenDetail = async () => {
+			setIsLoading(true)
+			setError(null)
+
+			const supabase = createClient()
+			const [ordenResult, equiposResult, alertasResult] = await Promise.all([
+				supabase.from("ordenes_trabajo").select("*").eq("id", otId).single(),
+				supabase.from("equipos").select("*"),
+				supabase.from("alertas_equipos").select("*"),
+			])
+
+			if (!isActive) return
+
+			const fetchError =
+				ordenResult.error ?? equiposResult.error ?? alertasResult.error
+
+			if (fetchError) {
+				setError(fetchError.message)
+				setOrden(null)
+				setChecklistState({})
+				setIsLoading(false)
+				return
+			}
+
+			const ordenRow = ordenResult.data as Tables<"ordenes_trabajo">
+			const equiposRows = (equiposResult.data ?? []) as Tables<"equipos">[]
+			const alertasRows = (alertasResult.data ??
+				[]) as Tables<"alertas_equipos">[]
+
+			const mappedOrden = mapOrdenRow(ordenRow)
+			setOrden(mappedOrden)
+			setEquiposData(equiposRows.map((row) => mapEquipoRow(row)))
+			setAlertasData(alertasRows.map((row) => mapAlertaRow(row)))
+			setChecklistState(buildChecklistState(mappedOrden.checklist))
+			setIsLoading(false)
+		}
+
+		void fetchOrdenDetail()
+
+		return () => {
+			isActive = false
+		}
+	}, [otId, reloadKey])
+
+	const handleStatusUpdate = async (newEstado: EstadoOrdenTrabajo) => {
+		if (!orden || orden.estado === newEstado) return
+
+		const supabase = createClient()
+		const { error: updateError } = await supabase
+			.from("ordenes_trabajo")
+			.update({ estado: newEstado })
+			.eq("id", otId)
+
+		if (updateError) {
+			setError(updateError.message)
+			return
+		}
+
+		setOrden((prev) => (prev ? { ...prev, estado: newEstado } : prev))
+	}
+
+	const handleChecklistToggle = async (checkIndex: number) => {
+		if (!orden || checkIndex < 0 || checkIndex >= orden.checklist.length) return
+
+		const updatedChecklist = [...orden.checklist]
+		updatedChecklist[checkIndex] = {
+			...updatedChecklist[checkIndex],
+			completado: !updatedChecklist[checkIndex].completado,
+		}
+
+		const supabase = createClient()
+		const { error: updateError } = await supabase
+			.from("ordenes_trabajo")
+			.update({
+				checklist:
+					updatedChecklist as unknown as Tables<"ordenes_trabajo">["checklist"],
+			})
+			.eq("id", otId)
+
+		if (updateError) {
+			setError(updateError.message)
+			return
+		}
+
+		setOrden((prev) => (prev ? { ...prev, checklist: updatedChecklist } : prev))
+		setChecklistState(buildChecklistState(updatedChecklist))
+	}
+
+	const toggleCheckItem = (itemId: string) => {
+		if (!orden) return
+
+		const checkIndex = orden.checklist.findIndex((item) => item.id === itemId)
+		if (checkIndex === -1) return
+
+		void handleChecklistToggle(checkIndex)
+	}
+
+	if (isLoading) {
+		return <PageLoading message="Cargando orden de trabajo..." />
+	}
+
+	if (error) {
+		return (
+			<PageError
+				message="Error al cargar la orden de trabajo"
+				description={error}
+				onRetry={() => setReloadKey((prev) => prev + 1)}
+			/>
+		)
+	}
+
+	const ot = orden
 
 	if (!ot) {
 		return (
@@ -235,13 +369,14 @@ export default function OrdenTrabajoDetailPage({
 		)
 	}
 
-	const equipo = equipos.find((e) => e.id === ot.idEquipo)
+	const equipo = equiposData.find((e) => e.id === ot.idEquipo)
 	const alerta = ot.idAlerta
-		? alertasEquipos.find((a) => a.id === ot.idAlerta)
+		? alertasData.find((a) => a.id === ot.idAlerta)
 		: null
 	const prioridadConf = PRIORIDAD_CONFIG[ot.prioridad]
 	const estadoConf = ESTADO_CONFIG[ot.estado]
 	const tipoConf = TIPO_CONFIG[ot.tipo]
+	const nextEstado = getNextEstado(ot.estado)
 
 	const categorias = ["epp", "herramienta", "repuesto", "procedimiento"]
 	const checklistPorCategoria = categorias.map((cat) => ({
@@ -253,13 +388,6 @@ export default function OrdenTrabajoDetailPage({
 	const completedItems = Object.values(checklistState).filter(Boolean).length
 	const progressPercent =
 		totalItems > 0 ? (completedItems / totalItems) * 100 : 0
-
-	const toggleCheckItem = (itemId: string) => {
-		setChecklistState((prev) => ({
-			...prev,
-			[itemId]: !prev[itemId],
-		}))
-	}
 
 	const estadoActualIndex = getEstadoIndex(ot.estado)
 
@@ -343,7 +471,15 @@ export default function OrdenTrabajoDetailPage({
 							</p>
 						</div>
 						<div className="flex gap-2">
-							<Button variant="outline">
+							<Button
+								variant="outline"
+								disabled={!nextEstado}
+								onClick={() => {
+									if (nextEstado) {
+										void handleStatusUpdate(nextEstado)
+									}
+								}}
+							>
 								<ArrowsClockwise className="mr-2 size-4" weight="bold" />
 								Cambiar Estado
 							</Button>
