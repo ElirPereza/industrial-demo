@@ -9,7 +9,7 @@ import {
 	UserCircleGear,
 	Wrench,
 } from "@phosphor-icons/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { type FormEvent, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -99,6 +99,7 @@ const MOBILE_VIEWS = [
 
 export default function LoginPage() {
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const supabase = useMemo(() => createClient(), [])
 	const { setRole } = useRole()
 	const [mode, setMode] = useState<AuthMode>("signin")
@@ -110,8 +111,16 @@ export default function LoginPage() {
 		email: false,
 		password: false,
 	})
-	const [authError, setAuthError] = useState<string | null>(null)
-	const [authSuccess, setAuthSuccess] = useState<string | null>(null)
+	const [authError, setAuthError] = useState<string | null>(
+		searchParams.get("error") === "auth"
+			? "Error al confirmar tu cuenta. Intenta de nuevo."
+			: null,
+	)
+	const [authSuccess, setAuthSuccess] = useState<string | null>(
+		searchParams.get("confirmed") === "true"
+			? "Correo confirmado exitosamente. Ya puedes iniciar sesión."
+			: null,
+	)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [quickAccessLoading, setQuickAccessLoading] =
 		useState<RolUsuario | null>(null)
