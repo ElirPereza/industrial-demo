@@ -19,6 +19,8 @@ import {
 	Wrench,
 } from "@phosphor-icons/react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -41,16 +43,28 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
 import {
-	alertasEquipos,
-	enviosFormularios,
-	equipos,
-	formulariosTemplate,
-	kpis,
-	ordenesTrabajo,
-	registrosMantenimiento,
-	usuarios,
+	mapAlertaRow,
+	mapEnvioRow,
+	mapEquipoRow,
+	mapFormTemplateRow,
+	mapKpiRow,
+	mapMantenimientoRow,
+	mapOrdenRow,
+	mapProfileRow,
+} from "@/lib/data-mappers"
+import type {
+	AlertaEquipo,
+	EnvioFormulario,
+	Equipo,
+	FormTemplate,
+	KPI,
+	OrdenTrabajo,
+	RegistroMantenimiento,
+	Usuario,
 } from "@/lib/mock-data"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
 import { useRole } from "@/lib/role-provider"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 import { ContratistaView } from "./_views/contratista-view"
 import { SupervisorView } from "./_views/supervisor-view"
@@ -165,7 +179,27 @@ const ESTADO_OT: Record<string, { cls: string; label: string }> = {
 	},
 }
 
-function AdminContent() {
+interface AdminContentProps {
+	alertasEquipos: AlertaEquipo[]
+	enviosFormularios: EnvioFormulario[]
+	equipos: Equipo[]
+	formulariosTemplate: FormTemplate[]
+	kpis: KPI[]
+	ordenesTrabajo: OrdenTrabajo[]
+	registrosMantenimiento: RegistroMantenimiento[]
+	usuarios: Usuario[]
+}
+
+function AdminContent({
+	alertasEquipos,
+	enviosFormularios,
+	equipos,
+	formulariosTemplate,
+	kpis,
+	ordenesTrabajo,
+	registrosMantenimiento,
+	usuarios,
+}: AdminContentProps) {
 	const operativos = equipos.filter((e) => e.estado === "operativo").length
 	const enMant = equipos.filter((e) => e.estado === "mantenimiento").length
 	const fueraServ = equipos.filter((e) => e.estado === "fuera-servicio").length
@@ -661,6 +695,71 @@ function AdminContent() {
 
 export default function DashboardPage() {
 	const { role } = useRole()
+	const equiposQuery = useSupabaseQuery(
+		"equipos",
+		(row: Record<string, unknown>) => mapEquipoRow(row as Tables<"equipos">),
+	)
+	const formulariosQuery = useSupabaseQuery(
+		"form_templates",
+		(row: Record<string, unknown>) =>
+			mapFormTemplateRow(row as Tables<"form_templates">),
+	)
+	const enviosQuery = useSupabaseQuery(
+		"envios_formularios",
+		(row: Record<string, unknown>) =>
+			mapEnvioRow(row as Tables<"envios_formularios">),
+	)
+	const ordenesQuery = useSupabaseQuery(
+		"ordenes_trabajo",
+		(row: Record<string, unknown>) =>
+			mapOrdenRow(row as Tables<"ordenes_trabajo">),
+	)
+	const alertasQuery = useSupabaseQuery(
+		"alertas_equipos",
+		(row: Record<string, unknown>) =>
+			mapAlertaRow(row as Tables<"alertas_equipos">),
+	)
+	const mantenimientosQuery = useSupabaseQuery(
+		"registros_mantenimiento",
+		(row: Record<string, unknown>) =>
+			mapMantenimientoRow(row as Tables<"registros_mantenimiento">),
+	)
+	const kpisQuery = useSupabaseQuery("kpis", (row: Record<string, unknown>) =>
+		mapKpiRow(row as Tables<"kpis">),
+	)
+	const usuariosQuery = useSupabaseQuery(
+		"profiles",
+		(row: Record<string, unknown>) => mapProfileRow(row as Tables<"profiles">),
+	)
+
+	const dashboardQueries = [
+		equiposQuery,
+		formulariosQuery,
+		enviosQuery,
+		ordenesQuery,
+		alertasQuery,
+		mantenimientosQuery,
+		kpisQuery,
+		usuariosQuery,
+	]
+
+	const isLoading = dashboardQueries.some((query) => query.isLoading)
+	const error = dashboardQueries.find((query) => query.error)?.error ?? null
+
+	const refetchAll = () => {
+		for (const query of dashboardQueries) {
+			query.refetch()
+		}
+	}
+
+	const equipos = equiposQuery.data ?? []
+	const formulariosTemplate = formulariosQuery.data ?? []
+	const enviosFormularios = enviosQuery.data ?? []
+	const ordenesTrabajo = ordenesQuery.data ?? []
+	const alertasEquipos = alertasQuery.data ?? []
+	const registrosMantenimiento = mantenimientosQuery.data ?? []
+	const kpis = kpisQuery.data ?? []
+	const usuarios = usuariosQuery.data ?? []
 
 	const breadcrumbTitles: Record<string, string> = {
 		admin: "Panel de Control",
@@ -698,10 +797,58 @@ export default function DashboardPage() {
 					</div>
 				</header>
 
-				{role === "admin" && <AdminContent />}
-				{role === "supervisor" && <SupervisorView />}
-				{role === "tecnico" && <TecnicoView />}
-				{role === "contratista" && <ContratistaView />}
+				{isLoading ? (
+					<PageLoading
+						message="Cargando dashboard..."
+						className="min-h-[calc(100vh-4rem)]"
+					/>
+				) : error ? (
+					<PageError
+						message="No se pudo cargar el dashboard"
+						description={error}
+						onRetry={refetchAll}
+						className="min-h-[calc(100vh-4rem)]"
+					/>
+				) : (
+					<>
+						{role === "admin" && (
+							<AdminContent
+								alertasEquipos={alertasEquipos}
+								enviosFormularios={enviosFormularios}
+								equipos={equipos}
+								formulariosTemplate={formulariosTemplate}
+								kpis={kpis}
+								ordenesTrabajo={ordenesTrabajo}
+								registrosMantenimiento={registrosMantenimiento}
+								usuarios={usuarios}
+							/>
+						)}
+						{role === "supervisor" && (
+							<SupervisorView
+								alertasEquipos={alertasEquipos}
+								equipos={equipos}
+								kpis={kpis}
+								ordenesTrabajo={ordenesTrabajo}
+								registrosMantenimiento={registrosMantenimiento}
+								usuarios={usuarios}
+							/>
+						)}
+						{role === "tecnico" && (
+							<TecnicoView
+								equipos={equipos}
+								formulariosTemplate={formulariosTemplate}
+								ordenesTrabajo={ordenesTrabajo}
+								registrosMantenimiento={registrosMantenimiento}
+							/>
+						)}
+						{role === "contratista" && (
+							<ContratistaView
+								equipos={equipos}
+								ordenesTrabajo={ordenesTrabajo}
+							/>
+						)}
+					</>
+				)}
 			</SidebarInset>
 		</SidebarProvider>
 	)

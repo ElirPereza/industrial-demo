@@ -15,15 +15,24 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import {
-	alertasEquipos,
-	equipos,
-	kpis,
-	ordenesTrabajo,
-	registrosMantenimiento,
-	usuarios,
+import type {
+	AlertaEquipo,
+	Equipo,
+	KPI,
+	OrdenTrabajo,
+	RegistroMantenimiento,
+	Usuario,
 } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
+
+interface SupervisorViewProps {
+	alertasEquipos: AlertaEquipo[]
+	equipos: Equipo[]
+	kpis: KPI[]
+	ordenesTrabajo: OrdenTrabajo[]
+	registrosMantenimiento: RegistroMantenimiento[]
+	usuarios: Usuario[]
+}
 
 function timeAgo(date: Date): string {
 	const now = new Date()
@@ -36,7 +45,14 @@ function timeAgo(date: Date): string {
 	return `hace ${diffDays}d`
 }
 
-export function SupervisorView() {
+export function SupervisorView({
+	alertasEquipos,
+	equipos,
+	kpis,
+	ordenesTrabajo,
+	registrosMantenimiento,
+	usuarios,
+}: SupervisorViewProps) {
 	const otsPendientesAprobacion = ordenesTrabajo.filter(
 		(ot) => ot.estado === "completada",
 	)

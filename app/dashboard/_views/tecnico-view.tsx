@@ -14,17 +14,29 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import {
-	equipos,
-	formulariosTemplate,
-	ordenesTrabajo,
-	registrosMantenimiento,
+import type {
+	Equipo,
+	FormTemplate,
+	OrdenTrabajo,
+	RegistroMantenimiento,
 } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 const TECNICO_NOMBRE = "María García"
 
-export function TecnicoView() {
+interface TecnicoViewProps {
+	equipos: Equipo[]
+	formulariosTemplate: FormTemplate[]
+	ordenesTrabajo: OrdenTrabajo[]
+	registrosMantenimiento: RegistroMantenimiento[]
+}
+
+export function TecnicoView({
+	equipos,
+	formulariosTemplate,
+	ordenesTrabajo,
+	registrosMantenimiento,
+}: TecnicoViewProps) {
 	const misOrdenes = ordenesTrabajo.filter(
 		(ot) => ot.tecnicoAsignado === TECNICO_NOMBRE,
 	)

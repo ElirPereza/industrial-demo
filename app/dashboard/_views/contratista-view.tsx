@@ -14,7 +14,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import { equipos, ordenesTrabajo } from "@/lib/mock-data"
+import type { Equipo, OrdenTrabajo } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 const CONTRATISTA = {
@@ -23,12 +23,6 @@ const CONTRATISTA = {
 	calificacion: 4.9,
 	horasEsteMes: 24.5,
 }
-
-const otContratista = [
-	ordenesTrabajo.find((ot) => ot.id === "ot-003"),
-	ordenesTrabajo.find((ot) => ot.id === "ot-005"),
-	ordenesTrabajo.find((ot) => ot.id === "ot-008"),
-].filter(Boolean)
 
 const documentosRequeridos = [
 	{
@@ -86,7 +80,20 @@ const horasRegistradas = [
 	},
 ]
 
-export function ContratistaView() {
+interface ContratistaViewProps {
+	equipos: Equipo[]
+	ordenesTrabajo: OrdenTrabajo[]
+}
+
+export function ContratistaView({
+	equipos,
+	ordenesTrabajo,
+}: ContratistaViewProps) {
+	const otContratista = [
+		ordenesTrabajo.find((ot) => ot.id === "ot-003"),
+		ordenesTrabajo.find((ot) => ot.id === "ot-005"),
+		ordenesTrabajo.find((ot) => ot.id === "ot-008"),
+	].filter(Boolean)
 	const totalHoras = horasRegistradas.reduce((sum, h) => sum + h.horas, 0)
 
 	return (
