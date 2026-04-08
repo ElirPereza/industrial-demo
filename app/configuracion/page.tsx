@@ -2,13 +2,22 @@
 
 import {
 	Bell,
+	Buildings,
+	CloudArrowUp,
+	Copy,
+	Cpu,
 	Globe,
+	Key,
 	Moon,
 	Palette,
+	Plus,
+	PlugsConnected,
 	Shield,
 	Sun,
+	TreeStructure,
 	User,
 } from "@phosphor-icons/react"
+import { useTheme } from "next-themes"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -51,7 +60,7 @@ export default function ConfiguracionPage() {
 	const [notifReportes, setNotifReportes] = useState(true)
 
 	// Appearance settings
-	const [tema, setTema] = useState<"light" | "dark" | "system">("system")
+	const { theme, setTheme } = useTheme()
 	const [idioma, setIdioma] = useState("es")
 	const [formatoFecha, setFormatoFecha] = useState("DD/MM/YYYY")
 
@@ -111,37 +120,47 @@ export default function ConfiguracionPage() {
 									</div>
 									<div>
 										<CardTitle>Perfil</CardTitle>
-										<CardDescription>
-											Información de tu cuenta
-										</CardDescription>
+										<CardDescription>Información de tu cuenta</CardDescription>
 									</div>
 								</div>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div>
-									<label className="mb-1.5 block text-sm font-medium">
+									<label
+										htmlFor="nombre"
+										className="mb-1.5 block text-sm font-medium"
+									>
 										Nombre Completo
 									</label>
 									<Input
+										id="nombre"
 										value={nombre}
 										onChange={(e) => setNombre(e.target.value)}
 									/>
 								</div>
 								<div>
-									<label className="mb-1.5 block text-sm font-medium">
+									<label
+										htmlFor="email"
+										className="mb-1.5 block text-sm font-medium"
+									>
 										Correo Electrónico
 									</label>
 									<Input
+										id="email"
 										type="email"
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
 									/>
 								</div>
 								<div>
-									<label className="mb-1.5 block text-sm font-medium">
+									<label
+										htmlFor="cargo"
+										className="mb-1.5 block text-sm font-medium"
+									>
 										Cargo
 									</label>
 									<Input
+										id="cargo"
 										value={cargo}
 										onChange={(e) => setCargo(e.target.value)}
 									/>
@@ -238,16 +257,19 @@ export default function ConfiguracionPage() {
 									</div>
 									<div>
 										<CardTitle>Apariencia</CardTitle>
-										<CardDescription>
-											Personaliza la interfaz
-										</CardDescription>
+										<CardDescription>Personaliza la interfaz</CardDescription>
 									</div>
 								</div>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div>
-									<label className="mb-2 block text-sm font-medium">Tema</label>
-									<div className="flex gap-2">
+									<label
+										htmlFor="tema"
+										className="mb-2 block text-sm font-medium"
+									>
+										Tema
+									</label>
+									<div id="tema" className="flex gap-2">
 										{[
 											{ value: "light", label: "Claro", icon: Sun },
 											{ value: "dark", label: "Oscuro", icon: Moon },
@@ -256,12 +278,10 @@ export default function ConfiguracionPage() {
 											<button
 												key={option.value}
 												type="button"
-												onClick={() =>
-													setTema(option.value as "light" | "dark" | "system")
-												}
+												onClick={() => setTheme(option.value)}
 												className={cn(
 													"flex flex-1 flex-col items-center gap-2 rounded-lg border p-3 transition-all",
-													tema === option.value
+													theme === option.value
 														? "border-primary bg-primary/5"
 														: "hover:bg-muted",
 												)}
@@ -269,7 +289,7 @@ export default function ConfiguracionPage() {
 												<option.icon
 													className={cn(
 														"size-5",
-														tema === option.value
+														theme === option.value
 															? "text-primary"
 															: "text-muted-foreground",
 													)}
@@ -284,10 +304,14 @@ export default function ConfiguracionPage() {
 								</div>
 								<Separator />
 								<div>
-									<label className="mb-1.5 block text-sm font-medium">
+									<label
+										htmlFor="idioma"
+										className="mb-1.5 block text-sm font-medium"
+									>
 										Idioma
 									</label>
 									<select
+										id="idioma"
 										value={idioma}
 										onChange={(e) => setIdioma(e.target.value)}
 										className="w-full rounded-md border bg-background p-2 text-sm"
@@ -298,10 +322,14 @@ export default function ConfiguracionPage() {
 									</select>
 								</div>
 								<div>
-									<label className="mb-1.5 block text-sm font-medium">
+									<label
+										htmlFor="formatoFecha"
+										className="mb-1.5 block text-sm font-medium"
+									>
 										Formato de Fecha
 									</label>
 									<select
+										id="formatoFecha"
 										value={formatoFecha}
 										onChange={(e) => setFormatoFecha(e.target.value)}
 										className="w-full rounded-md border bg-background p-2 text-sm"
@@ -323,9 +351,7 @@ export default function ConfiguracionPage() {
 									</div>
 									<div>
 										<CardTitle>Seguridad</CardTitle>
-										<CardDescription>
-											Protege tu cuenta
-										</CardDescription>
+										<CardDescription>Protege tu cuenta</CardDescription>
 									</div>
 								</div>
 							</CardHeader>
@@ -347,7 +373,9 @@ export default function ConfiguracionPage() {
 								<Separator />
 								<div className="flex items-center justify-between">
 									<div>
-										<p className="text-sm font-medium">Mantener Sesión Activa</p>
+										<p className="text-sm font-medium">
+											Mantener Sesión Activa
+										</p>
 										<p className="text-xs text-muted-foreground">
 											No cerrar sesión automáticamente
 										</p>
@@ -366,6 +394,313 @@ export default function ConfiguracionPage() {
 								<div>
 									<Button variant="destructive" className="w-full">
 										Cerrar Todas las Sesiones
+									</Button>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+
+					{/* Integraciones IoT */}
+					<Separator />
+					<div className="space-y-6">
+						<Card>
+							<CardHeader>
+								<div className="flex items-center gap-3">
+									<div className="flex size-10 items-center justify-center rounded-lg bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400">
+										<Cpu className="size-5" weight="duotone" />
+									</div>
+									<div>
+										<CardTitle>Integraciones IoT</CardTitle>
+										<CardDescription>
+											Conecta equipos industriales para monitoreo en tiempo real
+										</CardDescription>
+									</div>
+								</div>
+							</CardHeader>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>Protocolos Soportados</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="grid gap-4 sm:grid-cols-2">
+									{[
+										{
+											name: "Modbus TCP",
+											icon: PlugsConnected,
+											status: "Configurado",
+											statusColor:
+												"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+											description: "Puerto 502, 3 dispositivos",
+											iconColor: "text-blue-600 dark:text-blue-400",
+											iconBg: "bg-blue-100 dark:bg-blue-900/30",
+										},
+										{
+											name: "OPC-UA",
+											icon: TreeStructure,
+											status: "Disponible",
+											statusColor:
+												"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+											description: "Servidor OPC-UA compatible",
+											iconColor: "text-purple-600 dark:text-purple-400",
+											iconBg: "bg-purple-100 dark:bg-purple-900/30",
+										},
+										{
+											name: "MQTT",
+											icon: CloudArrowUp,
+											status: "Configurado",
+											statusColor:
+												"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+											description: "Broker: mqtt.planta.local:1883",
+											iconColor: "text-emerald-600 dark:text-emerald-400",
+											iconBg: "bg-emerald-100 dark:bg-emerald-900/30",
+										},
+										{
+											name: "BACnet",
+											icon: Buildings,
+											status: "No configurado",
+											statusColor:
+												"bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+											description: "Para sistemas HVAC",
+											iconColor: "text-orange-600 dark:text-orange-400",
+											iconBg: "bg-orange-100 dark:bg-orange-900/30",
+										},
+									].map((protocol) => (
+										<div
+											key={protocol.name}
+											className="flex flex-col gap-3 rounded-lg border p-4"
+										>
+											<div className="flex items-start justify-between">
+												<div
+													className={cn(
+														"flex size-10 items-center justify-center rounded-lg",
+														protocol.iconBg,
+													)}
+												>
+													<protocol.icon
+														className={cn("size-5", protocol.iconColor)}
+														weight="duotone"
+													/>
+												</div>
+												<span
+													className={cn(
+														"rounded-full px-2 py-0.5 text-xs font-medium",
+														protocol.statusColor,
+													)}
+												>
+													{protocol.status}
+												</span>
+											</div>
+											<div>
+												<p className="font-medium">{protocol.name}</p>
+												<p className="text-xs text-muted-foreground">
+													{protocol.description}
+												</p>
+											</div>
+											<Button variant="outline" size="sm" className="w-full">
+												Configurar
+											</Button>
+										</div>
+									))}
+								</div>
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<div className="flex items-center justify-between">
+									<CardTitle>Dispositivos Conectados</CardTitle>
+									<Button size="sm">
+										<Plus className="size-4" />
+										Agregar Dispositivo
+									</Button>
+								</div>
+							</CardHeader>
+							<CardContent className="p-0">
+								<div className="divide-y">
+									{[
+										{
+											name: "Danfoss VLT FC-302",
+											type: "Variador",
+											protocol: "Modbus TCP",
+											address: "192.168.1.101",
+											status: "online",
+											statusLabel: "Online",
+											lastData: "Último dato: hace 2 min",
+										},
+										{
+											name: "Siemens Sinamics G120",
+											type: "Variador",
+											protocol: "Modbus TCP",
+											address: "192.168.1.102",
+											status: "online",
+											statusLabel: "Online",
+											lastData: "Último dato: hace 1 min",
+										},
+										{
+											name: "Siemens S7-1200",
+											type: "PLC",
+											protocol: "OPC-UA",
+											address: "192.168.1.200",
+											status: "online",
+											statusLabel: "Online",
+											lastData: "Último dato: hace 30 seg",
+										},
+										{
+											name: "ABB ACS580",
+											type: "Variador",
+											protocol: "MQTT",
+											address: "Topic: planta/variadores/abb",
+											status: "warning",
+											statusLabel: "Intermitente",
+											lastData: "Último dato: hace 15 min",
+										},
+										{
+											name: "Danfoss MCB 101",
+											type: "Controlador",
+											protocol: "MQTT",
+											address: "Topic: planta/hvac/danfoss",
+											status: "offline",
+											statusLabel: "Offline",
+											lastData: "Sin datos hace 2h",
+										},
+									].map((device) => (
+										<div
+											key={device.name}
+											className="flex items-center gap-4 p-4"
+										>
+											<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+												<Cpu
+													className="size-5 text-muted-foreground"
+													weight="duotone"
+												/>
+											</div>
+											<div className="min-w-0 flex-1">
+												<div className="flex items-center gap-2">
+													<p className="truncate text-sm font-medium">
+														{device.name}
+													</p>
+													<span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+														{device.type}
+													</span>
+												</div>
+												<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+													<span
+														className={cn(
+															"rounded-full px-2 py-0.5 font-medium",
+															device.protocol === "Modbus TCP" &&
+																"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+															device.protocol === "OPC-UA" &&
+																"bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+															device.protocol === "MQTT" &&
+																"bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+														)}
+													>
+														{device.protocol}
+													</span>
+													<span className="truncate">{device.address}</span>
+												</div>
+											</div>
+											<div className="flex shrink-0 flex-col items-end gap-1">
+												<div className="flex items-center gap-1.5">
+													<div
+														className={cn(
+															"size-2 rounded-full",
+															device.status === "online" && "bg-green-500",
+															device.status === "warning" && "bg-yellow-500",
+															device.status === "offline" && "bg-red-500",
+														)}
+													/>
+													<span
+														className={cn(
+															"text-xs font-medium",
+															device.status === "online" &&
+																"text-green-700 dark:text-green-400",
+															device.status === "warning" &&
+																"text-yellow-700 dark:text-yellow-400",
+															device.status === "offline" &&
+																"text-red-700 dark:text-red-400",
+														)}
+													>
+														{device.statusLabel}
+													</span>
+												</div>
+												<span className="text-xs text-muted-foreground">
+													{device.lastData}
+												</span>
+											</div>
+										</div>
+									))}
+								</div>
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<div className="flex items-center gap-3">
+									<div className="flex size-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+										<Globe className="size-5" weight="duotone" />
+									</div>
+									<div>
+										<CardTitle>Webhooks y APIs</CardTitle>
+										<CardDescription>
+											Integra con sistemas externos (SCADA, MES, ERP)
+										</CardDescription>
+									</div>
+								</div>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="divide-y rounded-lg border">
+									{[
+										{
+											name: "Notificación de alertas críticas",
+											method: "POST",
+											url: "https://scada.planta.local/api/alerts",
+										},
+										{
+											name: "Reporte diario de mantenimiento",
+											method: "POST",
+											url: "https://erp.empresa.com/api/maintenance",
+										},
+									].map((webhook) => (
+										<div
+											key={webhook.name}
+											className="flex items-center justify-between gap-4 p-3"
+										>
+											<div className="min-w-0 flex-1">
+												<p className="text-sm font-medium">{webhook.name}</p>
+												<p className="truncate text-xs text-muted-foreground">
+													{webhook.method} → {webhook.url}
+												</p>
+											</div>
+											<span className="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+												Activo
+											</span>
+										</div>
+									))}
+								</div>
+								<Button variant="outline" size="sm">
+									<Plus className="size-4" />
+									Agregar Webhook
+								</Button>
+								<Separator />
+								<div className="flex items-center justify-between gap-4 rounded-lg border p-3">
+									<div className="flex items-center gap-3">
+										<Key
+											className="size-5 text-muted-foreground"
+											weight="duotone"
+										/>
+										<div>
+											<p className="text-sm font-medium">Tu API Key</p>
+											<p className="font-mono text-xs text-muted-foreground">
+												●●●●●●●●●●●●sk-prod-xxxx
+											</p>
+										</div>
+									</div>
+									<Button variant="outline" size="sm">
+										<Copy className="size-4" />
+										Copiar
 									</Button>
 								</div>
 							</CardContent>
