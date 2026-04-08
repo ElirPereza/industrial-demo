@@ -43,26 +43,83 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
-import { equipos, formulariosTemplate } from "@/lib/mock-data"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
+import { mapEquipoRow, mapFormTemplateRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { Equipo, FormTemplate } from "@/lib/mock-data"
+import { createClient } from "@/lib/supabase/client"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 export default function FormAdminPage() {
-	const [formularios, setFormularios] = useState(formulariosTemplate)
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-	const [selectedFormulario, setSelectedFormulario] = useState<string | null>(
-		null,
+	const [, setSelectedFormulario] = useState<string | null>(null)
+	const [updatingFormId, setUpdatingFormId] = useState<string | null>(null)
+
+	const {
+		data: formulariosData,
+		isLoading: loadingFormularios,
+		error: errorFormularios,
+		refetch: refetchFormularios,
+	} = useSupabaseQuery("form_templates", (row) =>
+		mapFormTemplateRow(row as unknown as Tables<"form_templates">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+		refetch: refetchEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
 	)
 
-	const handleToggleActivo = (id: string) => {
-		setFormularios((prev) =>
-			prev.map((f) => (f.id === id ? { ...f, activo: !f.activo } : f)),
+	const isLoading = loadingFormularios || loadingEquipos
+	const error = errorFormularios ?? errorEquipos
+	const formularios: FormTemplate[] = formulariosData ?? []
+	const equipos: Equipo[] = equiposData ?? []
+
+	const handleToggleActivo = async (formulario: FormTemplate) => {
+		setUpdatingFormId(formulario.id)
+
+		const supabase = createClient()
+		const { error: updateError } = await supabase
+			.from("form_templates")
+			.update({ activo: !formulario.activo })
+			.eq("id", formulario.id)
+
+		setUpdatingFormId(null)
+
+		if (updateError) {
+			alert(`No se pudo actualizar el formulario: ${updateError.message}`)
+			return
+		}
+
+		refetchFormularios()
+		alert(
+			`Formulario ${!formulario.activo ? "activado" : "desactivado"} exitosamente`,
 		)
 	}
 
 	const handleDelete = () => {
-		setFormularios((prev) => prev.filter((f) => f.id !== selectedFormulario))
 		setDeleteDialogOpen(false)
 		setSelectedFormulario(null)
+	}
+
+	if (isLoading) {
+		return <PageLoading />
+	}
+
+	if (error) {
+		return (
+			<PageError
+				message={error}
+				onRetry={() => {
+					refetchFormularios()
+					refetchEquipos()
+				}}
+			/>
+		)
 	}
 
 	return (
@@ -209,8 +266,9 @@ export default function FormAdminPage() {
 													<div className="flex items-center gap-2">
 														<Switch
 															checked={formulario.activo}
+															disabled={updatingFormId === formulario.id}
 															onCheckedChange={() =>
-																handleToggleActivo(formulario.id)
+																void handleToggleActivo(formulario)
 															}
 														/>
 														<span

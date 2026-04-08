@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation"
 import { use, useRef, useState } from "react"
 import SignatureCanvas from "react-signature-canvas"
 import { AppSidebar } from "@/components/app-sidebar"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -35,7 +37,12 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { formulariosTemplate, usuarios } from "@/lib/mock-data"
+import { mapEquipoRow, mapFormTemplateRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { CampoRespuesta, Equipo, FormTemplate } from "@/lib/mock-data"
+import { useRole } from "@/lib/role-provider"
+import { createClient } from "@/lib/supabase/client"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 export default function FormFillPage({
@@ -46,11 +53,68 @@ export default function FormFillPage({
 	const { id: formularioId } = use(params)
 	const router = useRouter()
 	const signatureRef = useRef<SignatureCanvas>(null)
+	const { user, profile } = useRole()
 
-	const formulario = formulariosTemplate.find((f) => f.id === formularioId)
+	const {
+		data: templatesData,
+		isLoading: loadingTemplates,
+		error: errorTemplates,
+		refetch: refetchTemplates,
+	} = useSupabaseQuery("form_templates", (row) =>
+		mapFormTemplateRow(row as unknown as Tables<"form_templates">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+		refetch: refetchEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
 	const [formData, setFormData] = useState<Record<string, string>>({})
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
 	const [signatureEmpty, setSignatureEmpty] = useState(true)
+	const [isSubmitting, setIsSubmitting] = useState(false)
+
+	const isLoading = loadingTemplates || loadingEquipos
+	const error = errorTemplates ?? errorEquipos
+
+	if (isLoading) {
+		return <PageLoading />
+	}
+
+	if (error) {
+		return (
+			<PageError
+				message={error}
+				onRetry={() => {
+					refetchTemplates()
+					refetchEquipos()
+				}}
+			/>
+		)
+	}
+
+	const formularios: FormTemplate[] = templatesData ?? []
+	const equipos: Equipo[] = equiposData ?? []
+	const formulario = formularios.find((f) => f.id === formularioId)
+	const selectedEquipoId =
+		formulario?.asociacion.tipo === "equipo"
+			? formulario.asociacion.valor
+			: null
+	const selectedEquipo = selectedEquipoId
+		? equipos.find((equipo) => equipo.id === selectedEquipoId)
+		: null
+	const currentUserName =
+		profile?.nombre ?? user?.email?.split("@")[0] ?? "Usuario actual"
+	const ubicacionFormulario = selectedEquipo?.ubicacion
+		? selectedEquipo.ubicacion
+		: formulario?.asociacion.tipo === "area"
+			? (formulario.asociacion.valor ?? "Área sin definir")
+			: formulario?.asociacion.tipo === "tipo-equipo"
+				? `Tipo: ${(formulario.asociacion.valor ?? "general").replace("-", " ")}`
+				: "Todos los equipos"
 
 	if (!formulario) {
 		return (
@@ -80,10 +144,14 @@ export default function FormFillPage({
 		setSignatureEmpty(true)
 	}
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
+		if (!user) {
+			alert("Debes iniciar sesión para enviar el formulario")
+			return
+		}
+
 		const newErrors: Record<string, boolean> = {}
 
-		// Validate required fields
 		formulario.campos.forEach((campo) => {
 			if (campo.requerido) {
 				if (campo.tipo === "firma") {
@@ -98,14 +166,44 @@ export default function FormFillPage({
 
 		setErrors(newErrors)
 
-		if (Object.keys(newErrors).length === 0) {
-			// Success
-			alert("Formulario enviado exitosamente (simulado)")
-			router.push("/formularios")
+		if (Object.keys(newErrors).length > 0) {
+			return
 		}
+
+		const respuestas: CampoRespuesta[] = formulario.campos.map((campo) => ({
+			idCampo: campo.id,
+			valor:
+				campo.tipo === "firma"
+					? (signatureRef.current?.toDataURL() ?? "")
+					: (formData[campo.id] ?? ""),
+		}))
+
+		setIsSubmitting(true)
+
+		const supabase = createClient()
+		const { error: insertError } = await supabase
+			.from("envios_formularios")
+			.insert({
+				id_formulario: formularioId,
+				id_equipo: selectedEquipoId || null,
+				id_usuario: user.id,
+				version_formulario: formulario.version,
+				respuestas:
+					respuestas as unknown as Tables<"envios_formularios">["respuestas"],
+				estado: "completado",
+			})
+
+		setIsSubmitting(false)
+
+		if (insertError) {
+			alert(`No se pudo enviar el formulario: ${insertError.message}`)
+			return
+		}
+
+		alert("Formulario enviado exitosamente")
+		router.push("/formularios")
 	}
 
-	const currentUser = usuarios[0] // Mock current user
 	const currentDate = new Date()
 
 	return (
@@ -162,7 +260,7 @@ export default function FormFillPage({
 									</div>
 									<div>
 										<p className="text-xs text-muted-foreground">Usuario</p>
-										<p className="text-sm font-medium">{currentUser.nombre}</p>
+										<p className="text-sm font-medium">{currentUserName}</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
@@ -190,9 +288,7 @@ export default function FormFillPage({
 									</div>
 									<div>
 										<p className="text-xs text-muted-foreground">Ubicación</p>
-										<p className="text-sm font-medium">
-											Planta Principal (mock)
-										</p>
+										<p className="text-sm font-medium">{ubicacionFormulario}</p>
 									</div>
 								</div>
 							</div>
@@ -409,13 +505,14 @@ export default function FormFillPage({
 					<div className="flex justify-end gap-2">
 						<Button
 							variant="outline"
+							disabled={isSubmitting}
 							onClick={() => router.push("/formularios")}
 						>
 							Cancelar
 						</Button>
-						<Button onClick={handleSubmit}>
+						<Button disabled={isSubmitting} onClick={() => void handleSubmit()}>
 							<Check className="mr-2 size-4" weight="bold" />
-							Enviar Formulario
+							{isSubmitting ? "Enviando..." : "Enviar Formulario"}
 						</Button>
 					</div>
 				</div>
