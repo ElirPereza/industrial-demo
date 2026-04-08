@@ -15,6 +15,8 @@ import {
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -38,65 +40,11 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { mapProfileRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { Usuario } from "@/lib/mock-data"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
-
-// Mock data for users
-const usuariosMock = [
-	{
-		id: "usr-001",
-		nombre: "Carlos Mendoza",
-		email: "carlos.mendoza@empresa.com",
-		rol: "admin",
-		departamento: "TI",
-		estado: "activo",
-		ultimoAcceso: new Date("2024-01-15"),
-	},
-	{
-		id: "usr-002",
-		nombre: "Ana García",
-		email: "ana.garcia@empresa.com",
-		rol: "supervisor",
-		departamento: "Mantenimiento",
-		estado: "activo",
-		ultimoAcceso: new Date("2024-01-14"),
-	},
-	{
-		id: "usr-003",
-		nombre: "Luis Rodríguez",
-		email: "luis.rodriguez@empresa.com",
-		rol: "tecnico",
-		departamento: "Mantenimiento",
-		estado: "activo",
-		ultimoAcceso: new Date("2024-01-15"),
-	},
-	{
-		id: "usr-004",
-		nombre: "María López",
-		email: "maria.lopez@empresa.com",
-		rol: "tecnico",
-		departamento: "Producción",
-		estado: "activo",
-		ultimoAcceso: new Date("2024-01-13"),
-	},
-	{
-		id: "usr-005",
-		nombre: "Pedro Sánchez",
-		email: "pedro.sanchez@empresa.com",
-		rol: "supervisor",
-		departamento: "Calidad",
-		estado: "inactivo",
-		ultimoAcceso: new Date("2024-01-10"),
-	},
-	{
-		id: "usr-006",
-		nombre: "Laura Martínez",
-		email: "laura.martinez@empresa.com",
-		rol: "tecnico",
-		departamento: "Mantenimiento",
-		estado: "activo",
-		ultimoAcceso: new Date("2024-01-15"),
-	},
-]
 
 const getRolIcon = (rol: string) => {
 	switch (rol) {
@@ -142,7 +90,25 @@ export default function UsuariosPage() {
 	const [busqueda, setBusqueda] = useState("")
 	const [filtroRol, setFiltroRol] = useState<string | null>(null)
 
-	const usuariosFiltrados = usuariosMock.filter((u) => {
+	const { data, isLoading, error, refetch } = useSupabaseQuery(
+		"profiles",
+		(row) => mapProfileRow(row as unknown as Tables<"profiles">),
+	)
+
+	if (isLoading) return <PageLoading message="Cargando usuarios..." />
+	if (error) {
+		return (
+			<PageError
+				message="Error al cargar usuarios"
+				description={error}
+				onRetry={refetch}
+			/>
+		)
+	}
+
+	const usuarios = data ?? []
+
+	const usuariosFiltrados = usuarios.filter((u) => {
 		const matchBusqueda =
 			u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
 			u.email.toLowerCase().includes(busqueda.toLowerCase())
@@ -151,9 +117,9 @@ export default function UsuariosPage() {
 	})
 
 	const conteoRoles = {
-		admin: usuariosMock.filter((u) => u.rol === "admin").length,
-		supervisor: usuariosMock.filter((u) => u.rol === "supervisor").length,
-		tecnico: usuariosMock.filter((u) => u.rol === "tecnico").length,
+		admin: usuarios.filter((u) => u.rol === "admin").length,
+		supervisor: usuarios.filter((u) => u.rol === "supervisor").length,
+		tecnico: usuarios.filter((u) => u.rol === "tecnico").length,
 	}
 
 	return (
@@ -197,7 +163,6 @@ export default function UsuariosPage() {
 						</Button>
 					</div>
 
-					{/* Stats Cards */}
 					<div className="grid gap-4 sm:grid-cols-3">
 						{[
 							{
@@ -237,7 +202,6 @@ export default function UsuariosPage() {
 						))}
 					</div>
 
-					{/* Search */}
 					<div className="relative">
 						<MagnifyingGlass className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 						<Input
@@ -248,7 +212,6 @@ export default function UsuariosPage() {
 						/>
 					</div>
 
-					{/* Users Table */}
 					<Card>
 						<CardHeader>
 							<CardTitle>Usuarios ({usuariosFiltrados.length})</CardTitle>
@@ -282,11 +245,6 @@ export default function UsuariosPage() {
 												>
 													{getRolLabel(usuario.rol)}
 												</span>
-												{usuario.estado === "inactivo" && (
-													<span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-														Inactivo
-													</span>
-												)}
 											</div>
 											<div className="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
 												<span className="flex items-center gap-1">
@@ -296,15 +254,6 @@ export default function UsuariosPage() {
 												<span>•</span>
 												<span>{usuario.departamento}</span>
 											</div>
-										</div>
-										<div className="text-right text-xs text-muted-foreground">
-											<p>Último acceso</p>
-											<p className="font-medium">
-												{usuario.ultimoAcceso.toLocaleDateString("es-ES", {
-													day: "2-digit",
-													month: "short",
-												})}
-											</p>
 										</div>
 										<div className="flex gap-1">
 											<Button variant="ghost" size="icon-sm">

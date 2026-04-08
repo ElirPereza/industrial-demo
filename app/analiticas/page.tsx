@@ -23,6 +23,8 @@ import {
 	YAxis,
 } from "recharts"
 import { AppSidebar } from "@/components/app-sidebar"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -44,9 +46,31 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
+import {
+	mapAlertaRow,
+	mapEquipoRow,
+	mapMantenimientoRow,
+	mapOrdenRow,
+} from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type {
+	AlertaEquipo,
+	Equipo,
+	OrdenTrabajo,
+	RegistroMantenimiento,
+} from "@/lib/mock-data"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({
+	active,
+	payload,
+	label,
+}: {
+	active?: boolean
+	payload?: { color: string; name: string; value: number }[]
+	label?: string
+}) => {
 	if (!active || !payload || !payload.length) {
 		return null
 	}
@@ -56,9 +80,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 	return (
 		<div className="overflow-hidden rounded-lg border bg-background p-3 shadow-lg">
 			<p className="text-sm font-semibold mb-2">{labelDate}</p>
-			{payload.map((entry: any, idx: number) => (
+			{payload.map((entry) => (
 				<div
-					key={idx}
+					key={entry.name}
 					className="flex items-center justify-between gap-4 text-sm"
 				>
 					<div className="flex items-center gap-2">
@@ -75,11 +99,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 	)
 }
 
-const CustomLegend = ({ data }: any) => {
+const CustomLegend = ({
+	data,
+}: {
+	data: { color: string; name: string }[]
+}) => {
 	return (
 		<div className="flex flex-wrap items-center justify-center gap-3">
-			{data.map((item: any, idx: number) => (
-				<div key={idx} className="flex items-center gap-2">
+			{data.map((item) => (
+				<div key={item.name} className="flex items-center gap-2">
 					<div
 						className="size-2.5 rounded-full"
 						style={{ backgroundColor: item.color }}
@@ -92,82 +120,208 @@ const CustomLegend = ({ data }: any) => {
 }
 
 const BAR_GRADIENT = "url(#barGradient)"
-const LINE_GRADIENT = "url(#lineGradient)"
-
-const formulariosporMes = [
-	{ mes: "Ene", completados: 45, pendientes: 12 },
-	{ mes: "Feb", completados: 52, pendientes: 8 },
-	{ mes: "Mar", completados: 61, pendientes: 15 },
-	{ mes: "Abr", completados: 48, pendientes: 10 },
-	{ mes: "May", completados: 72, pendientes: 5 },
-	{ mes: "Jun", completados: 68, pendientes: 9 },
-]
-
-const tendenciaFallas = [
-	{ semana: "Sem 1", fallas: 8 },
-	{ semana: "Sem 2", fallas: 12 },
-	{ semana: "Sem 3", fallas: 6 },
-	{ semana: "Sem 4", fallas: 9 },
-	{ semana: "Sem 5", fallas: 4 },
-	{ semana: "Sem 6", fallas: 7 },
-	{ semana: "Sem 7", fallas: 3 },
-	{ semana: "Sem 8", fallas: 5 },
-]
-
-const equiposMasIntervenidos = [
-	{ equipo: "Compresor A-01", intervenciones: 18 },
-	{ equipo: "Bomba B-03", intervenciones: 15 },
-	{ equipo: "Motor M-02", intervenciones: 12 },
-	{ equipo: "Generador G-01", intervenciones: 10 },
-	{ equipo: "Caldera C-01", intervenciones: 8 },
-]
-
-const tecnicosMasActivos = [
-	{ nombre: "Carlos Méndez", formularios: 45 },
-	{ nombre: "Ana García", formularios: 38 },
-	{ nombre: "Luis Rodríguez", formularios: 32 },
-	{ nombre: "María López", formularios: 28 },
-	{ nombre: "Pedro Sánchez", formularios: 22 },
-]
-
-const tiposMantenimiento = [
-	{ tipo: "Preventivo", valor: 45, color: "var(--color-chart-1)" },
-	{ tipo: "Correctivo", valor: 30, color: "var(--color-chart-3)" },
-	{ tipo: "Inspección", valor: 25, color: "var(--color-chart-2)" },
-]
-
-const kpis = [
-	{
-		titulo: "Formularios Este Mes",
-		valor: "156",
-		cambio: "+12%",
-		tipo: "positivo",
-		icon: TrendUp,
-	},
-	{
-		titulo: "Tiempo Promedio",
-		valor: "24 min",
-		cambio: "-8%",
-		tipo: "positivo",
-		icon: Clock,
-	},
-	{
-		titulo: "Técnicos Activos",
-		valor: "12",
-		cambio: "+2",
-		tipo: "positivo",
-		icon: Users,
-	},
-	{
-		titulo: "Equipos Críticos",
-		valor: "3",
-		cambio: "-1",
-		tipo: "positivo",
-		icon: Wrench,
-	},
+const MONTHS = [
+	"Ene",
+	"Feb",
+	"Mar",
+	"Abr",
+	"May",
+	"Jun",
+	"Jul",
+	"Ago",
+	"Sep",
+	"Oct",
+	"Nov",
+	"Dic",
 ]
 
 export default function AnaliticasPage() {
+	const {
+		data: alertasData,
+		isLoading: isLoadingAlertas,
+		error: errorAlertas,
+		refetch: refetchAlertas,
+	} = useSupabaseQuery("alertas_equipos", (row) =>
+		mapAlertaRow(row as unknown as Tables<"alertas_equipos">),
+	)
+
+	const {
+		data: registrosData,
+		isLoading: isLoadingRegistros,
+		error: errorRegistros,
+		refetch: refetchRegistros,
+	} = useSupabaseQuery("registros_mantenimiento", (row) =>
+		mapMantenimientoRow(row as unknown as Tables<"registros_mantenimiento">),
+	)
+
+	const {
+		data: equiposData,
+		isLoading: isLoadingEquipos,
+		error: errorEquipos,
+		refetch: refetchEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
+	const {
+		data: ordenesData,
+		isLoading: isLoadingOrdenes,
+		error: errorOrdenes,
+		refetch: refetchOrdenes,
+	} = useSupabaseQuery("ordenes_trabajo", (row) =>
+		mapOrdenRow(row as unknown as Tables<"ordenes_trabajo">),
+	)
+
+	const isLoading =
+		isLoadingAlertas ||
+		isLoadingRegistros ||
+		isLoadingEquipos ||
+		isLoadingOrdenes
+	const error = errorAlertas ?? errorRegistros ?? errorEquipos ?? errorOrdenes
+
+	if (isLoading) return <PageLoading message="Cargando analíticas..." />
+	if (error) {
+		return (
+			<PageError
+				message="Error al cargar analíticas"
+				description={error}
+				onRetry={() => {
+					refetchAlertas()
+					refetchRegistros()
+					refetchEquipos()
+					refetchOrdenes()
+				}}
+			/>
+		)
+	}
+
+	const alertas = alertasData ?? []
+	const registros = registrosData ?? []
+	const equipos = equiposData ?? []
+	const ordenes = ordenesData ?? []
+
+	const now = new Date()
+
+	const formulariosporMes = Array.from({ length: 6 }, (_, i) => {
+		const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+		const nextD = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 1)
+		const monthOrdenes = ordenes.filter(
+			(o) => o.fechaCreacion >= d && o.fechaCreacion < nextD,
+		)
+		return {
+			mes: MONTHS[d.getMonth()],
+			completados: monthOrdenes.filter((o) => o.estado === "completada").length,
+			pendientes: monthOrdenes.filter((o) => o.estado !== "completada").length,
+		}
+	})
+
+	const tendenciaFallas = Array.from({ length: 8 }, (_, i) => {
+		const weekEnd = new Date(now.getTime() - (7 - i) * 7 * 24 * 60 * 60 * 1000)
+		const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000)
+		return {
+			semana: `Sem ${i + 1}`,
+			fallas: alertas.filter(
+				(a) => a.fechaDeteccion >= weekStart && a.fechaDeteccion < weekEnd,
+			).length,
+		}
+	})
+
+	const equipoConteo = new Map<string, number>()
+	for (const reg of registros) {
+		equipoConteo.set(reg.idEquipo, (equipoConteo.get(reg.idEquipo) ?? 0) + 1)
+	}
+	const equiposMasIntervenidos = [...equipoConteo.entries()]
+		.map(([idEquipo, intervenciones]) => ({
+			equipo: equipos.find((e) => e.id === idEquipo)?.nombre ?? idEquipo,
+			intervenciones,
+		}))
+		.sort((a, b) => b.intervenciones - a.intervenciones)
+		.slice(0, 5)
+
+	const preventivo = registros.filter((r) => r.tipo === "preventivo").length
+	const correctivo = registros.filter((r) => r.tipo === "correctivo").length
+	const inspeccion = registros.filter((r) => r.tipo === "inspección").length
+	const totalReg = preventivo + correctivo + inspeccion || 1
+	const tiposMantenimiento = [
+		{
+			name: "Preventivo",
+			valor: Math.round((preventivo * 100) / totalReg),
+			color: "var(--color-chart-1)",
+		},
+		{
+			name: "Correctivo",
+			valor: Math.round((correctivo * 100) / totalReg),
+			color: "var(--color-chart-3)",
+		},
+		{
+			name: "Inspección",
+			valor: Math.round((inspeccion * 100) / totalReg),
+			color: "var(--color-chart-2)",
+		},
+	]
+
+	const tecnicoConteo = new Map<string, number>()
+	for (const reg of registros) {
+		tecnicoConteo.set(reg.tecnico, (tecnicoConteo.get(reg.tecnico) ?? 0) + 1)
+	}
+	const tecnicosMasActivos = [...tecnicoConteo.entries()]
+		.map(([nombre, formularios]) => ({ nombre, formularios }))
+		.sort((a, b) => b.formularios - a.formularios)
+		.slice(0, 5)
+	const maxFormularios =
+		tecnicosMasActivos.length > 0
+			? Math.max(...tecnicosMasActivos.map((t) => t.formularios))
+			: 1
+
+	const thisMonth = now.getMonth()
+	const thisYear = now.getFullYear()
+	const formulariosEsteMes = ordenes.filter(
+		(o) =>
+			o.fechaCreacion.getMonth() === thisMonth &&
+			o.fechaCreacion.getFullYear() === thisYear,
+	).length
+	const tiempoPromedioMin =
+		registros.length > 0
+			? Math.round(
+					(registros.reduce((s, r) => s + r.horasEmpleadas, 0) /
+						registros.length) *
+						60,
+				)
+			: 0
+	const tecnicosActivos = new Set(registros.map((r) => r.tecnico)).size
+	const equiposCriticos = equipos.filter((e) => e.estado !== "operativo").length
+
+	const kpis = [
+		{
+			titulo: "Formularios Este Mes",
+			valor: String(formulariosEsteMes),
+			cambio: "+",
+			tipo: "positivo",
+			icon: TrendUp,
+		},
+		{
+			titulo: "Tiempo Promedio",
+			valor: `${tiempoPromedioMin} min`,
+			cambio: "-",
+			tipo: "positivo",
+			icon: Clock,
+		},
+		{
+			titulo: "Técnicos Activos",
+			valor: String(tecnicosActivos),
+			cambio: "+",
+			tipo: "positivo",
+			icon: Users,
+		},
+		{
+			titulo: "Equipos Críticos",
+			valor: String(equiposCriticos),
+			cambio: equiposCriticos > 0 ? "-" : "+",
+			tipo: equiposCriticos > 0 ? "negativo" : "positivo",
+			icon: Wrench,
+		},
+	]
+
 	return (
 		<SidebarProvider>
 			<AppSidebar />
@@ -203,7 +357,6 @@ export default function AnaliticasPage() {
 						</p>
 					</div>
 
-					{/* KPIs */}
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 						{kpis.map((kpi) => (
 							<Card key={kpi.titulo} className="overflow-hidden">
@@ -244,9 +397,7 @@ export default function AnaliticasPage() {
 						))}
 					</div>
 
-					{/* Charts Row 1 */}
 					<div className="grid gap-6 lg:grid-cols-2">
-						{/* Formularios por Mes - Enhanced Bar Chart */}
 						<Card>
 							<CardHeader>
 								<CardTitle>Formularios por Mes</CardTitle>
@@ -327,7 +478,6 @@ export default function AnaliticasPage() {
 							</CardContent>
 						</Card>
 
-						{/* Tendencia de Fallas - Enhanced Line Chart */}
 						<Card>
 							<CardHeader>
 								<CardTitle>Tendencia de Fallas</CardTitle>
@@ -394,9 +544,7 @@ export default function AnaliticasPage() {
 						</Card>
 					</div>
 
-					{/* Charts Row 2 */}
 					<div className="grid gap-6 lg:grid-cols-3">
-						{/* Equipos Más Intervenidos - Enhanced Horizontal Bar Chart */}
 						<Card className="lg:col-span-2">
 							<CardHeader>
 								<CardTitle>Equipos Más Intervenidos</CardTitle>
@@ -461,7 +609,6 @@ export default function AnaliticasPage() {
 							</CardContent>
 						</Card>
 
-						{/* Tipos de Mantenimiento - Enhanced Donut Chart */}
 						<Card>
 							<CardHeader>
 								<CardTitle>Tipos de Mantenimiento</CardTitle>
@@ -473,7 +620,7 @@ export default function AnaliticasPage() {
 										<Pie
 											data={tiposMantenimiento}
 											dataKey="valor"
-											nameKey="tipo"
+											nameKey="name"
 											cx="50%"
 											cy="50%"
 											innerRadius={70}
@@ -482,7 +629,7 @@ export default function AnaliticasPage() {
 											startAngle={-90}
 										>
 											{tiposMantenimiento.map((entry) => (
-												<Cell key={entry.tipo} fill={entry.color} />
+												<Cell key={entry.name} fill={entry.color} />
 											))}
 										</Pie>
 										<Tooltip content={<CustomTooltip />} />
@@ -495,7 +642,6 @@ export default function AnaliticasPage() {
 						</Card>
 					</div>
 
-					{/* Técnicos Más Activos - Enhanced Progress List */}
 					<Card>
 						<CardHeader>
 							<CardTitle>Técnicos Más Activos</CardTitle>
@@ -510,7 +656,6 @@ export default function AnaliticasPage() {
 										key={tecnico.nombre}
 										className="group flex items-center gap-4"
 									>
-										{/* Rank Badge */}
 										<div
 											className={cn(
 												"flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all group-hover:scale-110",
@@ -526,23 +671,20 @@ export default function AnaliticasPage() {
 											{index + 1}
 										</div>
 
-										{/* User Info */}
 										<div className="flex-1 min-w-0">
 											<p className="text-sm font-semibold text-foreground">
 												{tecnico.nombre}
 											</p>
-											{/* Progress Bar with Gradient */}
 											<div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
 												<div
 													className="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-1000"
 													style={{
-														width: `${(tecnico.formularios / 45) * 100}%`,
+														width: `${(tecnico.formularios / maxFormularios) * 100}%`,
 													}}
 												/>
 											</div>
 										</div>
 
-										{/* Score */}
 										<div className="flex shrink-0 flex-col items-end">
 											<p className="text-lg font-bold text-foreground">
 												{tecnico.formularios}

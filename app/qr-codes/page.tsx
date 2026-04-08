@@ -12,6 +12,8 @@ import {
 import { QRCodeSVG } from "qrcode.react"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -42,7 +44,10 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { equipos, formulariosTemplate } from "@/lib/mock-data"
+import { mapEquipoRow, mapFormTemplateRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { Equipo, FormTemplate } from "@/lib/mock-data"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 type TabType = "equipos" | "formularios"
@@ -56,6 +61,44 @@ export default function QRCodesPage() {
 	const [searchEquipo, setSearchEquipo] = useState("")
 	const [searchFormulario, setSearchFormulario] = useState("")
 	const [filterTipo, setFilterTipo] = useState<string | null>(null)
+
+	const {
+		data: equiposData,
+		isLoading: isLoadingEquipos,
+		error: errorEquipos,
+		refetch: refetchEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
+	const {
+		data: formulariosData,
+		isLoading: isLoadingFormularios,
+		error: errorFormularios,
+		refetch: refetchFormularios,
+	} = useSupabaseQuery("form_templates", (row) =>
+		mapFormTemplateRow(row as unknown as Tables<"form_templates">),
+	)
+
+	const isLoading = isLoadingEquipos || isLoadingFormularios
+	const error = errorEquipos ?? errorFormularios
+
+	if (isLoading) return <PageLoading message="Cargando códigos QR..." />
+	if (error) {
+		return (
+			<PageError
+				message="Error al cargar datos"
+				description={error}
+				onRetry={() => {
+					refetchEquipos()
+					refetchFormularios()
+				}}
+			/>
+		)
+	}
+
+	const equipos = equiposData ?? []
+	const formulariosTemplate = formulariosData ?? []
 
 	const selectedEquipoData = equipos.find((e) => e.id === selectedEquipo)
 	const selectedFormularioData = formulariosTemplate.find(
