@@ -13,7 +13,7 @@ import {
 } from "@phosphor-icons/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { type ChangeEvent, useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -47,9 +47,18 @@ import {
 } from "@/components/ui/sidebar"
 import { mapAreaRow } from "@/lib/data-mappers"
 import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import { useRole } from "@/lib/role-provider"
 import { createClient } from "@/lib/supabase/client"
 import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
+
+type UploadedImage = {
+	fileName: string
+	mimeType: string
+	publicUrl: string
+	size: number
+	storagePath: string
+}
 
 const tiposEquipo = [
 	{ value: "maquinaria-pesada", label: "Maquinaria Pesada", icon: Factory },
@@ -66,6 +75,7 @@ const estadosEquipo = [
 
 export default function NuevoEquipoPage() {
 	const router = useRouter()
+	const { user } = useRole()
 
 	// Form state
 	const [nombre, setNombre] = useState("")
@@ -78,6 +88,7 @@ export default function NuevoEquipoPage() {
 	const [fabricante, setFabricante] = useState("")
 	const [descripcion, setDescripcion] = useState("")
 	const [imagenes, setImagenes] = useState<string[]>([])
+	const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([])
 
 	// Validation
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
@@ -88,21 +99,57 @@ export default function NuevoEquipoPage() {
 		mapAreaRow(row as unknown as Tables<"areas_produccion">),
 	)
 
-	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files
-		if (files) {
-			Array.from(files).forEach((file) => {
-				const reader = new FileReader()
-				reader.onload = (ev) => {
-					setImagenes((prev) => [...prev, ev.target?.result as string])
-				}
-				reader.readAsDataURL(file)
+		if (!files) {
+			return
+		}
+
+		const supabase = createClient()
+		const nextImages: UploadedImage[] = []
+
+		for (const file of Array.from(files)) {
+			const ext = file.name.split(".").pop() ?? "bin"
+			const storagePath = `equipos/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+			const { error: uploadError } = await supabase.storage
+				.from("equipos-media")
+				.upload(storagePath, file, {
+					contentType: file.type || undefined,
+				})
+
+			if (uploadError) {
+				setSubmitError(uploadError.message)
+				continue
+			}
+
+			const {
+				data: { publicUrl },
+			} = supabase.storage.from("equipos-media").getPublicUrl(storagePath)
+
+			nextImages.push({
+				fileName: storagePath.split("/").pop() ?? file.name,
+				mimeType: file.type || "application/octet-stream",
+				publicUrl,
+				size: file.size,
+				storagePath,
 			})
 		}
+
+		if (nextImages.length > 0) {
+			setImagenes((prev) => [
+				...prev,
+				...nextImages.map((image) => image.publicUrl),
+			])
+			setUploadedImages((prev) => [...prev, ...nextImages])
+		}
+
+		e.target.value = ""
 	}
 
 	const handleRemoveImage = (index: number) => {
 		setImagenes((prev) => prev.filter((_, i) => i !== index))
+		setUploadedImages((prev) => prev.filter((_, i) => i !== index))
 	}
 
 	const handleSubmit = async () => {
@@ -120,21 +167,49 @@ export default function NuevoEquipoPage() {
 		setSubmitError(null)
 
 		const supabase = createClient()
-		const { error } = await supabase.from("equipos").insert({
-			nombre,
-			id_area: idArea || null,
-			tipo,
-			ubicacion,
-			estado: "operativo",
-			tiene_iot: false,
-		})
+		const { data: equipo, error } = await supabase
+			.from("equipos")
+			.insert({
+				nombre,
+				id_area: idArea || null,
+				tipo,
+				ubicacion,
+				estado,
+				tiene_iot: false,
+			})
+			.select("id")
+			.single()
 
-		setIsSubmitting(false)
-
-		if (error) {
+		if (error || !equipo) {
+			setIsSubmitting(false)
 			setSubmitError(error.message)
 			return
 		}
+
+		if (uploadedImages.length > 0) {
+			const { error: filesError } = await supabase
+				.from("equipo_archivos")
+				.insert(
+					uploadedImages.map((image) => ({
+						id_equipo: equipo.id,
+						tipo: "imagen",
+						nombre: "Foto del equipo",
+						nombre_archivo: image.fileName,
+						storage_path: image.storagePath,
+						mime_type: image.mimeType,
+						tamano_bytes: image.size,
+						subido_por: user?.id ?? null,
+					})),
+				)
+
+			if (filesError) {
+				setIsSubmitting(false)
+				setSubmitError(filesError.message)
+				return
+			}
+		}
+
+		setIsSubmitting(false)
 
 		router.push("/activos")
 	}
@@ -475,6 +550,7 @@ export default function NuevoEquipoPage() {
 															className="aspect-square w-full rounded-lg object-cover"
 															width={200}
 															height={200}
+															unoptimized
 														/>
 														<button
 															type="button"
