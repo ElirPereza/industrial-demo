@@ -298,7 +298,7 @@ export default function QRCodesPage() {
 							{/* Equipment Grid */}
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 								{equiposFiltrados.map((equipo) => {
-									const qrUrl = `https://industrial-portal.com/activos/${equipo.id}`
+									const qrUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/p/equipo/${equipo.id}`
 
 									return (
 										<Card
@@ -395,7 +395,7 @@ export default function QRCodesPage() {
 							{/* Forms Grid */}
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 								{formulariosFiltrados.map((formulario) => {
-									const qrUrl = `https://industrial-portal.com/formularios/llenar/${formulario.id}`
+									const qrUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/formularios/llenar/${formulario.id}`
 
 									return (
 										<Card
@@ -491,7 +491,7 @@ export default function QRCodesPage() {
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
 							{selectedEquipoData && (
 								<QRCodeSVG
-									value={`https://industrial-portal.com/activos/${selectedEquipoData.id}`}
+									value={`${typeof window !== "undefined" ? window.location.origin : ""}/p/equipo/${selectedEquipoData.id}`}
 									size={256}
 									level="H"
 									includeMargin
@@ -574,7 +574,7 @@ export default function QRCodesPage() {
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
 							{selectedFormularioData && (
 								<QRCodeSVG
-									value={`https://industrial-portal.com/formularios/llenar/${selectedFormularioData.id}`}
+									value={`${typeof window !== "undefined" ? window.location.origin : ""}/formularios/llenar/${selectedFormularioData.id}`}
 									size={256}
 									level="H"
 									includeMargin
