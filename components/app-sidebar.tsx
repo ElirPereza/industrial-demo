@@ -1,17 +1,17 @@
 "use client"
 
 import {
+	BellRinging,
 	Buildings,
 	ChartBarIcon,
 	ChartLineIcon,
 	CubeIcon,
 	FactoryIcon,
 	FileTextIcon,
-	GearIcon,
 	QrCodeIcon,
 	SlidersIcon,
 	Users,
-	WrenchIcon,
+	Wrench,
 } from "@phosphor-icons/react"
 import type * as React from "react"
 import { NavAdmin } from "@/components/nav-admin"
@@ -34,7 +34,7 @@ const data = {
 	user: {
 		name: usuarios[0].nombre,
 		email: usuarios[0].email,
-		avatar: "/avatars/admin.jpg",
+		avatar: "",
 	},
 	navMain: [
 		{
@@ -57,6 +57,20 @@ const data = {
 			title: "Equipos",
 			url: "/equipos",
 			icon: <CubeIcon />,
+		},
+		{
+			title: "Alertas",
+			url: "/alertas",
+			icon: <BellRinging />,
+		},
+		{
+			title: "Órdenes de Trabajo",
+			url: "/ordenes-trabajo",
+			icon: <Wrench />,
+			items: [
+				{ title: "Listado", url: "/ordenes-trabajo" },
+				{ title: "Nueva OT", url: "/ordenes-trabajo/nueva" },
+			],
 		},
 		{
 			title: "Analíticas",
