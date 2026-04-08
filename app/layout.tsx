@@ -4,6 +4,7 @@ import "./globals.css"
 import { DesktopOnly } from "@/components/desktop-only"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { RoleProvider } from "@/lib/role-provider"
 
 const jetbrainsMono = JetBrains_Mono({
 	variable: "--font-mono",
@@ -13,7 +14,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
 	title: "Industrial Portal",
 	description:
-		"Portal de Gestión Industrial - Formularios, Equipos y Mantenimiento",
+		"Portal de Gestión Industrial - Formularios, Activos y Mantenimiento",
 }
 
 export default function RootLayout({
@@ -30,9 +31,11 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					<TooltipProvider>
-						<DesktopOnly>{children}</DesktopOnly>
-					</TooltipProvider>
+					<RoleProvider>
+						<TooltipProvider>
+							<DesktopOnly>{children}</DesktopOnly>
+						</TooltipProvider>
+					</RoleProvider>
 				</ThemeProvider>
 			</body>
 		</html>

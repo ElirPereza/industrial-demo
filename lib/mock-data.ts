@@ -50,22 +50,44 @@ export interface FormTemplate {
 	frecuencia?: "diario" | "semanal" | "mensual" | "trimestral" | "eventual"
 }
 
+export type RolUsuario = "admin" | "supervisor" | "tecnico" | "contratista"
+
 export interface Usuario {
 	id: string
 	nombre: string
 	email: string
-	rol: "admin" | "tecnico" | "operador"
+	rol: RolUsuario
 	departamento: string
+}
+
+export interface AreaProduccion {
+	id: string
+	nombre: string
+	ubicacion: string
+	tipo: "linea" | "area" | "zona"
+	descripcion?: string
+}
+
+export interface DispositivoIoT {
+	nombre: string
+	tipo: "variador" | "plc" | "controlador" | "sensor"
+	protocolo: "modbus-tcp" | "opc-ua" | "mqtt" | "bacnet" | "profinet"
+	direccion: string
+	estado: "online" | "warning" | "offline"
+	ultimoDato?: string
 }
 
 export interface Equipo {
 	id: string
 	nombre: string
+	idArea: string
 	tipo: "maquinaria-pesada" | "linea-produccion" | "electricos" | "hvac"
 	ubicacion: string
 	estado: "operativo" | "mantenimiento" | "fuera-servicio"
 	ultimoMantenimiento: Date
 	proximoMantenimiento: Date
+	tieneIoT: boolean
+	dispositivoIoT?: DispositivoIoT
 }
 
 export interface CampoRespuesta {
@@ -136,15 +158,60 @@ export const usuarios: Usuario[] = [
 		id: "usr-004",
 		nombre: "Ana López",
 		email: "ana.lopez@industrial.com",
-		rol: "operador",
+		rol: "supervisor",
 		departamento: "Producción",
 	},
 	{
 		id: "usr-005",
 		nombre: "Pedro Sánchez",
 		email: "pedro.sanchez@industrial.com",
-		rol: "operador",
+		rol: "contratista",
 		departamento: "Producción",
+	},
+]
+
+export const areasProduccion: AreaProduccion[] = [
+	{
+		id: "area-001",
+		nombre: "Nave A — Maquinado",
+		ubicacion: "Nave A",
+		tipo: "area",
+		descripcion: "Tornos, prensas y taladros de precisión",
+	},
+	{
+		id: "area-002",
+		nombre: "Nave B — Maquinado Secundario",
+		ubicacion: "Nave B",
+		tipo: "area",
+		descripcion: "Fresadoras y compresores auxiliares",
+	},
+	{
+		id: "area-003",
+		nombre: "Nave C — Ensamble y Empaque",
+		ubicacion: "Nave C",
+		tipo: "linea",
+		descripcion: "Líneas de ensamble y empaque de producto terminado",
+	},
+	{
+		id: "area-004",
+		nombre: "Nave D — Soldadura y Pintura",
+		ubicacion: "Nave D",
+		tipo: "linea",
+		descripcion: "Líneas de soldadura, pintura y extracción de humos",
+	},
+	{
+		id: "area-005",
+		nombre: "Subestación Eléctrica",
+		ubicacion: "Subestación A",
+		tipo: "zona",
+		descripcion: "Transformadores, paneles de control y generadores",
+	},
+	{
+		id: "area-006",
+		nombre: "Climatización",
+		ubicacion: "Distribuido",
+		tipo: "zona",
+		descripcion: "Sistemas HVAC, ventilación y calefacción",
 	},
 ]
 
@@ -390,153 +457,277 @@ export const formulariosTemplate: FormTemplate[] = [
 // ============================================================================
 
 export const equipos: Equipo[] = [
-	// Maquinaria Pesada
 	{
 		id: "eq-001",
 		nombre: "Torno CNC-01",
+		idArea: "area-001",
 		tipo: "maquinaria-pesada",
 		ubicacion: "Nave A - Sector 1",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-28"),
 		proximoMantenimiento: new Date("2026-02-28"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Danfoss VLT FC-302",
+			tipo: "variador",
+			protocolo: "modbus-tcp",
+			direccion: "192.168.1.101",
+			estado: "online",
+			ultimoDato: "Hace 2 min",
+		},
 	},
 	{
 		id: "eq-002",
 		nombre: "Prensa Hidráulica-02",
+		idArea: "area-001",
 		tipo: "maquinaria-pesada",
 		ubicacion: "Nave A - Sector 2",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-15"),
 		proximoMantenimiento: new Date("2026-02-15"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "ABB ACS580-01",
+			tipo: "variador",
+			protocolo: "mqtt",
+			direccion: "Topic: planta/variadores/abb-02",
+			estado: "online",
+			ultimoDato: "Hace 1 min",
+		},
 	},
 	{
 		id: "eq-003",
 		nombre: "Fresadora-03",
+		idArea: "area-002",
 		tipo: "maquinaria-pesada",
 		ubicacion: "Nave B - Sector 1",
 		estado: "mantenimiento",
 		ultimoMantenimiento: new Date("2026-02-05"),
 		proximoMantenimiento: new Date("2026-03-05"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Danfoss VLT FC-302",
+			tipo: "variador",
+			protocolo: "modbus-tcp",
+			direccion: "192.168.1.103",
+			estado: "offline",
+			ultimoDato: "Sin datos hace 2h",
+		},
 	},
 	{
 		id: "eq-004",
 		nombre: "Taladro Radial-04",
+		idArea: "area-001",
 		tipo: "maquinaria-pesada",
 		ubicacion: "Nave B - Sector 2",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-20"),
 		proximoMantenimiento: new Date("2026-02-20"),
+		tieneIoT: false,
 	},
-	// Líneas de Producción
 	{
 		id: "eq-005",
 		nombre: "Línea Ensamble-01",
+		idArea: "area-003",
 		tipo: "linea-produccion",
 		ubicacion: "Nave C - Línea 1",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-25"),
 		proximoMantenimiento: new Date("2026-02-25"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Siemens Sinamics G120",
+			tipo: "variador",
+			protocolo: "modbus-tcp",
+			direccion: "192.168.1.102",
+			estado: "online",
+			ultimoDato: "Hace 1 min",
+		},
 	},
 	{
 		id: "eq-006",
 		nombre: "Línea Empaque-02",
+		idArea: "area-003",
 		tipo: "linea-produccion",
 		ubicacion: "Nave C - Línea 2",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-02-01"),
 		proximoMantenimiento: new Date("2026-03-01"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Siemens Sinamics G120",
+			tipo: "variador",
+			protocolo: "modbus-tcp",
+			direccion: "192.168.1.106",
+			estado: "online",
+			ultimoDato: "Hace 30 seg",
+		},
 	},
 	{
 		id: "eq-007",
 		nombre: "Línea Pintura-03",
+		idArea: "area-004",
 		tipo: "linea-produccion",
 		ubicacion: "Nave D - Línea 3",
 		estado: "fuera-servicio",
 		ultimoMantenimiento: new Date("2026-01-10"),
 		proximoMantenimiento: new Date("2026-02-10"),
+		tieneIoT: false,
 	},
 	{
 		id: "eq-008",
 		nombre: "Línea Soldadura-04",
+		idArea: "area-004",
 		tipo: "linea-produccion",
 		ubicacion: "Nave D - Línea 4",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-30"),
 		proximoMantenimiento: new Date("2026-02-28"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Siemens Sinamics G120",
+			tipo: "variador",
+			protocolo: "opc-ua",
+			direccion: "192.168.1.108",
+			estado: "online",
+			ultimoDato: "Hace 45 seg",
+		},
 	},
-	// Equipos Eléctricos
 	{
 		id: "eq-009",
 		nombre: "Transformador Principal-01",
+		idArea: "area-005",
 		tipo: "electricos",
 		ubicacion: "Subestación A",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2025-12-15"),
 		proximoMantenimiento: new Date("2026-03-15"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Siemens S7-1200 CPU 1214C",
+			tipo: "plc",
+			protocolo: "opc-ua",
+			direccion: "192.168.1.200",
+			estado: "online",
+			ultimoDato: "Hace 30 seg",
+		},
 	},
 	{
 		id: "eq-010",
 		nombre: "Panel de Control-02",
+		idArea: "area-005",
 		tipo: "electricos",
 		ubicacion: "Nave A - Oficina",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-22"),
 		proximoMantenimiento: new Date("2026-04-22"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Siemens S7-1200 CPU 1214C",
+			tipo: "plc",
+			protocolo: "opc-ua",
+			direccion: "192.168.1.201",
+			estado: "online",
+			ultimoDato: "Hace 1 min",
+		},
 	},
 	{
 		id: "eq-011",
 		nombre: "Compresor Eléctrico-03",
+		idArea: "area-002",
 		tipo: "electricos",
 		ubicacion: "Nave B - Almacén",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-02-03"),
 		proximoMantenimiento: new Date("2026-03-03"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "ABB ACS580-01",
+			tipo: "variador",
+			protocolo: "mqtt",
+			direccion: "Topic: planta/variadores/abb-03",
+			estado: "warning",
+			ultimoDato: "Hace 15 min",
+		},
 	},
 	{
 		id: "eq-012",
 		nombre: "Generador de Emergencia-04",
+		idArea: "area-005",
 		tipo: "electricos",
 		ubicacion: "Exterior - Zona Segura",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-05"),
 		proximoMantenimiento: new Date("2026-04-05"),
+		tieneIoT: false,
 	},
-	// HVAC
 	{
 		id: "eq-013",
 		nombre: "Aire Acondicionado Central-01",
+		idArea: "area-006",
 		tipo: "hvac",
 		ubicacion: "Nave A - Techo",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-18"),
 		proximoMantenimiento: new Date("2026-02-18"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Danfoss MCB 101",
+			tipo: "controlador",
+			protocolo: "mqtt",
+			direccion: "Topic: planta/hvac/danfoss-01",
+			estado: "online",
+			ultimoDato: "Hace 5 min",
+		},
 	},
 	{
 		id: "eq-014",
 		nombre: "Ventilación Nave B-02",
+		idArea: "area-006",
 		tipo: "hvac",
 		ubicacion: "Nave B - Techo",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-02-02"),
 		proximoMantenimiento: new Date("2026-03-02"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "Danfoss MCB 101",
+			tipo: "controlador",
+			protocolo: "mqtt",
+			direccion: "Topic: planta/hvac/danfoss-02",
+			estado: "online",
+			ultimoDato: "Hace 3 min",
+		},
 	},
 	{
 		id: "eq-015",
 		nombre: "Calefacción Oficinas-03",
+		idArea: "area-006",
 		tipo: "hvac",
 		ubicacion: "Edificio Administrativo",
 		estado: "operativo",
 		ultimoMantenimiento: new Date("2026-01-12"),
 		proximoMantenimiento: new Date("2026-04-12"),
+		tieneIoT: false,
 	},
 	{
 		id: "eq-016",
 		nombre: "Extractor Humos-04",
+		idArea: "area-004",
 		tipo: "hvac",
 		ubicacion: "Nave D - Soldadura",
 		estado: "mantenimiento",
 		ultimoMantenimiento: new Date("2026-02-08"),
 		proximoMantenimiento: new Date("2026-03-08"),
+		tieneIoT: true,
+		dispositivoIoT: {
+			nombre: "ABB ACS580-01",
+			tipo: "variador",
+			protocolo: "mqtt",
+			direccion: "Topic: planta/variadores/abb-04",
+			estado: "offline",
+			ultimoDato: "Sin datos hace 2h",
+		},
 	},
 ]
 

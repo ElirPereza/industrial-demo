@@ -28,22 +28,35 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import type { RolUsuario } from "@/lib/mock-data"
 import { usuarios } from "@/lib/mock-data"
+import { useRole } from "@/lib/role-provider"
 
-const data = {
-	user: {
-		name: usuarios[0].nombre,
-		email: usuarios[0].email,
-		avatar: "",
-	},
-	navMain: [
+const ROLE_LABELS: Record<RolUsuario, string> = {
+	admin: "Administrador",
+	supervisor: "Supervisor",
+	tecnico: "Técnico",
+	contratista: "Contratista",
+}
+
+function getNavMain(role: RolUsuario) {
+	const items: {
+		title: string
+		url: string
+		icon: React.ReactElement
+		isActive?: boolean
+		items?: { title: string; url: string }[]
+	}[] = [
 		{
 			title: "Dashboard",
 			url: "/dashboard",
 			icon: <ChartLineIcon />,
 			isActive: true,
 		},
-		{
+	]
+
+	if (role === "admin") {
+		items.push({
 			title: "Formularios",
 			url: "/formularios",
 			icon: <FileTextIcon />,
@@ -52,61 +65,91 @@ const data = {
 				{ title: "Constructor", url: "/formularios/constructor" },
 				{ title: "Administración", url: "/formularios/admin" },
 			],
-		},
-		{
-			title: "Equipos",
-			url: "/equipos",
+		})
+	}
+
+	if (role === "supervisor" || role === "tecnico" || role === "contratista") {
+		items.push({
+			title: "Formularios",
+			url: "/formularios",
+			icon: <FileTextIcon />,
+		})
+	}
+
+	if (role === "admin" || role === "supervisor") {
+		items.push({
+			title: "Activos",
+			url: "/activos",
 			icon: <CubeIcon />,
-		},
-		{
+		})
+	}
+
+	if (role === "admin" || role === "supervisor" || role === "tecnico") {
+		items.push({
 			title: "Alertas",
 			url: "/alertas",
 			icon: <BellRinging />,
-		},
-		{
-			title: "Órdenes de Trabajo",
-			url: "/ordenes-trabajo",
-			icon: <Wrench />,
-			items: [
-				{ title: "Listado", url: "/ordenes-trabajo" },
-				{ title: "Nueva OT", url: "/ordenes-trabajo/nueva" },
-			],
-		},
-		{
+		})
+	}
+
+	items.push({
+		title: "Órdenes de Trabajo",
+		url: "/ordenes-trabajo",
+		icon: <Wrench />,
+		items:
+			role === "admin" || role === "supervisor"
+				? [
+						{ title: "Listado", url: "/ordenes-trabajo" },
+						{ title: "Nueva OT", url: "/ordenes-trabajo/nueva" },
+					]
+				: undefined,
+	})
+
+	if (role === "admin" || role === "supervisor") {
+		items.push({
 			title: "Analíticas",
 			url: "/analiticas",
 			icon: <ChartBarIcon />,
-		},
-	],
-	administracion: [
-		{
-			title: "Usuarios",
-			url: "/usuarios",
-			icon: <Users />,
-		},
-		{
-			title: "Contratistas",
-			url: "/contratistas",
-			icon: <Buildings />,
-		},
-	],
-	herramientas: [
-		{
-			name: "Códigos QR",
-			url: "/qr-codes",
-			icon: <QrCodeIcon />,
-		},
-	],
-	navSecondary: [
-		{
-			title: "Configuración",
-			url: "/configuracion",
-			icon: <SlidersIcon />,
-		},
-	],
+		})
+	}
+
+	return items
+}
+
+function getNavAdmin(role: RolUsuario) {
+	if (role !== "admin") return []
+	return [
+		{ title: "Usuarios", url: "/usuarios", icon: <Users /> },
+		{ title: "Contratistas", url: "/contratistas", icon: <Buildings /> },
+	]
+}
+
+function getHerramientas(role: RolUsuario) {
+	if (role === "contratista") return []
+	return [{ name: "Códigos QR", url: "/qr-codes", icon: <QrCodeIcon /> }]
+}
+
+function getNavSecondary(role: RolUsuario) {
+	if (role !== "admin") return []
+	return [
+		{ title: "Configuración", url: "/configuracion", icon: <SlidersIcon /> },
+	]
+}
+
+const userData = {
+	name: usuarios[0].nombre,
+	email: usuarios[0].email,
+	avatar: "",
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+	const { role } = useRole()
+
+	const navMain = getNavMain(role)
+	const administracion = getNavAdmin(role)
+	const herramientas = getHerramientas(role)
+	const navSecondary = getNavSecondary(role)
+
 	return (
 		<Sidebar variant="inset" {...props}>
 			<SidebarHeader>
@@ -121,7 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 									<span className="truncate font-medium">
 										Industrial Portal
 									</span>
-									<span className="truncate text-xs">Gestión Industrial</span>
+									<span className="truncate text-xs">{ROLE_LABELS[role]}</span>
 								</div>
 							</a>
 						</SidebarMenuButton>
@@ -129,13 +172,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
-				<NavAdmin items={data.administracion} />
-				<NavProjects projects={data.herramientas} />
-				<NavSecondary items={data.navSecondary} className="mt-auto" />
+				<NavMain items={navMain} />
+				{administracion.length > 0 && <NavAdmin items={administracion} />}
+				{herramientas.length > 0 && <NavProjects projects={herramientas} />}
+				{navSecondary.length > 0 && (
+					<NavSecondary items={navSecondary} className="mt-auto" />
+				)}
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={data.user} />
+				<NavUser user={userData} />
 			</SidebarFooter>
 		</Sidebar>
 	)

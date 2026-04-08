@@ -255,7 +255,7 @@ export default function QRCodesPage() {
 							{/* Equipment Grid */}
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 								{equiposFiltrados.map((equipo) => {
-									const qrUrl = `https://industrial-portal.com/equipos/${equipo.id}`
+									const qrUrl = `https://industrial-portal.com/activos/${equipo.id}`
 
 									return (
 										<Card
@@ -448,7 +448,7 @@ export default function QRCodesPage() {
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
 							{selectedEquipoData && (
 								<QRCodeSVG
-									value={`https://industrial-portal.com/equipos/${selectedEquipoData.id}`}
+									value={`https://industrial-portal.com/activos/${selectedEquipoData.id}`}
 									size={256}
 									level="H"
 									includeMargin

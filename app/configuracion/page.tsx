@@ -3,6 +3,7 @@
 import {
 	Bell,
 	Buildings,
+	ChartBar,
 	CloudArrowUp,
 	Copy,
 	Cpu,
@@ -10,12 +11,13 @@ import {
 	Key,
 	Moon,
 	Palette,
-	Plus,
 	PlugsConnected,
+	Plus,
 	Shield,
 	Sun,
 	TreeStructure,
 	User,
+	Wrench,
 } from "@phosphor-icons/react"
 import { useTheme } from "next-themes"
 import { useState } from "react"
@@ -400,6 +402,115 @@ export default function ConfiguracionPage() {
 						</Card>
 					</div>
 
+					{/* Roles y Permisos */}
+					<Separator />
+					<div className="space-y-6">
+						<Card>
+							<CardHeader>
+								<div className="flex items-center gap-3">
+									<div className="flex size-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+										<Shield className="size-5" weight="duotone" />
+									</div>
+									<div>
+										<CardTitle>Roles y Permisos</CardTitle>
+										<CardDescription>
+											Gestiona el acceso y los permisos de los usuarios del
+											sistema
+										</CardDescription>
+									</div>
+								</div>
+							</CardHeader>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>Roles del Sistema</CardTitle>
+								<CardDescription>
+									Configura los permisos de cada rol
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="grid gap-4 sm:grid-cols-2">
+									{[
+										{
+											nombre: "Admin",
+											descripcion:
+												"Acceso total al sistema. Gestiona usuarios, configuración y datos.",
+											usuarios: 1,
+											icon: Shield,
+											iconColor: "text-red-600 dark:text-red-400",
+											iconBg: "bg-red-100 dark:bg-red-900/30",
+										},
+										{
+											nombre: "Supervisor",
+											descripcion:
+												"Supervisa operaciones, aprueba formularios y ve reportes.",
+											usuarios: 1,
+											icon: ChartBar,
+											iconColor: "text-blue-600 dark:text-blue-400",
+											iconBg: "bg-blue-100 dark:bg-blue-900/30",
+										},
+										{
+											nombre: "Técnico",
+											descripcion:
+												"Ejecuta mantenimientos, llena formularios y reporta fallas.",
+											usuarios: 2,
+											icon: Wrench,
+											iconColor: "text-green-600 dark:text-green-400",
+											iconBg: "bg-green-100 dark:bg-green-900/30",
+										},
+										{
+											nombre: "Contratista",
+											descripcion:
+												"Acceso limitado a equipos y formularios asignados.",
+											usuarios: 1,
+											icon: Buildings,
+											iconColor: "text-orange-600 dark:text-orange-400",
+											iconBg: "bg-orange-100 dark:bg-orange-900/30",
+										},
+									].map((rol) => (
+										<div
+											key={rol.nombre}
+											className="flex flex-col gap-3 rounded-lg border p-4"
+										>
+											<div className="flex items-start justify-between">
+												<div
+													className={cn(
+														"flex size-10 items-center justify-center rounded-lg",
+														rol.iconBg,
+													)}
+												>
+													<rol.icon
+														className={cn("size-5", rol.iconColor)}
+														weight="duotone"
+													/>
+												</div>
+												<span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+													{rol.usuarios}{" "}
+													{rol.usuarios === 1 ? "usuario" : "usuarios"}
+												</span>
+											</div>
+											<div>
+												<p className="font-medium">{rol.nombre}</p>
+												<p className="text-xs text-muted-foreground">
+													{rol.descripcion}
+												</p>
+											</div>
+											<Button
+												variant="outline"
+												size="sm"
+												className="w-full"
+												disabled
+											>
+												Editar Permisos
+											</Button>
+										</div>
+									))}
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+
 					{/* Integraciones IoT */}
 					<Separator />
 					<div className="space-y-6">
@@ -501,135 +612,6 @@ export default function ConfiguracionPage() {
 											<Button variant="outline" size="sm" className="w-full">
 												Configurar
 											</Button>
-										</div>
-									))}
-								</div>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<div className="flex items-center justify-between">
-									<CardTitle>Dispositivos Conectados</CardTitle>
-									<Button size="sm">
-										<Plus className="size-4" />
-										Agregar Dispositivo
-									</Button>
-								</div>
-							</CardHeader>
-							<CardContent className="p-0">
-								<div className="divide-y">
-									{[
-										{
-											name: "Danfoss VLT FC-302",
-											type: "Variador",
-											protocol: "Modbus TCP",
-											address: "192.168.1.101",
-											status: "online",
-											statusLabel: "Online",
-											lastData: "Último dato: hace 2 min",
-										},
-										{
-											name: "Siemens Sinamics G120",
-											type: "Variador",
-											protocol: "Modbus TCP",
-											address: "192.168.1.102",
-											status: "online",
-											statusLabel: "Online",
-											lastData: "Último dato: hace 1 min",
-										},
-										{
-											name: "Siemens S7-1200",
-											type: "PLC",
-											protocol: "OPC-UA",
-											address: "192.168.1.200",
-											status: "online",
-											statusLabel: "Online",
-											lastData: "Último dato: hace 30 seg",
-										},
-										{
-											name: "ABB ACS580",
-											type: "Variador",
-											protocol: "MQTT",
-											address: "Topic: planta/variadores/abb",
-											status: "warning",
-											statusLabel: "Intermitente",
-											lastData: "Último dato: hace 15 min",
-										},
-										{
-											name: "Danfoss MCB 101",
-											type: "Controlador",
-											protocol: "MQTT",
-											address: "Topic: planta/hvac/danfoss",
-											status: "offline",
-											statusLabel: "Offline",
-											lastData: "Sin datos hace 2h",
-										},
-									].map((device) => (
-										<div
-											key={device.name}
-											className="flex items-center gap-4 p-4"
-										>
-											<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-												<Cpu
-													className="size-5 text-muted-foreground"
-													weight="duotone"
-												/>
-											</div>
-											<div className="min-w-0 flex-1">
-												<div className="flex items-center gap-2">
-													<p className="truncate text-sm font-medium">
-														{device.name}
-													</p>
-													<span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-														{device.type}
-													</span>
-												</div>
-												<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-													<span
-														className={cn(
-															"rounded-full px-2 py-0.5 font-medium",
-															device.protocol === "Modbus TCP" &&
-																"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-															device.protocol === "OPC-UA" &&
-																"bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-															device.protocol === "MQTT" &&
-																"bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-														)}
-													>
-														{device.protocol}
-													</span>
-													<span className="truncate">{device.address}</span>
-												</div>
-											</div>
-											<div className="flex shrink-0 flex-col items-end gap-1">
-												<div className="flex items-center gap-1.5">
-													<div
-														className={cn(
-															"size-2 rounded-full",
-															device.status === "online" && "bg-green-500",
-															device.status === "warning" && "bg-yellow-500",
-															device.status === "offline" && "bg-red-500",
-														)}
-													/>
-													<span
-														className={cn(
-															"text-xs font-medium",
-															device.status === "online" &&
-																"text-green-700 dark:text-green-400",
-															device.status === "warning" &&
-																"text-yellow-700 dark:text-yellow-400",
-															device.status === "offline" &&
-																"text-red-700 dark:text-red-400",
-														)}
-													>
-														{device.statusLabel}
-													</span>
-												</div>
-												<span className="text-xs text-muted-foreground">
-													{device.lastData}
-												</span>
-											</div>
 										</div>
 									))}
 								</div>

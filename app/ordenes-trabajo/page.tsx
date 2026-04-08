@@ -1,19 +1,19 @@
 "use client"
 
-import { useState, useMemo } from "react"
 import {
+	CheckCircle,
 	ClockCountdown,
 	Eye,
 	FunnelSimple,
 	Hourglass,
 	MagnifyingGlass,
 	Plus,
-	CheckCircle,
 	Spinner,
 	Warning,
 } from "@phosphor-icons/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -46,10 +46,10 @@ import {
 	TableRow,
 } from "@/components/ui/table"
 import {
-	ordenesTrabajo,
-	equipos,
-	type PrioridadOT,
 	type EstadoOrdenTrabajo,
+	equipos,
+	ordenesTrabajo,
+	type PrioridadOT,
 } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 

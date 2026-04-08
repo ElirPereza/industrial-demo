@@ -5,6 +5,7 @@ import {
 	CheckCircle,
 	ClipboardText,
 	Clock,
+	Cpu,
 	Download,
 	Eye,
 	FileDoc,
@@ -14,8 +15,10 @@ import {
 	Info,
 	MapPin,
 	PencilSimple,
+	PlugsConnected,
 	QrCode,
 	Timer,
+	WifiHigh,
 	Wrench,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
@@ -354,8 +357,8 @@ export default function EquipoDetailPage({
 					<div className="flex min-h-screen items-center justify-center">
 						<div className="text-center">
 							<h1 className="text-2xl font-semibold">Equipo no encontrado</h1>
-							<Button className="mt-4" onClick={() => router.push("/equipos")}>
-								Volver a Equipos
+							<Button className="mt-4" onClick={() => router.push("/activos")}>
+								Volver a Activos
 							</Button>
 						</div>
 					</div>
@@ -452,7 +455,7 @@ export default function EquipoDetailPage({
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
-									<BreadcrumbLink href="/equipos">Equipos</BreadcrumbLink>
+									<BreadcrumbLink href="/activos">Activos</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -468,10 +471,10 @@ export default function EquipoDetailPage({
 					<Button
 						variant="ghost"
 						className="w-fit"
-						onClick={() => router.push("/equipos")}
+						onClick={() => router.push("/activos")}
 					>
 						<ArrowLeft className="mr-2 size-4" weight="bold" />
-						Volver a Equipos
+						Volver a Activos
 					</Button>
 
 					{/* Equipment header */}
@@ -639,6 +642,124 @@ export default function EquipoDetailPage({
 										</div>
 									</CardContent>
 								</Card>
+
+								{equipo.tieneIoT && equipo.dispositivoIoT && (
+									<Card>
+										<CardHeader>
+											<CardTitle className="flex items-center gap-2">
+												<WifiHigh
+													className="size-5 text-cyan-600 dark:text-cyan-400"
+													weight="duotone"
+												/>
+												Conexión IoT
+											</CardTitle>
+											<CardDescription>
+												Dispositivo conectado para monitoreo en tiempo real
+											</CardDescription>
+										</CardHeader>
+										<CardContent>
+											<div className="grid gap-4 sm:grid-cols-2">
+												<div className="flex items-center gap-3">
+													<div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+														<Cpu
+															className="size-5 text-muted-foreground"
+															weight="duotone"
+														/>
+													</div>
+													<div>
+														<p className="text-sm text-muted-foreground">
+															Dispositivo
+														</p>
+														<p className="font-medium">
+															{equipo.dispositivoIoT.nombre}
+														</p>
+													</div>
+												</div>
+												<div className="flex items-center gap-3">
+													<div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+														<PlugsConnected
+															className="size-5 text-muted-foreground"
+															weight="duotone"
+														/>
+													</div>
+													<div>
+														<p className="text-sm text-muted-foreground">
+															Protocolo
+														</p>
+														<span
+															className={cn(
+																"inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
+																equipo.dispositivoIoT.protocolo ===
+																	"modbus-tcp" &&
+																	"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+																equipo.dispositivoIoT.protocolo === "opc-ua" &&
+																	"bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+																equipo.dispositivoIoT.protocolo === "mqtt" &&
+																	"bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+																equipo.dispositivoIoT.protocolo === "bacnet" &&
+																	"bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+															)}
+														>
+															{equipo.dispositivoIoT.protocolo.toUpperCase()}
+														</span>
+													</div>
+												</div>
+												<div>
+													<p className="text-sm text-muted-foreground">Tipo</p>
+													<span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-xs font-medium capitalize">
+														{equipo.dispositivoIoT.tipo}
+													</span>
+												</div>
+												<div>
+													<p className="text-sm text-muted-foreground">
+														Dirección
+													</p>
+													<p className="truncate font-mono text-sm font-medium">
+														{equipo.dispositivoIoT.direccion}
+													</p>
+												</div>
+											</div>
+											<Separator className="my-4" />
+											<div className="flex items-center justify-between">
+												<div className="flex items-center gap-2">
+													<div
+														className={cn(
+															"size-2.5 rounded-full",
+															equipo.dispositivoIoT.estado === "online" &&
+																"bg-green-500",
+															equipo.dispositivoIoT.estado === "warning" &&
+																"bg-yellow-500",
+															equipo.dispositivoIoT.estado === "offline" &&
+																"bg-red-500",
+														)}
+													/>
+													<span
+														className={cn(
+															"text-sm font-medium",
+															equipo.dispositivoIoT.estado === "online" &&
+																"text-green-700 dark:text-green-400",
+															equipo.dispositivoIoT.estado === "warning" &&
+																"text-yellow-700 dark:text-yellow-400",
+															equipo.dispositivoIoT.estado === "offline" &&
+																"text-red-700 dark:text-red-400",
+														)}
+													>
+														{equipo.dispositivoIoT.estado === "online"
+															? "Conectado"
+															: equipo.dispositivoIoT.estado === "warning"
+																? "Intermitente"
+																: "Desconectado"}
+													</span>
+												</div>
+												{equipo.dispositivoIoT.ultimoDato && (
+													<span className="text-xs text-muted-foreground">
+														{equipo.dispositivoIoT.ultimoDato}
+													</span>
+												)}
+											</div>
+										</CardContent>
+									</Card>
+								)}
 							</div>
 
 							{/* QR Code Card */}
@@ -656,7 +777,7 @@ export default function EquipoDetailPage({
 									<CardContent className="flex flex-col items-center gap-4">
 										<div className="rounded-lg bg-white p-4">
 											<QRCodeSVG
-												value={`https://industrial-portal.com/equipos/${equipoId}`}
+												value={`https://industrial-portal.com/activos/${equipoId}`}
 												size={150}
 												level="M"
 											/>

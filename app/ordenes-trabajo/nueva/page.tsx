@@ -1,21 +1,21 @@
 "use client"
 
-import { useState } from "react"
 import {
+	ArrowClockwise,
 	ArrowLeft,
+	ChartLine,
 	Check,
+	Lightning,
+	ListChecks,
+	Package,
 	Plus,
+	ShieldCheck,
+	Star,
 	Trash,
 	Wrench,
-	Package,
-	ShieldCheck,
-	ListChecks,
-	Lightning,
-	ArrowClockwise,
-	ChartLine,
-	Star,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -48,11 +48,11 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
 import {
-	equipos,
 	alertasEquipos,
-	usuarios,
+	equipos,
 	type PrioridadOT,
 	type TipoOT,
+	usuarios,
 } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 

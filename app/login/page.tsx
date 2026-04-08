@@ -19,9 +19,12 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import type { RolUsuario } from "@/lib/mock-data"
+import { useRole } from "@/lib/role-provider"
 
 export default function LoginPage() {
 	const router = useRouter()
+	const { setRole } = useRole()
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
 	const [errors, setErrors] = useState({ email: false, password: false })
@@ -131,51 +134,51 @@ export default function LoginPage() {
 							Acceso rápido por rol (demo)
 						</p>
 						<div className="grid grid-cols-2 gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								className="h-auto flex-col gap-1 py-3"
-								onClick={() => router.push("/dashboard")}
-							>
-								<ShieldCheck className="size-5 text-primary" weight="duotone" />
-								<span className="text-xs">Admin</span>
-							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								className="h-auto flex-col gap-1 py-3"
-								onClick={() => router.push("/dashboard/supervisor")}
-							>
-								<UserCircleGear
-									className="size-5 text-blue-600 dark:text-blue-400"
-									weight="duotone"
-								/>
-								<span className="text-xs">Supervisor</span>
-							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								className="h-auto flex-col gap-1 py-3"
-								onClick={() => router.push("/dashboard/tecnico")}
-							>
-								<Wrench
-									className="size-5 text-green-600 dark:text-green-400"
-									weight="duotone"
-								/>
-								<span className="text-xs">Técnico</span>
-							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								className="h-auto flex-col gap-1 py-3"
-								onClick={() => router.push("/dashboard/contratista")}
-							>
-								<Buildings
-									className="size-5 text-orange-600 dark:text-orange-400"
-									weight="duotone"
-								/>
-								<span className="text-xs">Contratista</span>
-							</Button>
+							{(
+								[
+									{
+										rol: "admin" as RolUsuario,
+										label: "Admin",
+										icon: ShieldCheck,
+										color: "text-primary",
+									},
+									{
+										rol: "supervisor" as RolUsuario,
+										label: "Supervisor",
+										icon: UserCircleGear,
+										color: "text-blue-600 dark:text-blue-400",
+									},
+									{
+										rol: "tecnico" as RolUsuario,
+										label: "Técnico",
+										icon: Wrench,
+										color: "text-green-600 dark:text-green-400",
+									},
+									{
+										rol: "contratista" as RolUsuario,
+										label: "Contratista",
+										icon: Buildings,
+										color: "text-orange-600 dark:text-orange-400",
+									},
+								] as const
+							).map((item) => (
+								<Button
+									key={item.rol}
+									variant="outline"
+									size="sm"
+									className="h-auto flex-col gap-1 py-3"
+									onClick={() => {
+										setRole(item.rol)
+										router.push("/dashboard")
+									}}
+								>
+									<item.icon
+										className={`size-5 ${item.color}`}
+										weight="duotone"
+									/>
+									<span className="text-xs">{item.label}</span>
+								</Button>
+							))}
 						</div>
 						<Button
 							variant="ghost"

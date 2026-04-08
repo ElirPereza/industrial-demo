@@ -1,26 +1,26 @@
 "use client"
 
-import { use, useState } from "react"
 import {
 	ArrowLeft,
-	Wrench,
-	Package,
-	ShieldCheck,
-	ListChecks,
-	MapPin,
-	Printer,
 	ArrowsClockwise,
 	CalendarBlank,
-	Clock,
-	User,
-	LinkSimple,
-	Warning,
 	CheckCircle,
 	Circle,
+	Clock,
+	LinkSimple,
+	ListChecks,
+	MapPin,
 	NoteBlank,
+	Package,
+	Printer,
+	ShieldCheck,
+	User,
+	Warning,
+	Wrench,
 } from "@phosphor-icons/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { use, useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -46,11 +46,11 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
 import {
-	ordenesTrabajo,
-	equipos,
 	alertasEquipos,
-	type PrioridadOT,
 	type EstadoOrdenTrabajo,
+	equipos,
+	ordenesTrabajo,
+	type PrioridadOT,
 } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
@@ -572,7 +572,7 @@ export default function OrdenTrabajoDetailPage({
 													className="mt-2 w-full"
 													asChild
 												>
-													<Link href={`/equipos/${equipo.id}`}>
+													<Link href={`/activos/${equipo.id}`}>
 														<LinkSimple className="mr-2 size-4" />
 														Ver equipo
 													</Link>

@@ -43,7 +43,7 @@ import { cn } from "@/lib/utils"
 const tiposEquipo = [
 	{ value: "maquinaria-pesada", label: "Maquinaria Pesada", icon: Factory },
 	{ value: "linea-produccion", label: "Línea de Producción", icon: Cube },
-	{ value: "electricos", label: "Equipos Eléctricos", icon: Hash },
+	{ value: "electricos", label: "Activos Eléctricos", icon: Hash },
 	{ value: "hvac", label: "HVAC / Climatización", icon: MapPin },
 ]
 
@@ -99,7 +99,7 @@ export default function NuevoEquipoPage() {
 		if (Object.keys(newErrors).length === 0) {
 			// Success - would save to database in real app
 			alert("Equipo creado exitosamente (simulado)")
-			router.push("/equipos")
+			router.push("/activos")
 		}
 	}
 
@@ -123,7 +123,7 @@ export default function NuevoEquipoPage() {
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
-									<BreadcrumbLink href="/equipos">Equipos</BreadcrumbLink>
+									<BreadcrumbLink href="/activos">Activos</BreadcrumbLink>
 								</BreadcrumbItem>
 								<BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
@@ -139,10 +139,10 @@ export default function NuevoEquipoPage() {
 					<Button
 						variant="ghost"
 						className="w-fit"
-						onClick={() => router.push("/equipos")}
+						onClick={() => router.push("/activos")}
 					>
 						<ArrowLeft className="mr-2 size-4" weight="bold" />
-						Volver a Equipos
+						Volver a Activos
 					</Button>
 
 					<div>
@@ -447,7 +447,7 @@ export default function NuevoEquipoPage() {
 										<Button
 											variant="outline"
 											className="w-full"
-											onClick={() => router.push("/equipos")}
+											onClick={() => router.push("/activos")}
 										>
 											Cancelar
 										</Button>
