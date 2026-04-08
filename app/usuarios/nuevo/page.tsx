@@ -161,10 +161,14 @@ export default function NuevoUsuarioPage() {
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<label
+											htmlFor="nombre"
+											className="mb-1.5 block text-sm font-medium"
+										>
 											Nombre Completo <span className="text-red-500">*</span>
 										</label>
 										<Input
+											id="nombre"
 											value={nombre}
 											onChange={(e) => {
 												setNombre(e.target.value)
@@ -173,18 +177,23 @@ export default function NuevoUsuarioPage() {
 											}}
 											placeholder="Ej: Juan Pérez"
 											className={cn(
-												errors.nombre && "border-red-500 ring-1 ring-red-500/20",
+												errors.nombre &&
+													"border-red-500 ring-1 ring-red-500/20",
 											)}
 										/>
 									</div>
 									<div className="grid gap-4 sm:grid-cols-2">
 										<div>
-											<label className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="email"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Email <span className="text-red-500">*</span>
 											</label>
 											<div className="relative">
 												<EnvelopeSimple className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 												<Input
+													id="email"
 													type="email"
 													value={email}
 													onChange={(e) => {
@@ -202,10 +211,14 @@ export default function NuevoUsuarioPage() {
 											</div>
 										</div>
 										<div>
-											<label className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="telefono"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Teléfono
 											</label>
 											<Input
+												id="telefono"
 												value={telefono}
 												onChange={(e) => setTelefono(e.target.value)}
 												placeholder="+57 300 123 4567"
@@ -213,10 +226,14 @@ export default function NuevoUsuarioPage() {
 										</div>
 									</div>
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<label
+											htmlFor="departamento"
+											className="mb-1.5 block text-sm font-medium"
+										>
 											Departamento <span className="text-red-500">*</span>
 										</label>
 										<select
+											id="departamento"
 											value={departamento}
 											onChange={(e) => {
 												setDepartamento(e.target.value)
@@ -313,9 +330,7 @@ export default function NuevoUsuarioPage() {
 									<Separator />
 									<div className="flex items-center justify-between">
 										<div>
-											<p className="text-sm font-medium">
-												Enviar Credenciales
-											</p>
+											<p className="text-sm font-medium">Enviar Credenciales</p>
 											<p className="text-xs text-muted-foreground">
 												Enviar email con acceso
 											</p>

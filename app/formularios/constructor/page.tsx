@@ -33,6 +33,7 @@ import {
 	Trash,
 	Upload,
 } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useRef, useState } from "react"
 import SignatureCanvas from "react-signature-canvas"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -298,13 +299,14 @@ function LivePreview({
 			<h4 className="text-lg font-semibold">{formName}</h4>
 			{fields.map((field) => (
 				<div key={field.id}>
-					<label className="mb-2 block text-sm font-medium">
+					<label htmlFor={field.id} className="mb-2 block text-sm font-medium">
 						{field.label}
 						{field.requerido && <span className="ml-1 text-red-600">*</span>}
 					</label>
 
 					{field.tipo === "texto-corto" && (
 						<Input
+							id={field.id}
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
 							placeholder={field.placeholder || "Escribe aquí..."}
@@ -313,6 +315,7 @@ function LivePreview({
 
 					{field.tipo === "texto-largo" && (
 						<textarea
+							id={field.id}
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
 							className="w-full rounded-md border bg-background p-2 text-sm"
@@ -323,6 +326,7 @@ function LivePreview({
 
 					{field.tipo === "numerico" && (
 						<Input
+							id={field.id}
 							type="number"
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
@@ -332,6 +336,7 @@ function LivePreview({
 
 					{field.tipo === "fecha" && (
 						<Input
+							id={field.id}
 							type="date"
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
@@ -340,6 +345,7 @@ function LivePreview({
 
 					{field.tipo === "seleccion-unica" && (
 						<select
+							id={field.id}
 							value={previewData[field.id] || ""}
 							onChange={(e) => onPreviewDataChange(field.id, e.target.value)}
 							className="w-full rounded-md border bg-background p-2 text-sm"
@@ -424,10 +430,13 @@ function LivePreview({
 						<div className="space-y-2">
 							{previewData[field.id] ? (
 								<div className="relative">
-									<img
+									<Image
 										src={previewData[field.id]}
-										alt="Preview"
+										alt="Vista previa de evidencia fotográfica"
 										className="h-32 w-full rounded-lg object-cover"
+										width={400}
+										height={128}
+										unoptimized
 									/>
 									<Button
 										variant="destructive"
@@ -668,10 +677,14 @@ export default function FormBuilderPage() {
 								{selectedField ? (
 									<div className="space-y-4">
 										<div>
-											<label className="mb-1.5 block text-xs font-medium">
+											<label
+												htmlFor="field-label"
+												className="mb-1.5 block text-xs font-medium"
+											>
 												Etiqueta
 											</label>
 											<Input
+												id="field-label"
 												value={selectedField.label}
 												onChange={(e) =>
 													handleUpdateField({ label: e.target.value })
@@ -680,10 +693,14 @@ export default function FormBuilderPage() {
 											/>
 										</div>
 										<div>
-											<label className="mb-1.5 block text-xs font-medium">
+											<label
+												htmlFor="field-placeholder"
+												className="mb-1.5 block text-xs font-medium"
+											>
 												Placeholder
 											</label>
 											<Input
+												id="field-placeholder"
 												value={selectedField.placeholder}
 												onChange={(e) =>
 													handleUpdateField({ placeholder: e.target.value })
@@ -692,10 +709,14 @@ export default function FormBuilderPage() {
 											/>
 										</div>
 										<div className="flex items-center justify-between">
-											<label className="text-xs font-medium">
+											<label
+												htmlFor="field-required"
+												className="text-xs font-medium"
+											>
 												Campo requerido
 											</label>
 											<Switch
+												id="field-required"
 												checked={selectedField.requerido}
 												onCheckedChange={(checked) =>
 													handleUpdateField({ requerido: checked })

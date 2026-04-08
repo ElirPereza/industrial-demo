@@ -1,6 +1,13 @@
 "use client"
 
-import { Cube, Globe, MapPin, PencilSimple, Target, Trash } from "@phosphor-icons/react"
+import {
+	Cube,
+	Globe,
+	MapPin,
+	PencilSimple,
+	Target,
+	Trash,
+} from "@phosphor-icons/react"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -120,33 +127,40 @@ export default function FormAdminPage() {
 										const getAsociacionInfo = () => {
 											switch (formulario.asociacion.tipo) {
 												case "equipo": {
-													const eq = equipos.find((e) => e.id === formulario.asociacion.valor)
+													const eq = equipos.find(
+														(e) => e.id === formulario.asociacion.valor,
+													)
 													return {
 														icon: Target,
 														label: eq?.nombre || "Equipo",
-														color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+														color:
+															"bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
 													}
 												}
 												case "tipo-equipo": {
 													return {
 														icon: Cube,
-														label: formulario.asociacion.valor?.replace("-", " ") || "Tipo",
-														color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+														label:
+															formulario.asociacion.valor?.replace("-", " ") ||
+															"Tipo",
+														color:
+															"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
 													}
 												}
 												case "area": {
 													return {
 														icon: MapPin,
 														label: formulario.asociacion.valor || "Área",
-														color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+														color:
+															"bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
 													}
 												}
-												case "general":
 												default: {
 													return {
 														icon: Globe,
 														label: "Todos los equipos",
-														color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+														color:
+															"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
 													}
 												}
 											}
@@ -165,9 +179,19 @@ export default function FormAdminPage() {
 													</span>
 												</TableCell>
 												<TableCell>
-													<div className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", asociacion.color)}>
-														<AsociacionIcon className="size-3.5" weight="duotone" />
-														<span className="capitalize">{asociacion.label}</span>
+													<div
+														className={cn(
+															"inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+															asociacion.color,
+														)}
+													>
+														<AsociacionIcon
+															className="size-3.5"
+															weight="duotone"
+														/>
+														<span className="capitalize">
+															{asociacion.label}
+														</span>
 													</div>
 												</TableCell>
 												<TableCell>
@@ -176,7 +200,9 @@ export default function FormAdminPage() {
 															{formulario.frecuencia}
 														</span>
 													) : (
-														<span className="text-xs text-muted-foreground">—</span>
+														<span className="text-xs text-muted-foreground">
+															—
+														</span>
 													)}
 												</TableCell>
 												<TableCell>
@@ -213,7 +239,10 @@ export default function FormAdminPage() {
 																// Visual only
 															}}
 														>
-															<PencilSimple className="size-4" weight="duotone" />
+															<PencilSimple
+																className="size-4"
+																weight="duotone"
+															/>
 														</Button>
 														<Button
 															variant="ghost"

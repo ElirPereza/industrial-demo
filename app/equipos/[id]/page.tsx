@@ -2,10 +2,9 @@
 
 import {
 	ArrowLeft,
-	CalendarBlank,
 	CheckCircle,
-	Clock,
 	ClipboardText,
+	Clock,
 	Download,
 	Eye,
 	FileDoc,
@@ -20,8 +19,8 @@ import {
 	Wrench,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { use, useState } from "react"
 import { QRCodeSVG } from "qrcode.react"
+import { use, useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
 	Breadcrumb,
@@ -45,28 +44,94 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { equipos, registrosMantenimiento, formulariosTemplate, enviosFormularios, usuarios } from "@/lib/mock-data"
+import {
+	enviosFormularios,
+	equipos,
+	formulariosTemplate,
+	registrosMantenimiento,
+	usuarios,
+} from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 // Mock documents for equipment
 const documentosMock: Record<
 	string,
-	{ id: string; nombre: string; tipo: "pdf" | "doc" | "img"; tamano: string; fecha: Date }[]
+	{
+		id: string
+		nombre: string
+		tipo: "pdf" | "doc" | "img"
+		tamano: string
+		fecha: Date
+	}[]
 > = {
 	"eq-001": [
-		{ id: "doc-001", nombre: "Manual de Usuario Torno CNC", tipo: "pdf", tamano: "2.4 MB", fecha: new Date("2025-06-15") },
-		{ id: "doc-002", nombre: "Ficha Técnica", tipo: "pdf", tamano: "845 KB", fecha: new Date("2025-06-15") },
-		{ id: "doc-003", nombre: "Certificado de Calibración 2025", tipo: "pdf", tamano: "320 KB", fecha: new Date("2025-12-01") },
-		{ id: "doc-004", nombre: "Plan de Mantenimiento Preventivo", tipo: "doc", tamano: "156 KB", fecha: new Date("2025-01-10") },
+		{
+			id: "doc-001",
+			nombre: "Manual de Usuario Torno CNC",
+			tipo: "pdf",
+			tamano: "2.4 MB",
+			fecha: new Date("2025-06-15"),
+		},
+		{
+			id: "doc-002",
+			nombre: "Ficha Técnica",
+			tipo: "pdf",
+			tamano: "845 KB",
+			fecha: new Date("2025-06-15"),
+		},
+		{
+			id: "doc-003",
+			nombre: "Certificado de Calibración 2025",
+			tipo: "pdf",
+			tamano: "320 KB",
+			fecha: new Date("2025-12-01"),
+		},
+		{
+			id: "doc-004",
+			nombre: "Plan de Mantenimiento Preventivo",
+			tipo: "doc",
+			tamano: "156 KB",
+			fecha: new Date("2025-01-10"),
+		},
 	],
 	"eq-002": [
-		{ id: "doc-005", nombre: "Manual Prensa Hidráulica", tipo: "pdf", tamano: "3.1 MB", fecha: new Date("2024-08-20") },
-		{ id: "doc-006", nombre: "Diagrama Hidráulico", tipo: "pdf", tamano: "1.2 MB", fecha: new Date("2024-08-20") },
-		{ id: "doc-007", nombre: "Certificado de Seguridad", tipo: "pdf", tamano: "280 KB", fecha: new Date("2025-11-15") },
+		{
+			id: "doc-005",
+			nombre: "Manual Prensa Hidráulica",
+			tipo: "pdf",
+			tamano: "3.1 MB",
+			fecha: new Date("2024-08-20"),
+		},
+		{
+			id: "doc-006",
+			nombre: "Diagrama Hidráulico",
+			tipo: "pdf",
+			tamano: "1.2 MB",
+			fecha: new Date("2024-08-20"),
+		},
+		{
+			id: "doc-007",
+			nombre: "Certificado de Seguridad",
+			tipo: "pdf",
+			tamano: "280 KB",
+			fecha: new Date("2025-11-15"),
+		},
 	],
 	"eq-003": [
-		{ id: "doc-008", nombre: "Manual Fresadora CNC", tipo: "pdf", tamano: "4.5 MB", fecha: new Date("2023-03-10") },
-		{ id: "doc-009", nombre: "Guía de Programación", tipo: "pdf", tamano: "1.8 MB", fecha: new Date("2023-03-10") },
+		{
+			id: "doc-008",
+			nombre: "Manual Fresadora CNC",
+			tipo: "pdf",
+			tamano: "4.5 MB",
+			fecha: new Date("2023-03-10"),
+		},
+		{
+			id: "doc-009",
+			nombre: "Guía de Programación",
+			tipo: "pdf",
+			tamano: "1.8 MB",
+			fecha: new Date("2023-03-10"),
+		},
 	],
 }
 
@@ -76,23 +141,68 @@ const imagenesMock: Record<
 	{ id: string; url: string; titulo: string; fecha: Date }[]
 > = {
 	"eq-001": [
-		{ id: "img-001", url: "/placeholder.svg", titulo: "Vista frontal", fecha: new Date("2025-12-01") },
-		{ id: "img-002", url: "/placeholder.svg", titulo: "Panel de control", fecha: new Date("2025-12-01") },
-		{ id: "img-003", url: "/placeholder.svg", titulo: "Área de trabajo", fecha: new Date("2026-01-15") },
-		{ id: "img-004", url: "/placeholder.svg", titulo: "Sistema de refrigeración", fecha: new Date("2026-01-28") },
+		{
+			id: "img-001",
+			url: "/placeholder.svg",
+			titulo: "Vista frontal",
+			fecha: new Date("2025-12-01"),
+		},
+		{
+			id: "img-002",
+			url: "/placeholder.svg",
+			titulo: "Panel de control",
+			fecha: new Date("2025-12-01"),
+		},
+		{
+			id: "img-003",
+			url: "/placeholder.svg",
+			titulo: "Área de trabajo",
+			fecha: new Date("2026-01-15"),
+		},
+		{
+			id: "img-004",
+			url: "/placeholder.svg",
+			titulo: "Sistema de refrigeración",
+			fecha: new Date("2026-01-28"),
+		},
 	],
 	"eq-002": [
-		{ id: "img-005", url: "/placeholder.svg", titulo: "Vista general", fecha: new Date("2025-10-20") },
-		{ id: "img-006", url: "/placeholder.svg", titulo: "Sistema hidráulico", fecha: new Date("2025-10-20") },
+		{
+			id: "img-005",
+			url: "/placeholder.svg",
+			titulo: "Vista general",
+			fecha: new Date("2025-10-20"),
+		},
+		{
+			id: "img-006",
+			url: "/placeholder.svg",
+			titulo: "Sistema hidráulico",
+			fecha: new Date("2025-10-20"),
+		},
 	],
 	"eq-003": [
-		{ id: "img-007", url: "/placeholder.svg", titulo: "Husillo dañado", fecha: new Date("2026-02-05") },
-		{ id: "img-008", url: "/placeholder.svg", titulo: "Reparación en progreso", fecha: new Date("2026-02-06") },
+		{
+			id: "img-007",
+			url: "/placeholder.svg",
+			titulo: "Husillo dañado",
+			fecha: new Date("2026-02-05"),
+		},
+		{
+			id: "img-008",
+			url: "/placeholder.svg",
+			titulo: "Reparación en progreso",
+			fecha: new Date("2026-02-06"),
+		},
 	],
 }
 
 // Extended activity types for timeline
-type ActividadTipo = "mantenimiento" | "inspeccion" | "falla" | "documento" | "modificacion"
+type ActividadTipo =
+	| "mantenimiento"
+	| "inspeccion"
+	| "falla"
+	| "documento"
+	| "modificacion"
 
 interface ActividadEquipo {
 	id: string
@@ -193,9 +303,18 @@ export default function EquipoDetailPage({
 	const formulariosAplicables = formulariosTemplate.filter((f) => {
 		if (!f.activo) return false
 		if (f.asociacion.tipo === "general") return true
-		if (f.asociacion.tipo === "equipo" && f.asociacion.valor === equipoId) return true
-		if (f.asociacion.tipo === "tipo-equipo" && f.asociacion.valor === equipo?.tipo) return true
-		if (f.asociacion.tipo === "area" && equipo?.ubicacion.includes(f.asociacion.valor || "")) return true
+		if (f.asociacion.tipo === "equipo" && f.asociacion.valor === equipoId)
+			return true
+		if (
+			f.asociacion.tipo === "tipo-equipo" &&
+			f.asociacion.valor === equipo?.tipo
+		)
+			return true
+		if (
+			f.asociacion.tipo === "area" &&
+			equipo?.ubicacion.includes(f.asociacion.valor || "")
+		)
+			return true
 		return false
 	})
 
@@ -209,13 +328,20 @@ export default function EquipoDetailPage({
 	const timelineCompleto = [
 		...historial.map((r) => ({
 			id: r.id,
-			tipo: r.tipo === "inspección" ? "inspeccion" : "mantenimiento" as ActividadTipo,
+			tipo:
+				r.tipo === "inspección"
+					? "inspeccion"
+					: ("mantenimiento" as ActividadTipo),
 			titulo: `${r.tipo.charAt(0).toUpperCase() + r.tipo.slice(1)}`,
 			descripcion: r.descripcion,
 			usuario: r.tecnico,
 			rol: "Técnico",
 			fecha: r.fechaInicio,
-			detalles: { horasEmpleadas: r.horasEmpleadas, costo: r.costo, estado: r.estado },
+			detalles: {
+				horasEmpleadas: r.horasEmpleadas,
+				costo: r.costo,
+				estado: r.estado,
+			},
 		})),
 		...actividades,
 	].sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
@@ -246,10 +372,30 @@ export default function EquipoDetailPage({
 
 	const tabs = [
 		{ id: "info" as TabType, label: "Información", icon: Info },
-		{ id: "formularios" as TabType, label: "Formularios", icon: ClipboardText, count: formulariosAplicables.length },
-		{ id: "documentos" as TabType, label: "Documentos", icon: FileText, count: documentos.length },
-		{ id: "galeria" as TabType, label: "Galería", icon: Images, count: imagenes.length },
-		{ id: "historial" as TabType, label: "Historial", icon: Timer, count: timelineCompleto.length },
+		{
+			id: "formularios" as TabType,
+			label: "Formularios",
+			icon: ClipboardText,
+			count: formulariosAplicables.length,
+		},
+		{
+			id: "documentos" as TabType,
+			label: "Documentos",
+			icon: FileText,
+			count: documentos.length,
+		},
+		{
+			id: "galeria" as TabType,
+			label: "Galería",
+			icon: Images,
+			count: imagenes.length,
+		},
+		{
+			id: "historial" as TabType,
+			label: "Historial",
+			icon: Timer,
+			count: timelineCompleto.length,
+		},
 	]
 
 	const getActividadIcon = (tipo: ActividadTipo) => {
@@ -395,33 +541,48 @@ export default function EquipoDetailPage({
 								<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 									<Card>
 										<CardContent className="p-4">
-											<p className="text-sm text-muted-foreground">Intervenciones</p>
-											<p className="text-2xl font-semibold">{totalIntervenciones}</p>
+											<p className="text-sm text-muted-foreground">
+												Intervenciones
+											</p>
+											<p className="text-2xl font-semibold">
+												{totalIntervenciones}
+											</p>
 										</CardContent>
 									</Card>
 									<Card>
 										<CardContent className="p-4">
-											<p className="text-sm text-muted-foreground">Última Falla</p>
+											<p className="text-sm text-muted-foreground">
+												Última Falla
+											</p>
 											<p className="text-lg font-semibold">
 												{ultimaFalla
-													? ultimaFalla.fechaInicio.toLocaleDateString("es-ES", {
-															day: "2-digit",
-															month: "short",
-														})
+													? ultimaFalla.fechaInicio.toLocaleDateString(
+															"es-ES",
+															{
+																day: "2-digit",
+																month: "short",
+															},
+														)
 													: "Sin fallas"}
 											</p>
 										</CardContent>
 									</Card>
 									<Card>
 										<CardContent className="p-4">
-											<p className="text-sm text-muted-foreground">Horas Mant.</p>
+											<p className="text-sm text-muted-foreground">
+												Horas Mant.
+											</p>
 											<p className="text-2xl font-semibold">{horasTotales}h</p>
 										</CardContent>
 									</Card>
 									<Card>
 										<CardContent className="p-4">
-											<p className="text-sm text-muted-foreground">Costo Total</p>
-											<p className="text-2xl font-semibold">${costoTotal.toLocaleString()}</p>
+											<p className="text-sm text-muted-foreground">
+												Costo Total
+											</p>
+											<p className="text-2xl font-semibold">
+												${costoTotal.toLocaleString()}
+											</p>
 										</CardContent>
 									</Card>
 								</div>
@@ -440,27 +601,39 @@ export default function EquipoDetailPage({
 												</p>
 											</div>
 											<div>
-												<p className="text-sm text-muted-foreground">Ubicación</p>
+												<p className="text-sm text-muted-foreground">
+													Ubicación
+												</p>
 												<p className="font-medium">{equipo.ubicacion}</p>
 											</div>
 											<div>
-												<p className="text-sm text-muted-foreground">Último Mantenimiento</p>
+												<p className="text-sm text-muted-foreground">
+													Último Mantenimiento
+												</p>
 												<p className="font-medium">
-													{equipo.ultimoMantenimiento.toLocaleDateString("es-ES", {
-														day: "2-digit",
-														month: "long",
-														year: "numeric",
-													})}
+													{equipo.ultimoMantenimiento.toLocaleDateString(
+														"es-ES",
+														{
+															day: "2-digit",
+															month: "long",
+															year: "numeric",
+														},
+													)}
 												</p>
 											</div>
 											<div>
-												<p className="text-sm text-muted-foreground">Próximo Mantenimiento</p>
+												<p className="text-sm text-muted-foreground">
+													Próximo Mantenimiento
+												</p>
 												<p className="font-medium">
-													{equipo.proximoMantenimiento.toLocaleDateString("es-ES", {
-														day: "2-digit",
-														month: "long",
-														year: "numeric",
-													})}
+													{equipo.proximoMantenimiento.toLocaleDateString(
+														"es-ES",
+														{
+															day: "2-digit",
+															month: "long",
+															year: "numeric",
+														},
+													)}
 												</p>
 											</div>
 										</div>
@@ -531,22 +704,33 @@ export default function EquipoDetailPage({
 														<div
 															className={cn(
 																"flex size-10 items-center justify-center rounded-lg",
-																form.tipo === "inspeccion" && "bg-blue-100 text-blue-700",
-																form.tipo === "preventivo" && "bg-green-100 text-green-700",
-																form.tipo === "correctivo" && "bg-orange-100 text-orange-700",
-																form.tipo === "reporte-fallas" && "bg-red-100 text-red-700",
+																form.tipo === "inspeccion" &&
+																	"bg-blue-100 text-blue-700",
+																form.tipo === "preventivo" &&
+																	"bg-green-100 text-green-700",
+																form.tipo === "correctivo" &&
+																	"bg-orange-100 text-orange-700",
+																form.tipo === "reporte-fallas" &&
+																	"bg-red-100 text-red-700",
 															)}
 														>
-															<ClipboardText className="size-5" weight="duotone" />
+															<ClipboardText
+																className="size-5"
+																weight="duotone"
+															/>
 														</div>
 														<div>
 															<p className="font-medium">{form.nombre}</p>
 															<div className="flex items-center gap-2 text-sm text-muted-foreground">
-																<span className="capitalize">{form.tipo.replace("-", " ")}</span>
+																<span className="capitalize">
+																	{form.tipo.replace("-", " ")}
+																</span>
 																{form.frecuencia && (
 																	<>
 																		<span>•</span>
-																		<span className="capitalize">{form.frecuencia}</span>
+																		<span className="capitalize">
+																			{form.frecuencia}
+																		</span>
 																	</>
 																)}
 															</div>
@@ -554,7 +738,11 @@ export default function EquipoDetailPage({
 													</div>
 													<Button
 														size="sm"
-														onClick={() => router.push(`/formularios/llenar/${form.id}?equipo=${equipoId}`)}
+														onClick={() =>
+															router.push(
+																`/formularios/llenar/${form.id}?equipo=${equipoId}`,
+															)
+														}
 													>
 														<PencilSimple className="mr-2 size-4" />
 														Llenar
@@ -576,7 +764,11 @@ export default function EquipoDetailPage({
 												Últimos formularios diligenciados
 											</CardDescription>
 										</div>
-										<Button variant="outline" size="sm" onClick={() => setActiveTab("historial")}>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => setActiveTab("historial")}
+										>
 											Ver todo
 										</Button>
 									</div>
@@ -592,8 +784,12 @@ export default function EquipoDetailPage({
 									) : (
 										<div className="space-y-3">
 											{enviosRecientes.map((envio) => {
-												const formulario = formulariosTemplate.find((f) => f.id === envio.idFormulario)
-												const usuario = usuarios.find((u) => u.id === envio.idUsuario)
+												const formulario = formulariosTemplate.find(
+													(f) => f.id === envio.idFormulario,
+												)
+												const usuario = usuarios.find(
+													(u) => u.id === envio.idUsuario,
+												)
 												return (
 													<div
 														key={envio.id}
@@ -603,25 +799,36 @@ export default function EquipoDetailPage({
 															<div
 																className={cn(
 																	"flex size-10 items-center justify-center rounded-lg",
-																	envio.estado === "completado" && "bg-green-100 text-green-700",
-																	envio.estado === "pendiente" && "bg-yellow-100 text-yellow-700",
-																	envio.estado === "rechazado" && "bg-red-100 text-red-700",
+																	envio.estado === "completado" &&
+																		"bg-green-100 text-green-700",
+																	envio.estado === "pendiente" &&
+																		"bg-yellow-100 text-yellow-700",
+																	envio.estado === "rechazado" &&
+																		"bg-red-100 text-red-700",
 																)}
 															>
-																<CheckCircle className="size-5" weight="duotone" />
+																<CheckCircle
+																	className="size-5"
+																	weight="duotone"
+																/>
 															</div>
 															<div>
-																<p className="font-medium">{formulario?.nombre || "Formulario"}</p>
+																<p className="font-medium">
+																	{formulario?.nombre || "Formulario"}
+																</p>
 																<div className="flex items-center gap-2 text-sm text-muted-foreground">
 																	<span>{usuario?.nombre || "Usuario"}</span>
 																	<span>•</span>
 																	<span>
-																		{envio.fechaEnvio.toLocaleDateString("es-ES", {
-																			day: "2-digit",
-																			month: "short",
-																			hour: "2-digit",
-																			minute: "2-digit",
-																		})}
+																		{envio.fechaEnvio.toLocaleDateString(
+																			"es-ES",
+																			{
+																				day: "2-digit",
+																				month: "short",
+																				hour: "2-digit",
+																				minute: "2-digit",
+																			},
+																		)}
 																	</span>
 																</div>
 															</div>
@@ -629,12 +836,19 @@ export default function EquipoDetailPage({
 														<span
 															className={cn(
 																"rounded-full px-2 py-0.5 text-xs font-medium",
-																envio.estado === "completado" && "bg-green-100 text-green-800",
-																envio.estado === "pendiente" && "bg-yellow-100 text-yellow-800",
-																envio.estado === "rechazado" && "bg-red-100 text-red-800",
+																envio.estado === "completado" &&
+																	"bg-green-100 text-green-800",
+																envio.estado === "pendiente" &&
+																	"bg-yellow-100 text-yellow-800",
+																envio.estado === "rechazado" &&
+																	"bg-red-100 text-red-800",
 															)}
 														>
-															{envio.estado === "completado" ? "Completado" : envio.estado === "pendiente" ? "Pendiente" : "Rechazado"}
+															{envio.estado === "completado"
+																? "Completado"
+																: envio.estado === "pendiente"
+																	? "Pendiente"
+																	: "Rechazado"}
 														</span>
 													</div>
 												)
@@ -698,7 +912,8 @@ export default function EquipoDetailPage({
 													<div>
 														<p className="font-medium">{doc.nombre}</p>
 														<p className="text-sm text-muted-foreground">
-															{doc.tamano} • {doc.fecha.toLocaleDateString("es-ES")}
+															{doc.tamano} •{" "}
+															{doc.fecha.toLocaleDateString("es-ES")}
 														</p>
 													</div>
 												</div>
@@ -802,14 +1017,19 @@ export default function EquipoDetailPage({
 															getActividadColor(actividad.tipo),
 														)}
 													>
-														<IconComponent className="size-5" weight="duotone" />
+														<IconComponent
+															className="size-5"
+															weight="duotone"
+														/>
 													</div>
 
 													{/* Content */}
 													<div className="flex-1 space-y-2 pb-6">
 														<div className="flex items-start justify-between">
 															<div>
-																<h3 className="font-semibold">{actividad.titulo}</h3>
+																<h3 className="font-semibold">
+																	{actividad.titulo}
+																</h3>
 																<p className="text-sm text-muted-foreground">
 																	{actividad.fecha.toLocaleDateString("es-ES", {
 																		day: "2-digit",
@@ -832,26 +1052,39 @@ export default function EquipoDetailPage({
 														<p className="text-sm">{actividad.descripcion}</p>
 														<div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
 															<span className="flex items-center gap-1">
-																<span className="font-medium">{actividad.usuario}</span>
+																<span className="font-medium">
+																	{actividad.usuario}
+																</span>
 																<span>({actividad.rol})</span>
 															</span>
 															{actividad.detalles && (
 																<>
 																	{actividad.detalles.horasEmpleadas && (
-																		<span>{actividad.detalles.horasEmpleadas}h empleadas</span>
+																		<span>
+																			{actividad.detalles.horasEmpleadas}h
+																			empleadas
+																		</span>
 																	)}
 																	{actividad.detalles.costo && (
-																		<span>${(actividad.detalles.costo as number).toLocaleString()}</span>
+																		<span>
+																			$
+																			{(
+																				actividad.detalles.costo as number
+																			).toLocaleString()}
+																		</span>
 																	)}
 																	{actividad.detalles.estado && (
 																		<span
 																			className={cn(
 																				"rounded-full px-2 py-0.5 font-medium capitalize",
-																				actividad.detalles.estado === "completado" &&
+																				actividad.detalles.estado ===
+																					"completado" &&
 																					"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-																				actividad.detalles.estado === "en-progreso" &&
+																				actividad.detalles.estado ===
+																					"en-progreso" &&
 																					"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-																				actividad.detalles.estado === "pendiente" &&
+																				actividad.detalles.estado ===
+																					"pendiente" &&
 																					"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
 																			)}
 																		>

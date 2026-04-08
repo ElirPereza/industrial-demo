@@ -186,7 +186,9 @@ export default function AnaliticasPage() {
 									</div>
 									<div className="mt-3">
 										<p className="text-2xl font-semibold">{kpi.valor}</p>
-										<p className="text-xs text-muted-foreground">{kpi.titulo}</p>
+										<p className="text-xs text-muted-foreground">
+											{kpi.titulo}
+										</p>
 									</div>
 								</CardContent>
 							</Card>
@@ -273,10 +275,7 @@ export default function AnaliticasPage() {
 										layout="vertical"
 										margin={{ left: 20 }}
 									>
-										<CartesianGrid
-											strokeDasharray="3 3"
-											horizontal={false}
-										/>
+										<CartesianGrid strokeDasharray="3 3" horizontal={false} />
 										<XAxis type="number" fontSize={12} />
 										<YAxis
 											type="category"
@@ -348,10 +347,7 @@ export default function AnaliticasPage() {
 						<CardContent>
 							<div className="space-y-4">
 								{tecnicosMasActivos.map((tecnico, index) => (
-									<div
-										key={tecnico.nombre}
-										className="flex items-center gap-4"
-									>
+									<div key={tecnico.nombre} className="flex items-center gap-4">
 										<div
 											className={cn(
 												"flex size-8 items-center justify-center rounded-full text-sm font-medium",

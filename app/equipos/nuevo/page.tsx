@@ -11,6 +11,7 @@ import {
 	Trash,
 	Upload,
 } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -164,10 +165,14 @@ export default function NuevoEquipoPage() {
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<label
+											htmlFor="nombre"
+											className="mb-1.5 block text-sm font-medium"
+										>
 											Nombre del Equipo <span className="text-red-500">*</span>
 										</label>
 										<Input
+											id="nombre"
 											value={nombre}
 											onChange={(e) => {
 												setNombre(e.target.value)
@@ -177,7 +182,8 @@ export default function NuevoEquipoPage() {
 											}}
 											placeholder="Ej: Compresor Principal A-01"
 											className={cn(
-												errors.nombre && "border-red-500 ring-1 ring-red-500/20",
+												errors.nombre &&
+													"border-red-500 ring-1 ring-red-500/20",
 											)}
 										/>
 										{errors.nombre && (
@@ -188,9 +194,9 @@ export default function NuevoEquipoPage() {
 									</div>
 
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<span className="mb-1.5 block text-sm font-medium">
 											Tipo de Equipo <span className="text-red-500">*</span>
-										</label>
+										</span>
 										<div className="grid grid-cols-2 gap-3">
 											{tiposEquipo.map((t) => (
 												<button
@@ -232,10 +238,14 @@ export default function NuevoEquipoPage() {
 									</div>
 
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<label
+											htmlFor="ubicacion"
+											className="mb-1.5 block text-sm font-medium"
+										>
 											Ubicación <span className="text-red-500">*</span>
 										</label>
 										<Input
+											id="ubicacion"
 											value={ubicacion}
 											onChange={(e) => {
 												setUbicacion(e.target.value)
@@ -257,9 +267,9 @@ export default function NuevoEquipoPage() {
 									</div>
 
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<span className="mb-1.5 block text-sm font-medium">
 											Estado Inicial
-										</label>
+										</span>
 										<div className="flex gap-2">
 											{estadosEquipo.map((e) => (
 												<button
@@ -293,20 +303,28 @@ export default function NuevoEquipoPage() {
 								<CardContent className="space-y-4">
 									<div className="grid gap-4 sm:grid-cols-2">
 										<div>
-											<label className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="fabricante"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Fabricante
 											</label>
 											<Input
+												id="fabricante"
 												value={fabricante}
 												onChange={(e) => setFabricante(e.target.value)}
 												placeholder="Ej: Caterpillar"
 											/>
 										</div>
 										<div>
-											<label className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="modelo"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Modelo
 											</label>
 											<Input
+												id="modelo"
 												value={modelo}
 												onChange={(e) => setModelo(e.target.value)}
 												placeholder="Ej: CAT-3500"
@@ -314,20 +332,28 @@ export default function NuevoEquipoPage() {
 										</div>
 									</div>
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<label
+											htmlFor="numeroSerie"
+											className="mb-1.5 block text-sm font-medium"
+										>
 											Número de Serie
 										</label>
 										<Input
+											id="numeroSerie"
 											value={numeroSerie}
 											onChange={(e) => setNumeroSerie(e.target.value)}
 											placeholder="Ej: SN-2024-001234"
 										/>
 									</div>
 									<div>
-										<label className="mb-1.5 block text-sm font-medium">
+										<label
+											htmlFor="descripcion"
+											className="mb-1.5 block text-sm font-medium"
+										>
 											Descripción / Notas
 										</label>
 										<textarea
+											id="descripcion"
 											value={descripcion}
 											onChange={(e) => setDescripcion(e.target.value)}
 											className="w-full rounded-md border bg-background p-3 text-sm"
@@ -384,16 +410,20 @@ export default function NuevoEquipoPage() {
 												{imagenes.length} imagen(es) seleccionada(s)
 											</p>
 											<div className="grid grid-cols-2 gap-2">
-												{imagenes.map((img, index) => (
-													<div key={index} className="group relative">
-														<img
+												{imagenes.map((img) => (
+													<div key={img} className="group relative">
+														<Image
 															src={img}
-															alt={`Equipo ${index + 1}`}
+															alt="Equipo"
 															className="aspect-square w-full rounded-lg object-cover"
+															width={200}
+															height={200}
 														/>
 														<button
 															type="button"
-															onClick={() => handleRemoveImage(index)}
+															onClick={() =>
+																handleRemoveImage(imagenes.indexOf(img))
+															}
 															className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
 														>
 															<Trash className="size-3" weight="bold" />

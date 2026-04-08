@@ -196,7 +196,9 @@ export default function ContratistasPage() {
 									<CalendarCheck className="size-5" weight="duotone" />
 								</div>
 								<div>
-									<p className="text-2xl font-semibold">{conteoEstado.activo}</p>
+									<p className="text-2xl font-semibold">
+										{conteoEstado.activo}
+									</p>
 									<p className="text-sm text-muted-foreground">Activos</p>
 								</div>
 							</CardContent>
@@ -305,10 +307,7 @@ export default function ContratistasPage() {
 
 									<div className="flex items-center justify-between text-sm">
 										<div className="flex items-center gap-1">
-											<Star
-												className="size-4 text-yellow-500"
-												weight="fill"
-											/>
+											<Star className="size-4 text-yellow-500" weight="fill" />
 											<span className="font-medium">
 												{contratista.calificacion}
 											</span>

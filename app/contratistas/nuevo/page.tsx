@@ -117,10 +117,6 @@ export default function NuevoContratistaPage() {
 		}
 	}
 
-	const removeDocument = (index: number) => {
-		setDocumentos(documentos.filter((_, i) => i !== index))
-	}
-
 	const handleSubmit = () => {
 		const newErrors: Record<string, boolean> = {}
 
@@ -201,8 +197,12 @@ export default function NuevoContratistaPage() {
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div>
-										<label htmlFor="nombreEmpresa" className="mb-1.5 block text-sm font-medium">
-											Nombre de la Empresa <span className="text-red-500">*</span>
+										<label
+											htmlFor="nombreEmpresa"
+											className="mb-1.5 block text-sm font-medium"
+										>
+											Nombre de la Empresa{" "}
+											<span className="text-red-500">*</span>
 										</label>
 										<Input
 											id="nombreEmpresa"
@@ -221,7 +221,10 @@ export default function NuevoContratistaPage() {
 									</div>
 									<div className="grid gap-4 sm:grid-cols-2">
 										<div>
-											<label htmlFor="nit" className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="nit"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												NIT / Identificación Fiscal
 											</label>
 											<Input
@@ -232,7 +235,10 @@ export default function NuevoContratistaPage() {
 											/>
 										</div>
 										<div>
-											<label htmlFor="direccion" className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="direccion"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Dirección
 											</label>
 											<Input
@@ -256,8 +262,12 @@ export default function NuevoContratistaPage() {
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div>
-										<label htmlFor="contacto" className="mb-1.5 block text-sm font-medium">
-											Persona de Contacto <span className="text-red-500">*</span>
+										<label
+											htmlFor="contacto"
+											className="mb-1.5 block text-sm font-medium"
+										>
+											Persona de Contacto{" "}
+											<span className="text-red-500">*</span>
 										</label>
 										<Input
 											id="contacto"
@@ -276,7 +286,10 @@ export default function NuevoContratistaPage() {
 									</div>
 									<div className="grid gap-4 sm:grid-cols-2">
 										<div>
-											<label htmlFor="email" className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="email"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Email <span className="text-red-500">*</span>
 											</label>
 											<div className="relative">
@@ -300,7 +313,10 @@ export default function NuevoContratistaPage() {
 											</div>
 										</div>
 										<div>
-											<label htmlFor="telefono" className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="telefono"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Teléfono
 											</label>
 											<div className="relative">
@@ -372,7 +388,10 @@ export default function NuevoContratistaPage() {
 								<CardContent>
 									<div className="grid gap-4 sm:grid-cols-2">
 										<div>
-											<label htmlFor="fechaInicio" className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="fechaInicio"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Fecha de Inicio <span className="text-red-500">*</span>
 											</label>
 											<Input
@@ -391,7 +410,10 @@ export default function NuevoContratistaPage() {
 											/>
 										</div>
 										<div>
-											<label htmlFor="fechaFin" className="mb-1.5 block text-sm font-medium">
+											<label
+												htmlFor="fechaFin"
+												className="mb-1.5 block text-sm font-medium"
+											>
 												Fecha de Fin <span className="text-red-500">*</span>
 											</label>
 											<Input
@@ -434,7 +456,9 @@ export default function NuevoContratistaPage() {
 											className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors hover:border-primary hover:bg-muted/50"
 										>
 											<FileText className="mb-2 size-8 text-muted-foreground" />
-											<span className="text-sm font-medium">Subir archivos</span>
+											<span className="text-sm font-medium">
+												Subir archivos
+											</span>
 											<span className="text-xs text-muted-foreground">
 												PDF, JPG, PNG (máx. 10MB)
 											</span>
@@ -462,7 +486,9 @@ export default function NuevoContratistaPage() {
 													<Button
 														variant="ghost"
 														size="icon-sm"
-														onClick={() => setDocumentos(documentos.filter((d) => d !== doc))}
+														onClick={() =>
+															setDocumentos(documentos.filter((d) => d !== doc))
+														}
 													>
 														×
 													</Button>
