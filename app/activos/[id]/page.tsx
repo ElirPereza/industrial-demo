@@ -18,12 +18,20 @@ import {
 	PlugsConnected,
 	QrCode,
 	Timer,
+	Upload,
 	WifiHigh,
 	Wrench,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { QRCodeSVG } from "qrcode.react"
-import { use, useCallback, useEffect, useState } from "react"
+import {
+	use,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+	type ChangeEvent,
+} from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { PageError } from "@/components/page-error"
 import { PageLoading } from "@/components/page-loading"
@@ -57,157 +65,28 @@ import {
 	mapMantenimientoRow,
 	mapProfileRow,
 } from "@/lib/data-mappers"
-import type { AlertaEquipo,
+import type {
+	AlertaEquipo,
 	EnvioFormulario,
 	Equipo,
 	FormTemplate,
 	RegistroMantenimiento,
-	Usuario, } from "@/lib/types"
+	Usuario,
+} from "@/lib/types"
+import { useRole } from "@/lib/role-provider"
 import { createClient } from "@/lib/supabase/client"
-import type { Tables } from "@/lib/supabase/types"
+import type { Tables, TablesInsert } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
-// Mock documents for equipment
-const documentosMock: Record<
-	string,
-	{
-		id: string
-		nombre: string
-		tipo: "pdf" | "doc" | "img"
-		tamano: string
-		fecha: Date
-	}[]
-> = {
-	"eq-001": [
-		{
-			id: "doc-001",
-			nombre: "Manual de Usuario Torno CNC",
-			tipo: "pdf",
-			tamano: "2.4 MB",
-			fecha: new Date("2025-06-15"),
-		},
-		{
-			id: "doc-002",
-			nombre: "Ficha Técnica",
-			tipo: "pdf",
-			tamano: "845 KB",
-			fecha: new Date("2025-06-15"),
-		},
-		{
-			id: "doc-003",
-			nombre: "Certificado de Calibración 2025",
-			tipo: "pdf",
-			tamano: "320 KB",
-			fecha: new Date("2025-12-01"),
-		},
-		{
-			id: "doc-004",
-			nombre: "Plan de Mantenimiento Preventivo",
-			tipo: "doc",
-			tamano: "156 KB",
-			fecha: new Date("2025-01-10"),
-		},
-	],
-	"eq-002": [
-		{
-			id: "doc-005",
-			nombre: "Manual Prensa Hidráulica",
-			tipo: "pdf",
-			tamano: "3.1 MB",
-			fecha: new Date("2024-08-20"),
-		},
-		{
-			id: "doc-006",
-			nombre: "Diagrama Hidráulico",
-			tipo: "pdf",
-			tamano: "1.2 MB",
-			fecha: new Date("2024-08-20"),
-		},
-		{
-			id: "doc-007",
-			nombre: "Certificado de Seguridad",
-			tipo: "pdf",
-			tamano: "280 KB",
-			fecha: new Date("2025-11-15"),
-		},
-	],
-	"eq-003": [
-		{
-			id: "doc-008",
-			nombre: "Manual Fresadora CNC",
-			tipo: "pdf",
-			tamano: "4.5 MB",
-			fecha: new Date("2023-03-10"),
-		},
-		{
-			id: "doc-009",
-			nombre: "Guía de Programación",
-			tipo: "pdf",
-			tamano: "1.8 MB",
-			fecha: new Date("2023-03-10"),
-		},
-	],
-}
-
-// Mock images for equipment
-const imagenesMock: Record<
-	string,
-	{ id: string; url: string; titulo: string; fecha: Date }[]
-> = {
-	"eq-001": [
-		{
-			id: "img-001",
-			url: "/placeholder.svg",
-			titulo: "Vista frontal",
-			fecha: new Date("2025-12-01"),
-		},
-		{
-			id: "img-002",
-			url: "/placeholder.svg",
-			titulo: "Panel de control",
-			fecha: new Date("2025-12-01"),
-		},
-		{
-			id: "img-003",
-			url: "/placeholder.svg",
-			titulo: "Área de trabajo",
-			fecha: new Date("2026-01-15"),
-		},
-		{
-			id: "img-004",
-			url: "/placeholder.svg",
-			titulo: "Sistema de refrigeración",
-			fecha: new Date("2026-01-28"),
-		},
-	],
-	"eq-002": [
-		{
-			id: "img-005",
-			url: "/placeholder.svg",
-			titulo: "Vista general",
-			fecha: new Date("2025-10-20"),
-		},
-		{
-			id: "img-006",
-			url: "/placeholder.svg",
-			titulo: "Sistema hidráulico",
-			fecha: new Date("2025-10-20"),
-		},
-	],
-	"eq-003": [
-		{
-			id: "img-007",
-			url: "/placeholder.svg",
-			titulo: "Husillo dañado",
-			fecha: new Date("2026-02-05"),
-		},
-		{
-			id: "img-008",
-			url: "/placeholder.svg",
-			titulo: "Reparación en progreso",
-			fecha: new Date("2026-02-06"),
-		},
-	],
+interface ArchivoEquipo {
+	id: string
+	tipo: string
+	nombre: string
+	nombre_archivo: string
+	storage_path: string
+	mime_type: string
+	tamano_bytes: number | null
+	created_at: string
 }
 
 // Extended activity types for timeline
@@ -307,11 +186,13 @@ export default function EquipoDetailPage({
 }) {
 	const { id: equipoId } = use(params)
 	const router = useRouter()
+	const { user } = useRole()
 	const [activeTab, setActiveTab] = useState<TabType>("info")
 	const [equipo, setEquipo] = useState<Equipo | null>(null)
 	const [registrosMantenimiento, setRegistrosMantenimiento] = useState<
 		RegistroMantenimiento[]
 	>([])
+	const [archivosEquipo, setArchivosEquipo] = useState<ArchivoEquipo[]>([])
 	const [alertasEquipos, setAlertasEquipos] = useState<AlertaEquipo[]>([])
 	const [enviosFormularios, setEnviosFormularios] = useState<EnvioFormulario[]>(
 		[],
@@ -320,8 +201,14 @@ export default function EquipoDetailPage({
 		FormTemplate[]
 	>([])
 	const [usuarios, setUsuarios] = useState<Usuario[]>([])
+	const [uploadError, setUploadError] = useState<string | null>(null)
+	const [uploadingTipo, setUploadingTipo] = useState<
+		"imagen" | "documento" | "manual" | null
+	>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+	const imageInputRef = useRef<HTMLInputElement>(null)
+	const documentInputRef = useRef<HTMLInputElement>(null)
 
 	const loadEquipoDetalle = useCallback(async () => {
 		setIsLoading(true)
@@ -332,6 +219,7 @@ export default function EquipoDetailPage({
 			const [
 				equipoResult,
 				mantenimientoResult,
+				archivosResult,
 				alertasResult,
 				enviosResult,
 				formulariosResult,
@@ -342,6 +230,11 @@ export default function EquipoDetailPage({
 					.from("registros_mantenimiento")
 					.select("*")
 					.eq("id_equipo", equipoId),
+				supabase
+					.from("equipo_archivos")
+					.select("*")
+					.eq("id_equipo", equipoId)
+					.order("created_at", { ascending: false }),
 				supabase.from("alertas_equipos").select("*").eq("id_equipo", equipoId),
 				supabase
 					.from("envios_formularios")
@@ -363,6 +256,10 @@ export default function EquipoDetailPage({
 				throw alertasResult.error
 			}
 
+			if (archivosResult.error) {
+				throw archivosResult.error
+			}
+
 			if (enviosResult.error) {
 				throw enviosResult.error
 			}
@@ -377,6 +274,7 @@ export default function EquipoDetailPage({
 
 			const equipoRow: Tables<"equipos"> | null = equipoResult.data
 			const mantenimientoRows = mantenimientoResult.data ?? []
+			const archivosRows = archivosResult.data ?? []
 			const alertasRows = alertasResult.data ?? []
 			const enviosRows = enviosResult.data ?? []
 			const formulariosRows = formulariosResult.data ?? []
@@ -388,6 +286,7 @@ export default function EquipoDetailPage({
 					mapMantenimientoRow(row),
 				),
 			)
+			setArchivosEquipo(archivosRows)
 			setAlertasEquipos(
 				alertasRows.map((row: Tables<"alertas_equipos">) => mapAlertaRow(row)),
 			)
@@ -417,6 +316,82 @@ export default function EquipoDetailPage({
 		void loadEquipoDetalle()
 	}, [loadEquipoDetalle])
 
+	const handleFileUpload = useCallback(
+		async (file: File, tipo: "imagen" | "documento" | "manual") => {
+			const supabase = createClient()
+			const ext = file.name.split(".").pop()
+			const path = `equipos/${equipoId}/${Date.now()}-${Math.random().toString(36).slice(2)}${ext ? `.${ext}` : ""}`
+
+			const { error: storageError } = await supabase.storage
+				.from("equipos-media")
+				.upload(path, file, {
+					contentType: file.type || undefined,
+				})
+
+			if (storageError) {
+				throw storageError
+			}
+
+			const {
+				data: { publicUrl },
+			} = supabase.storage.from("equipos-media").getPublicUrl(path)
+
+			const payload: TablesInsert<"equipo_archivos"> = {
+				id_equipo: equipoId,
+				tipo,
+				nombre: file.name,
+				nombre_archivo: file.name,
+				storage_path: publicUrl,
+				mime_type: file.type || "application/octet-stream",
+				tamano_bytes: file.size,
+				subido_por: user?.id ?? null,
+			}
+
+			const { error: insertError } = await supabase
+				.from("equipo_archivos")
+				.insert(payload)
+
+			if (insertError) {
+				throw insertError
+			}
+		},
+		[equipoId, user?.id],
+	)
+
+	const handleFilesSelected = useCallback(
+		async (
+			event: ChangeEvent<HTMLInputElement>,
+			tipo: "imagen" | "documento" | "manual",
+		) => {
+			const files = event.target.files
+
+			if (!files?.length) {
+				return
+			}
+
+			setUploadError(null)
+			setUploadingTipo(tipo)
+
+			try {
+				for (const file of Array.from(files)) {
+					await handleFileUpload(file, tipo)
+				}
+
+				await loadEquipoDetalle()
+			} catch (uploadFileError) {
+				setUploadError(
+					uploadFileError instanceof Error
+						? uploadFileError.message
+						: "No se pudo subir el archivo",
+				)
+			} finally {
+				setUploadingTipo(null)
+				event.target.value = ""
+			}
+		},
+		[handleFileUpload, loadEquipoDetalle],
+	)
+
 	const historial = registrosMantenimiento
 		.filter((r) => r.idEquipo === equipoId)
 		.sort((a, b) => b.fechaInicio.getTime() - a.fechaInicio.getTime())
@@ -435,9 +410,51 @@ export default function EquipoDetailPage({
 		)
 	}
 
-	const documentos = documentosMock[equipoId] || []
-	const imagenes = imagenesMock[equipoId] || []
+	const documentos = archivosEquipo.filter(
+		(archivo) => archivo.tipo !== "imagen",
+	)
+	const imagenes = archivosEquipo.filter((archivo) => archivo.tipo === "imagen")
 	const actividades = actividadesMock[equipoId] || []
+
+	const formatFileSize = (bytes: number | null) => {
+		if (!bytes) {
+			return "Tamaño no disponible"
+		}
+
+		if (bytes < 1024) {
+			return `${bytes} B`
+		}
+
+		const units = ["KB", "MB", "GB"]
+		let value = bytes / 1024
+		let unitIndex = 0
+
+		while (value >= 1024 && unitIndex < units.length - 1) {
+			value /= 1024
+			unitIndex += 1
+		}
+
+		return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unitIndex]}`
+	}
+
+	const getDocumentIcon = (archivo: ArchivoEquipo) => {
+		if (
+			archivo.mime_type === "application/pdf" ||
+			archivo.nombre_archivo.toLowerCase().endsWith(".pdf")
+		) {
+			return FilePdf
+		}
+
+		if (
+			archivo.mime_type.includes("word") ||
+			archivo.nombre_archivo.toLowerCase().endsWith(".doc") ||
+			archivo.nombre_archivo.toLowerCase().endsWith(".docx")
+		) {
+			return FileDoc
+		}
+
+		return FileText
+	}
 
 	// Get applicable forms for this equipment
 	const formulariosAplicables = formulariosTemplate.filter((f) => {
@@ -583,6 +600,10 @@ export default function EquipoDetailPage({
 				return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
 		}
 	}
+
+	const isUploadingImage = uploadingTipo === "imagen"
+	const isUploadingDocument =
+		uploadingTipo === "documento" || uploadingTipo === "manual"
 
 	return (
 		<SidebarProvider>
@@ -1140,63 +1161,102 @@ export default function EquipoDetailPage({
 											Manuales, certificados y documentación técnica
 										</CardDescription>
 									</div>
-									<Button>
-										<FileText className="mr-2 size-4" />
-										Subir Documento
+									<Button
+										onClick={() => documentInputRef.current?.click()}
+										disabled={isUploadingDocument}
+									>
+										<Upload className="mr-2 size-4" />
+										{isUploadingDocument ? "Subiendo..." : "Subir Documento"}
 									</Button>
+									<input
+										ref={documentInputRef}
+										type="file"
+										className="hidden"
+										multiple
+										accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.dwg"
+										onChange={(event) => {
+											void handleFilesSelected(event, "documento")
+										}}
+									/>
 								</div>
 							</CardHeader>
 							<CardContent>
+								{uploadError && (
+									<p className="mb-4 text-sm text-red-500">{uploadError}</p>
+								)}
 								{documentos.length === 0 ? (
 									<div className="flex flex-col items-center justify-center py-12 text-center">
 										<FileText className="mb-4 size-12 text-muted-foreground" />
 										<p className="text-muted-foreground">
 											No hay documentos disponibles para este equipo
 										</p>
-										<Button variant="outline" className="mt-4">
+										<Button
+											variant="outline"
+											className="mt-4"
+											onClick={() => documentInputRef.current?.click()}
+											disabled={isUploadingDocument}
+										>
 											Subir primer documento
 										</Button>
 									</div>
 								) : (
 									<div className="space-y-2">
-										{documentos.map((doc) => (
-											<div
-												key={doc.id}
-												className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
-											>
-												<div className="flex items-center gap-4">
+										{documentos.map((doc) =>
+											(() => {
+												const DocumentIcon = getDocumentIcon(doc)
+												const isPdf = DocumentIcon === FilePdf
+
+												return (
 													<div
-														className={cn(
-															"flex size-10 items-center justify-center rounded-lg",
-															doc.tipo === "pdf"
-																? "bg-red-100 text-red-700"
-																: "bg-blue-100 text-blue-700",
-														)}
+														key={doc.id}
+														className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
 													>
-														{doc.tipo === "pdf" ? (
-															<FilePdf className="size-5" weight="duotone" />
-														) : (
-															<FileDoc className="size-5" weight="duotone" />
-														)}
+														<div className="flex items-center gap-4">
+															<div
+																className={cn(
+																	"flex size-10 items-center justify-center rounded-lg",
+																	isPdf
+																		? "bg-red-100 text-red-700"
+																		: "bg-blue-100 text-blue-700",
+																)}
+															>
+																<DocumentIcon
+																	className="size-5"
+																	weight="duotone"
+																/>
+															</div>
+															<div>
+																<p className="font-medium">{doc.nombre}</p>
+																<p className="text-sm text-muted-foreground">
+																	{formatFileSize(doc.tamano_bytes)} •{" "}
+																	{new Date(doc.created_at).toLocaleDateString(
+																		"es-ES",
+																	)}
+																</p>
+															</div>
+														</div>
+														<div className="flex gap-2">
+															<Button variant="ghost" size="icon-sm" asChild>
+																<a
+																	href={doc.storage_path}
+																	target="_blank"
+																	rel="noreferrer"
+																>
+																	<Eye className="size-4" />
+																</a>
+															</Button>
+															<Button variant="ghost" size="icon-sm" asChild>
+																<a
+																	href={`${doc.storage_path}?download=${encodeURIComponent(doc.nombre_archivo)}`}
+																>
+																	<Download className="size-4" />
+																</a>
+															</Button>
+														</div>
 													</div>
-													<div>
-														<p className="font-medium">{doc.nombre}</p>
-														<p className="text-sm text-muted-foreground">
-															{doc.tamano} •{" "}
-															{doc.fecha.toLocaleDateString("es-ES")}
-														</p>
-													</div>
-												</div>
-												<div className="flex gap-2">
-													<Button variant="ghost" size="icon-sm">
-														<Eye className="size-4" />
-													</Button>
-													<Button variant="ghost" size="icon-sm">
-														<Download className="size-4" />
-													</Button>
-												</div>
-											</div>
-										))}
+												)
+											})(),
+										)}
 									</div>
 								)}
 							</CardContent>
@@ -1213,20 +1273,41 @@ export default function EquipoDetailPage({
 											Fotos del equipo, inspecciones y reparaciones
 										</CardDescription>
 									</div>
-									<Button>
-										<Images className="mr-2 size-4" />
-										Subir Imagen
+									<Button
+										onClick={() => imageInputRef.current?.click()}
+										disabled={isUploadingImage}
+									>
+										<Upload className="mr-2 size-4" />
+										{isUploadingImage ? "Subiendo..." : "Subir Imagen"}
 									</Button>
+									<input
+										ref={imageInputRef}
+										type="file"
+										className="hidden"
+										multiple
+										accept="image/*"
+										onChange={(event) => {
+											void handleFilesSelected(event, "imagen")
+										}}
+									/>
 								</div>
 							</CardHeader>
 							<CardContent>
+								{uploadError && (
+									<p className="mb-4 text-sm text-red-500">{uploadError}</p>
+								)}
 								{imagenes.length === 0 ? (
 									<div className="flex flex-col items-center justify-center py-12 text-center">
 										<Images className="mb-4 size-12 text-muted-foreground" />
 										<p className="text-muted-foreground">
 											No hay imágenes disponibles para este equipo
 										</p>
-										<Button variant="outline" className="mt-4">
+										<Button
+											variant="outline"
+											className="mt-4"
+											onClick={() => imageInputRef.current?.click()}
+											disabled={isUploadingImage}
+										>
 											Subir primera imagen
 										</Button>
 									</div>
@@ -1237,15 +1318,19 @@ export default function EquipoDetailPage({
 												key={img.id}
 												className="group relative aspect-square overflow-hidden rounded-lg border bg-muted"
 											>
-												<div className="flex size-full items-center justify-center text-muted-foreground">
-													<Images className="size-12" />
-												</div>
+												<img
+													src={img.storage_path}
+													alt={img.nombre}
+													className="size-full object-cover"
+												/>
 												<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
 													<p className="text-sm font-medium text-white">
-														{img.titulo}
+														{img.nombre}
 													</p>
 													<p className="text-xs text-white/80">
-														{img.fecha.toLocaleDateString("es-ES")}
+														{new Date(img.created_at).toLocaleDateString(
+															"es-ES",
+														)}
 													</p>
 												</div>
 											</div>
