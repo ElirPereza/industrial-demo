@@ -1,6 +1,13 @@
 "use client"
 
-import { Factory } from "@phosphor-icons/react"
+import {
+	Buildings,
+	Eye,
+	Factory,
+	ShieldCheck,
+	UserCircleGear,
+	Wrench,
+} from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -109,7 +116,7 @@ export default function LoginPage() {
 						<div className="text-center">
 							<button
 								type="button"
-								className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+								className="text-xs text-muted-foreground transition-colors hover:text-foreground"
 								onClick={() => {
 									// Non-functional, just visual
 								}}
@@ -118,6 +125,68 @@ export default function LoginPage() {
 							</button>
 						</div>
 					</form>
+
+					<div className="mt-6 border-t pt-6">
+						<p className="mb-3 text-center text-xs font-medium text-muted-foreground">
+							Acceso rápido por rol (demo)
+						</p>
+						<div className="grid grid-cols-2 gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-auto flex-col gap-1 py-3"
+								onClick={() => router.push("/dashboard")}
+							>
+								<ShieldCheck className="size-5 text-primary" weight="duotone" />
+								<span className="text-xs">Admin</span>
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-auto flex-col gap-1 py-3"
+								onClick={() => router.push("/dashboard/supervisor")}
+							>
+								<UserCircleGear
+									className="size-5 text-blue-600 dark:text-blue-400"
+									weight="duotone"
+								/>
+								<span className="text-xs">Supervisor</span>
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-auto flex-col gap-1 py-3"
+								onClick={() => router.push("/dashboard/tecnico")}
+							>
+								<Wrench
+									className="size-5 text-green-600 dark:text-green-400"
+									weight="duotone"
+								/>
+								<span className="text-xs">Técnico</span>
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-auto flex-col gap-1 py-3"
+								onClick={() => router.push("/dashboard/contratista")}
+							>
+								<Buildings
+									className="size-5 text-orange-600 dark:text-orange-400"
+									weight="duotone"
+								/>
+								<span className="text-xs">Contratista</span>
+							</Button>
+						</div>
+						<Button
+							variant="ghost"
+							size="sm"
+							className="mt-2 w-full gap-2"
+							onClick={() => router.push("/onboarding")}
+						>
+							<Eye className="size-4" />
+							<span className="text-xs">Ver Onboarding</span>
+						</Button>
+					</div>
 				</CardContent>
 			</Card>
 		</div>
