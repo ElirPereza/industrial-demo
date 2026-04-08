@@ -10,11 +10,13 @@ import {
 } from "@phosphor-icons/react"
 import { MobileShell } from "@/components/mobile-shell"
 import {
-	equipos,
-	formulariosTemplate,
-	ordenesTrabajo,
-	registrosMantenimiento,
-} from "@/lib/mock-data"
+	mapEquipoRow,
+	mapFormTemplateRow,
+	mapMantenimientoRow,
+	mapOrdenRow,
+} from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 const CONTRATISTA_OT_IDS = ["ot-003", "ot-005", "ot-008"]
@@ -47,6 +49,44 @@ const documentos = [
 ]
 
 export default function MobileContratistaPage() {
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+	const {
+		data: formulariosData,
+		isLoading: loadingFormularios,
+		error: errorFormularios,
+	} = useSupabaseQuery("form_templates", (row) =>
+		mapFormTemplateRow(row as unknown as Tables<"form_templates">),
+	)
+	const {
+		data: ordenesData,
+		isLoading: loadingOrdenes,
+		error: errorOrdenes,
+	} = useSupabaseQuery("ordenes_trabajo", (row) =>
+		mapOrdenRow(row as unknown as Tables<"ordenes_trabajo">),
+	)
+	const {
+		data: registrosData,
+		isLoading: loadingRegistros,
+		error: errorRegistros,
+	} = useSupabaseQuery("registros_mantenimiento", (row) =>
+		mapMantenimientoRow(row as unknown as Tables<"registros_mantenimiento">),
+	)
+
+	const isLoading =
+		loadingEquipos || loadingFormularios || loadingOrdenes || loadingRegistros
+	const error =
+		errorEquipos ?? errorFormularios ?? errorOrdenes ?? errorRegistros
+	const equipos = equiposData ?? []
+	const formulariosTemplate = formulariosData ?? []
+	const ordenesTrabajo = ordenesData ?? []
+	const registrosMantenimiento = registrosData ?? []
+
 	const misOTs = ordenesTrabajo.filter((ot) =>
 		CONTRATISTA_OT_IDS.includes(ot.id),
 	)
@@ -54,6 +94,35 @@ export default function MobileContratistaPage() {
 	const registrosRelacionados = registrosMantenimiento.filter((r) =>
 		misOTs.some((ot) => ot.idEquipo === r.idEquipo),
 	)
+	const horasEsteMes = registrosRelacionados
+		.filter((registro) => {
+			const ahora = new Date()
+			return (
+				registro.fechaInicio.getMonth() === ahora.getMonth() &&
+				registro.fechaInicio.getFullYear() === ahora.getFullYear()
+			)
+		})
+		.reduce((total, registro) => total + registro.horasEmpleadas, 0)
+
+	if (isLoading) {
+		return (
+			<MobileShell activeTab="/mobile/contratista">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6">
+					<div className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+				</div>
+			</MobileShell>
+		)
+	}
+
+	if (error) {
+		return (
+			<MobileShell activeTab="/mobile/contratista">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6 text-center">
+					<p className="text-sm text-muted-foreground">{error}</p>
+				</div>
+			</MobileShell>
+		)
+	}
 
 	return (
 		<MobileShell activeTab="/mobile/contratista">
@@ -88,7 +157,9 @@ export default function MobileContratistaPage() {
 						</div>
 						<div className="flex-1">
 							<p className="text-xs text-muted-foreground">OTs Asignadas</p>
-							<p className="text-xl font-bold text-foreground">3</p>
+							<p className="text-xl font-bold text-foreground">
+								{misOTs.length}
+							</p>
 						</div>
 					</div>
 
@@ -101,7 +172,9 @@ export default function MobileContratistaPage() {
 						</div>
 						<div className="flex-1">
 							<p className="text-xs text-muted-foreground">Horas Este Mes</p>
-							<p className="text-xl font-bold text-foreground">24.5h</p>
+							<p className="text-xl font-bold text-foreground">
+								{horasEsteMes.toFixed(1)}h
+							</p>
 						</div>
 					</div>
 

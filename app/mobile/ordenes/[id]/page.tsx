@@ -15,15 +15,12 @@ import {
 	Warning,
 	Wrench,
 } from "@phosphor-icons/react"
-import { use, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { MobileShell } from "@/components/mobile-shell"
-import {
-	type EstadoOrdenTrabajo,
-	equipos,
-	ordenesTrabajo,
-	type PrioridadOT,
-	type TipoOT,
-} from "@/lib/mock-data"
+import { mapEquipoRow, mapOrdenRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { EstadoOrdenTrabajo, PrioridadOT, TipoOT } from "@/lib/types"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 const PRIORIDAD_CONFIG: Record<
@@ -174,19 +171,64 @@ export default function MobileOrdenDetallePage({
 	params: Promise<{ id: string }>
 }) {
 	const { id } = use(params)
-	const ot = ordenesTrabajo.find((o) => o.id === id)
-	const equipo = ot ? equipos.find((e) => e.id === ot.idEquipo) : null
+	const {
+		data: ordenesData,
+		isLoading: loadingOrdenes,
+		error: errorOrdenes,
+	} = useSupabaseQuery("ordenes_trabajo", (row) =>
+		mapOrdenRow(row as unknown as Tables<"ordenes_trabajo">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
+	const isLoading = loadingOrdenes || loadingEquipos
+	const error = errorOrdenes ?? errorEquipos
+	const ordenesTrabajo = ordenesData ?? []
+	const equipos = equiposData ?? []
+	const ot = ordenesTrabajo.find((orden) => orden.id === id)
+	const equipo = ot ? equipos.find((item) => item.id === ot.idEquipo) : null
 
 	const [checklistState, setChecklistState] = useState<Record<string, boolean>>(
-		() => {
-			if (!ot) return {}
-			const initial: Record<string, boolean> = {}
-			for (const item of ot.checklist) {
-				initial[item.id] = item.completado
-			}
-			return initial
-		},
+		{},
 	)
+
+	useEffect(() => {
+		if (!ot) {
+			setChecklistState({})
+			return
+		}
+
+		const initial: Record<string, boolean> = {}
+		for (const item of ot.checklist) {
+			initial[item.id] = item.completado
+		}
+		setChecklistState(initial)
+	}, [ot])
+
+	if (isLoading) {
+		return (
+			<MobileShell activeTab="/mobile/ordenes">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6">
+					<div className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+				</div>
+			</MobileShell>
+		)
+	}
+
+	if (error) {
+		return (
+			<MobileShell activeTab="/mobile/ordenes">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6 text-center">
+					<p className="text-sm text-muted-foreground">{error}</p>
+				</div>
+			</MobileShell>
+		)
+	}
 
 	if (!ot) {
 		return (

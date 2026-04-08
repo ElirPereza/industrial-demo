@@ -3,13 +3,10 @@
 import { CheckCircle, ClipboardText, User } from "@phosphor-icons/react"
 import { useMemo } from "react"
 import { MobileShell } from "@/components/mobile-shell"
-import {
-	type EstadoOrdenTrabajo,
-	equipos,
-	ordenesTrabajo,
-	type PrioridadOT,
-	type TipoOT,
-} from "@/lib/mock-data"
+import { mapEquipoRow, mapOrdenRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { EstadoOrdenTrabajo, PrioridadOT, TipoOT } from "@/lib/types"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 const PRIORIDAD_CONFIG: Record<PrioridadOT, { label: string; bar: string }> = {
@@ -80,11 +77,31 @@ const TIPO_CONFIG: Record<TipoOT, { label: string; bg: string; text: string }> =
 	}
 
 export default function MobileOrdenesPage() {
+	const {
+		data: ordenesData,
+		isLoading: loadingOrdenes,
+		error: errorOrdenes,
+	} = useSupabaseQuery("ordenes_trabajo", (row) =>
+		mapOrdenRow(row as unknown as Tables<"ordenes_trabajo">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
+	const isLoading = loadingOrdenes || loadingEquipos
+	const error = errorOrdenes ?? errorEquipos
+	const ordenesTrabajo = ordenesData ?? []
+	const equipos = equiposData ?? []
+
 	const ordenesOrdenadas = useMemo(() => {
 		return [...ordenesTrabajo].sort(
 			(a, b) => b.fechaCreacion.getTime() - a.fechaCreacion.getTime(),
 		)
-	}, [])
+	}, [ordenesTrabajo])
 
 	const abiertas = ordenesTrabajo.filter((ot) =>
 		["creada", "asignada"].includes(ot.estado),
@@ -95,6 +112,26 @@ export default function MobileOrdenesPage() {
 	const completadas = ordenesTrabajo.filter((ot) =>
 		["completada", "verificada"].includes(ot.estado),
 	).length
+
+	if (isLoading) {
+		return (
+			<MobileShell activeTab="/mobile/ordenes">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6">
+					<div className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+				</div>
+			</MobileShell>
+		)
+	}
+
+	if (error) {
+		return (
+			<MobileShell activeTab="/mobile/ordenes">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6 text-center">
+					<p className="text-sm text-muted-foreground">{error}</p>
+				</div>
+			</MobileShell>
+		)
+	}
 
 	return (
 		<MobileShell activeTab="/mobile/ordenes">

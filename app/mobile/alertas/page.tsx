@@ -3,12 +3,10 @@
 import { BellRinging } from "@phosphor-icons/react"
 import { useMemo, useState } from "react"
 import { MobileShell } from "@/components/mobile-shell"
-import {
-	alertasEquipos,
-	type EstadoAlerta,
-	equipos,
-	type SeveridadAlerta,
-} from "@/lib/mock-data"
+import { mapAlertaRow, mapEquipoRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { EstadoAlerta, SeveridadAlerta } from "@/lib/types"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 function tiempoRelativo(fecha: Date): string {
@@ -98,12 +96,51 @@ const FILTROS: { valor: FiltroSeveridad; label: string }[] = [
 
 export default function MobileAlertasPage() {
 	const [filtro, setFiltro] = useState<FiltroSeveridad>("todas")
+	const {
+		data: alertasData,
+		isLoading: loadingAlertas,
+		error: errorAlertas,
+	} = useSupabaseQuery("alertas_equipos", (row) =>
+		mapAlertaRow(row as unknown as Tables<"alertas_equipos">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
+	const isLoading = loadingAlertas || loadingEquipos
+	const error = errorAlertas ?? errorEquipos
+	const alertasEquipos = alertasData ?? []
+	const equipos = equiposData ?? []
 
 	const alertasFiltradas = useMemo(() => {
 		return [...alertasEquipos]
 			.sort((a, b) => b.fechaDeteccion.getTime() - a.fechaDeteccion.getTime())
 			.filter((alerta) => filtro === "todas" || alerta.severidad === filtro)
 	}, [filtro])
+
+	if (isLoading) {
+		return (
+			<MobileShell activeTab="/mobile/alertas">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6">
+					<div className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+				</div>
+			</MobileShell>
+		)
+	}
+
+	if (error) {
+		return (
+			<MobileShell activeTab="/mobile/alertas">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6 text-center">
+					<p className="text-sm text-muted-foreground">{error}</p>
+				</div>
+			</MobileShell>
+		)
+	}
 
 	return (
 		<MobileShell activeTab="/mobile/alertas">

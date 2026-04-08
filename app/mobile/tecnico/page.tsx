@@ -9,16 +9,56 @@ import {
 } from "@phosphor-icons/react"
 import { MobileShell } from "@/components/mobile-shell"
 import {
-	equipos,
-	formulariosTemplate,
-	ordenesTrabajo,
-	registrosMantenimiento,
-} from "@/lib/mock-data"
+	mapEquipoRow,
+	mapFormTemplateRow,
+	mapMantenimientoRow,
+	mapOrdenRow,
+} from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 const TECNICO_NOMBRE = "María García"
 
 export default function MobileTecnicoPage() {
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+	const {
+		data: formulariosData,
+		isLoading: loadingFormularios,
+		error: errorFormularios,
+	} = useSupabaseQuery("form_templates", (row) =>
+		mapFormTemplateRow(row as unknown as Tables<"form_templates">),
+	)
+	const {
+		data: ordenesData,
+		isLoading: loadingOrdenes,
+		error: errorOrdenes,
+	} = useSupabaseQuery("ordenes_trabajo", (row) =>
+		mapOrdenRow(row as unknown as Tables<"ordenes_trabajo">),
+	)
+	const {
+		data: registrosData,
+		isLoading: loadingRegistros,
+		error: errorRegistros,
+	} = useSupabaseQuery("registros_mantenimiento", (row) =>
+		mapMantenimientoRow(row as unknown as Tables<"registros_mantenimiento">),
+	)
+
+	const isLoading =
+		loadingEquipos || loadingFormularios || loadingOrdenes || loadingRegistros
+	const error =
+		errorEquipos ?? errorFormularios ?? errorOrdenes ?? errorRegistros
+	const equipos = equiposData ?? []
+	const formulariosTemplate = formulariosData ?? []
+	const ordenesTrabajo = ordenesData ?? []
+	const registrosMantenimiento = registrosData ?? []
+
 	const misOrdenes = ordenesTrabajo.filter(
 		(ot) => ot.tecnicoAsignado === TECNICO_NOMBRE,
 	)
@@ -36,6 +76,26 @@ export default function MobileTecnicoPage() {
 	const tareasCompletadas = registrosMantenimiento.filter(
 		(r) => r.tecnico === TECNICO_NOMBRE && r.estado === "completado",
 	).length
+
+	if (isLoading) {
+		return (
+			<MobileShell activeTab="/mobile/tecnico">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6">
+					<div className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+				</div>
+			</MobileShell>
+		)
+	}
+
+	if (error) {
+		return (
+			<MobileShell activeTab="/mobile/tecnico">
+				<div className="flex min-h-[60vh] items-center justify-center px-5 py-6 text-center">
+					<p className="text-sm text-muted-foreground">{error}</p>
+				</div>
+			</MobileShell>
+		)
+	}
 
 	return (
 		<MobileShell activeTab="/mobile/tecnico">
