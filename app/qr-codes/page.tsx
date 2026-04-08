@@ -395,7 +395,7 @@ export default function QRCodesPage() {
 							{/* Forms Grid */}
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 								{formulariosFiltrados.map((formulario) => {
-									const qrUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/formularios/llenar/${formulario.id}`
+									const qrUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/p/formulario/${formulario.id}`
 
 									return (
 										<Card
@@ -574,7 +574,7 @@ export default function QRCodesPage() {
 						<div className="flex items-center justify-center rounded-lg bg-white p-8">
 							{selectedFormularioData && (
 								<QRCodeSVG
-									value={`${typeof window !== "undefined" ? window.location.origin : ""}/formularios/llenar/${selectedFormularioData.id}`}
+									value={`${typeof window !== "undefined" ? window.location.origin : ""}/p/formulario/${selectedFormularioData.id}`}
 									size={256}
 									level="H"
 									includeMargin
