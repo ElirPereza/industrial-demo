@@ -45,12 +45,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
-import {
-	type EstadoOrdenTrabajo,
-	equipos,
-	ordenesTrabajo,
-	type PrioridadOT,
-} from "@/lib/mock-data"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
+import { mapEquipoRow, mapOrdenRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { EstadoOrdenTrabajo, PrioridadOT } from "@/lib/mock-data"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 const PRIORIDAD_CONFIG: Record<
@@ -153,6 +153,52 @@ export default function OrdenesTrabajoPage() {
 	const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>("todos")
 	const [busqueda, setBusqueda] = useState("")
 
+	const {
+		data: ordenesData,
+		isLoading: loadingOrdenes,
+		error: errorOrdenes,
+	} = useSupabaseQuery("ordenes_trabajo", (row) =>
+		mapOrdenRow(row as unknown as Tables<"ordenes_trabajo">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
+	const isLoading = loadingOrdenes || loadingEquipos
+	const error = errorOrdenes ?? errorEquipos
+
+	// Filtered list
+	const ordenesFiltradas = useMemo(() => {
+		const ordenes = ordenesData ?? []
+		const eqs = equiposData ?? []
+		return [...ordenes]
+			.sort((a, b) => b.fechaCreacion.getTime() - a.fechaCreacion.getTime())
+			.filter((ot) => {
+				if (filtroPrioridad !== "todas" && ot.prioridad !== filtroPrioridad)
+					return false
+				if (filtroEstado !== "todos" && ot.estado !== filtroEstado) return false
+				if (busqueda.trim()) {
+					const equipo = eqs.find((e) => e.id === ot.idEquipo)
+					const textos = [ot.titulo, equipo?.nombre, ot.tecnicoAsignado]
+						.filter(Boolean)
+						.join(" ")
+						.toLowerCase()
+					if (!textos.includes(busqueda.trim().toLowerCase())) return false
+				}
+				return true
+			})
+	}, [filtroPrioridad, filtroEstado, busqueda, ordenesData, equiposData])
+
+	if (isLoading) return <PageLoading />
+	if (error) return <PageError message={error} />
+
+	const ordenesTrabajo = ordenesData ?? []
+	const equipos = equiposData ?? []
+
 	// Stats
 	const abiertas = ordenesTrabajo.filter(
 		(ot) => ot.estado === "creada" || ot.estado === "asignada",
@@ -177,26 +223,6 @@ export default function OrdenesTrabajoPage() {
 					) / otsConTiempoReal.length
 				).toFixed(1)
 			: "—"
-
-	// Filtered list
-	const ordenesFiltradas = useMemo(() => {
-		return [...ordenesTrabajo]
-			.sort((a, b) => b.fechaCreacion.getTime() - a.fechaCreacion.getTime())
-			.filter((ot) => {
-				if (filtroPrioridad !== "todas" && ot.prioridad !== filtroPrioridad)
-					return false
-				if (filtroEstado !== "todos" && ot.estado !== filtroEstado) return false
-				if (busqueda.trim()) {
-					const equipo = equipos.find((e) => e.id === ot.idEquipo)
-					const textos = [ot.titulo, equipo?.nombre, ot.tecnicoAsignado]
-						.filter(Boolean)
-						.join(" ")
-						.toLowerCase()
-					if (!textos.includes(busqueda.trim().toLowerCase())) return false
-				}
-				return true
-			})
-	}, [filtroPrioridad, filtroEstado, busqueda])
 
 	const filtrosPrioridad: { valor: FiltroPrioridad; label: string }[] = [
 		{ valor: "todas", label: "Todas" },

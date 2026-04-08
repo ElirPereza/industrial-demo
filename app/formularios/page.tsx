@@ -34,17 +34,62 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
-	enviosFormularios,
-	equipos,
-	formulariosTemplate,
-	usuarios,
-} from "@/lib/mock-data"
+	mapEnvioRow,
+	mapEquipoRow,
+	mapFormTemplateRow,
+	mapProfileRow,
+} from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 export default function FormulariosPage() {
 	const router = useRouter()
 	const [selectedEnvio, setSelectedEnvio] = useState<string | null>(null)
+
+	const {
+		data: enviosData,
+		isLoading: loadingEnvios,
+		error: errorEnvios,
+	} = useSupabaseQuery("envios_formularios", (row) =>
+		mapEnvioRow(row as unknown as Tables<"envios_formularios">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+	const {
+		data: templatesData,
+		isLoading: loadingTemplates,
+		error: errorTemplates,
+	} = useSupabaseQuery("form_templates", (row) =>
+		mapFormTemplateRow(row as unknown as Tables<"form_templates">),
+	)
+	const {
+		data: profilesData,
+		isLoading: loadingProfiles,
+		error: errorProfiles,
+	} = useSupabaseQuery("profiles", (row) =>
+		mapProfileRow(row as unknown as Tables<"profiles">),
+	)
+
+	const isLoading =
+		loadingEnvios || loadingEquipos || loadingTemplates || loadingProfiles
+	const error = errorEnvios ?? errorEquipos ?? errorTemplates ?? errorProfiles
+
+	if (isLoading) return <PageLoading />
+	if (error) return <PageError message={error} />
+
+	const enviosFormularios = enviosData ?? []
+	const equipos = equiposData ?? []
+	const formulariosTemplate = templatesData ?? []
+	const usuarios = profilesData ?? []
 
 	// Prepare table data with joins
 	const tableData = enviosFormularios.map((envio) => {

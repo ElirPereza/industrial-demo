@@ -37,7 +37,12 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { alertasEquipos, equipos, type SeveridadAlerta } from "@/lib/mock-data"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
+import { mapAlertaRow, mapEquipoRow } from "@/lib/data-mappers"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import type { SeveridadAlerta } from "@/lib/mock-data"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 function tiempoRelativo(fecha: Date): string {
@@ -122,14 +127,34 @@ export default function AlertasPage() {
 		useState<FiltroSeveridad>("todas")
 	const [busqueda, setBusqueda] = useState("")
 
+	const {
+		data: alertasData,
+		isLoading: loadingAlertas,
+		error: errorAlertas,
+	} = useSupabaseQuery("alertas_equipos", (row) =>
+		mapAlertaRow(row as unknown as Tables<"alertas_equipos">),
+	)
+	const {
+		data: equiposData,
+		isLoading: loadingEquipos,
+		error: errorEquipos,
+	} = useSupabaseQuery("equipos", (row) =>
+		mapEquipoRow(row as unknown as Tables<"equipos">),
+	)
+
+	const isLoading = loadingAlertas || loadingEquipos
+	const error = errorAlertas ?? errorEquipos
+
 	const alertasOrdenadas = useMemo(() => {
-		return [...alertasEquipos]
+		const alertas = alertasData ?? []
+		const eqs = equiposData ?? []
+		return [...alertas]
 			.sort((a, b) => b.fechaDeteccion.getTime() - a.fechaDeteccion.getTime())
 			.filter((alerta) => {
 				if (filtroSeveridad !== "todas" && alerta.severidad !== filtroSeveridad)
 					return false
 				if (busqueda.trim()) {
-					const equipo = equipos.find((e) => e.id === alerta.idEquipo)
+					const equipo = eqs.find((e) => e.id === alerta.idEquipo)
 					const textosBusqueda = [
 						equipo?.nombre,
 						alerta.marca,
@@ -145,7 +170,13 @@ export default function AlertasPage() {
 				}
 				return true
 			})
-	}, [filtroSeveridad, busqueda])
+	}, [filtroSeveridad, busqueda, alertasData, equiposData])
+
+	if (isLoading) return <PageLoading />
+	if (error) return <PageError message={error} />
+
+	const alertasEquipos = alertasData ?? []
+	const equipos = equiposData ?? []
 
 	const conteoActivas = alertasEquipos.filter(
 		(a) => a.estado === "activa",
