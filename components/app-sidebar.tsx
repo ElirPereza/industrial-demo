@@ -14,6 +14,8 @@ import {
 	Wrench,
 } from "@phosphor-icons/react"
 import type * as React from "react"
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { NavAdmin } from "@/components/nav-admin"
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
@@ -137,6 +139,20 @@ function getNavSecondary(role: RolUsuario) {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { role, profile, signOut } = useRole()
+	const [orgNombre, setOrgNombre] = useState("Industrial Portal")
+
+	useEffect(() => {
+		if (!profile?.id_organizacion) return
+		const supabase = createClient()
+		void supabase
+			.from("organizaciones")
+			.select("nombre")
+			.eq("id", profile.id_organizacion)
+			.single()
+			.then(({ data }) => {
+				if (data?.nombre) setOrgNombre(data.nombre)
+			})
+	}, [profile?.id_organizacion])
 
 	const userData = {
 		name: profile?.nombre ?? "Cargando...",
@@ -160,9 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 									<FactoryIcon className="size-4" />
 								</div>
 								<div className="grid flex-1 text-left text-sm leading-tight">
-									<span className="truncate font-medium">
-										Industrial Portal
-									</span>
+									<span className="truncate font-medium">{orgNombre}</span>
 									<span className="truncate text-xs">{ROLE_LABELS[role]}</span>
 								</div>
 							</a>
