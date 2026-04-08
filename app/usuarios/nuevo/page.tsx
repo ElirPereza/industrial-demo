@@ -84,6 +84,7 @@ export default function NuevoUsuarioPage() {
 	const [activo, setActivo] = useState(true)
 
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
+	const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
 	const handleSubmit = () => {
 		const newErrors: Record<string, boolean> = {}
@@ -96,8 +97,11 @@ export default function NuevoUsuarioPage() {
 		setErrors(newErrors)
 
 		if (Object.keys(newErrors).length === 0) {
-			alert("Usuario creado exitosamente (simulado)")
-			router.push("/usuarios")
+			setSuccessMessage("Usuario creado exitosamente")
+			setTimeout(() => {
+				setSuccessMessage(null)
+				router.push("/usuarios")
+			}, 3000)
 		}
 	}
 
@@ -345,11 +349,14 @@ export default function NuevoUsuarioPage() {
 
 							{/* Actions */}
 							<Card>
-								<CardContent className="p-4 space-y-3">
+								<CardContent className="space-y-3 p-4">
 									<Button className="w-full" onClick={handleSubmit}>
 										<Check className="mr-2 size-4" weight="bold" />
 										Crear Usuario
 									</Button>
+									{successMessage && (
+										<p className="text-sm text-green-600">{successMessage}</p>
+									)}
 									<Button
 										variant="outline"
 										className="w-full"

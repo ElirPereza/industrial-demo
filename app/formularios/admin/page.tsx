@@ -56,6 +56,10 @@ export default function FormAdminPage() {
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 	const [, setSelectedFormulario] = useState<string | null>(null)
 	const [updatingFormId, setUpdatingFormId] = useState<string | null>(null)
+	const [feedbackMessage, setFeedbackMessage] = useState<{
+		type: "success" | "error"
+		text: string
+	} | null>(null)
 
 	const {
 		data: formulariosData,
@@ -91,14 +95,19 @@ export default function FormAdminPage() {
 		setUpdatingFormId(null)
 
 		if (updateError) {
-			alert(`No se pudo actualizar el formulario: ${updateError.message}`)
+			setFeedbackMessage({
+				type: "error",
+				text: `No se pudo actualizar el formulario: ${updateError.message}`,
+			})
 			return
 		}
 
 		refetchFormularios()
-		alert(
-			`Formulario ${!formulario.activo ? "activado" : "desactivado"} exitosamente`,
-		)
+		setFeedbackMessage({
+			type: "success",
+			text: `Formulario ${!formulario.activo ? "activado" : "desactivado"} exitosamente`,
+		})
+		setTimeout(() => setFeedbackMessage(null), 3000)
 	}
 
 	const handleDelete = () => {
@@ -163,6 +172,18 @@ export default function FormAdminPage() {
 						<p className="text-sm text-muted-foreground">
 							Activa, desactiva y gestiona los formularios del sistema
 						</p>
+						{feedbackMessage && (
+							<p
+								className={cn(
+									"mt-2 text-sm",
+									feedbackMessage.type === "success"
+										? "text-green-600"
+										: "text-destructive",
+								)}
+							>
+								{feedbackMessage.text}
+							</p>
+						)}
 					</div>
 
 					<Card>

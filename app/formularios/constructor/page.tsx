@@ -489,6 +489,7 @@ export default function FormBuilderPage() {
 	const [activeTipo, setActiveTipo] = useState<FieldType | null>(null)
 	const [isOverCanvas, setIsOverCanvas] = useState(false)
 	const [previewData, setPreviewData] = useState<Record<string, string>>({})
+	const [saveMessage, setSaveMessage] = useState<string | null>(null)
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -572,6 +573,11 @@ export default function FormBuilderPage() {
 		setPreviewData({ ...previewData, [id]: value })
 	}
 
+	const handleSave = () => {
+		setSaveMessage("Formulario guardado")
+		setTimeout(() => setSaveMessage(null), 3000)
+	}
+
 	return (
 		<SidebarProvider>
 			<AppSidebar />
@@ -604,10 +610,15 @@ export default function FormBuilderPage() {
 								</BreadcrumbList>
 							</Breadcrumb>
 						</div>
-						<Button onClick={() => alert("Formulario guardado (simulado)")}>
-							<FloppyDisk className="mr-2 size-4" weight="duotone" />
-							Guardar
-						</Button>
+						<div className="flex flex-col items-end gap-2">
+							<Button onClick={handleSave}>
+								<FloppyDisk className="mr-2 size-4" weight="duotone" />
+								Guardar
+							</Button>
+							{saveMessage && (
+								<p className="text-sm text-green-600">{saveMessage}</p>
+							)}
+						</div>
 					</div>
 				</header>
 

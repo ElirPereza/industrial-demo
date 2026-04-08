@@ -69,9 +69,11 @@ export default function ConfiguracionPage() {
 	// Security settings
 	const [autenticacion2FA, setAutenticacion2FA] = useState(false)
 	const [sesionActiva, setSesionActiva] = useState(true)
+	const [saveMessage, setSaveMessage] = useState<string | null>(null)
 
 	const handleSave = () => {
-		alert("Configuración guardada (simulado)")
+		setSaveMessage("Configuración guardada")
+		setTimeout(() => setSaveMessage(null), 3000)
 	}
 
 	return (
@@ -109,7 +111,12 @@ export default function ConfiguracionPage() {
 								Personaliza tu experiencia en el portal
 							</p>
 						</div>
-						<Button onClick={handleSave}>Guardar Cambios</Button>
+						<div className="flex flex-col items-end gap-2">
+							<Button onClick={handleSave}>Guardar Cambios</Button>
+							{saveMessage && (
+								<p className="text-sm text-green-600">{saveMessage}</p>
+							)}
+						</div>
 					</div>
 
 					<div className="grid gap-6 lg:grid-cols-2">

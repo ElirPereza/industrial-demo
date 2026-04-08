@@ -148,9 +148,12 @@ export default function FormFillPage({
 
 	const handleSubmit = async () => {
 		if (!user) {
-			alert("Debes iniciar sesión para enviar el formulario")
+			setSubmitError("Debes iniciar sesión para enviar el formulario")
 			return
 		}
+
+		setSubmitError(null)
+		setSubmitSuccess(false)
 
 		const newErrors: Record<string, boolean> = {}
 
@@ -509,18 +512,35 @@ export default function FormFillPage({
 					</Card>
 
 					{/* Submit Button */}
-					<div className="flex justify-end gap-2">
-						<Button
-							variant="outline"
-							disabled={isSubmitting}
-							onClick={() => router.push("/formularios")}
-						>
-							Cancelar
-						</Button>
-						<Button disabled={isSubmitting} onClick={() => void handleSubmit()}>
-							<Check className="mr-2 size-4" weight="bold" />
-							{isSubmitting ? "Enviando..." : "Enviar Formulario"}
-						</Button>
+					<div className="space-y-3">
+						{(submitError || submitSuccess) && (
+							<p
+								className={cn(
+									"text-sm",
+									submitSuccess ? "text-green-600" : "text-destructive",
+								)}
+							>
+								{submitSuccess
+									? "Formulario enviado exitosamente"
+									: submitError}
+							</p>
+						)}
+						<div className="flex justify-end gap-2">
+							<Button
+								variant="outline"
+								disabled={isSubmitting}
+								onClick={() => router.push("/formularios")}
+							>
+								Cancelar
+							</Button>
+							<Button
+								disabled={isSubmitting}
+								onClick={() => void handleSubmit()}
+							>
+								<Check className="mr-2 size-4" weight="bold" />
+								{isSubmitting ? "Enviando..." : "Enviar Formulario"}
+							</Button>
+						</div>
 					</div>
 				</div>
 			</SidebarInset>

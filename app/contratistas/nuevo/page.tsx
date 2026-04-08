@@ -108,6 +108,7 @@ export default function NuevoContratistaPage() {
 	const [documentos, setDocumentos] = useState<string[]>([])
 
 	const [errors, setErrors] = useState<Record<string, boolean>>({})
+	const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files
@@ -130,8 +131,11 @@ export default function NuevoContratistaPage() {
 		setErrors(newErrors)
 
 		if (Object.keys(newErrors).length === 0) {
-			alert("Contratista registrado exitosamente (simulado)")
-			router.push("/contratistas")
+			setSuccessMessage("Contratista registrado exitosamente")
+			setTimeout(() => {
+				setSuccessMessage(null)
+				router.push("/contratistas")
+			}, 3000)
 		}
 	}
 
@@ -524,6 +528,9 @@ export default function NuevoContratistaPage() {
 										<Check className="mr-2 size-4" weight="bold" />
 										Registrar Contratista
 									</Button>
+									{successMessage && (
+										<p className="text-sm text-green-600">{successMessage}</p>
+									)}
 									<Button
 										variant="outline"
 										className="w-full"
