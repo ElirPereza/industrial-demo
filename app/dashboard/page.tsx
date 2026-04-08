@@ -211,7 +211,7 @@ export default function DashboardPage() {
 	return (
 		<SidebarProvider>
 			<AppSidebar />
-			<SidebarInset>
+			<SidebarInset className="min-w-0">
 				<header className="flex h-16 shrink-0 items-center gap-2">
 					<div className="flex items-center gap-2 px-4">
 						<SidebarTrigger className="-ml-1" />
@@ -235,10 +235,10 @@ export default function DashboardPage() {
 					</div>
 				</header>
 
-				<div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+				<div className="flex min-w-0 flex-1 flex-col gap-6 p-4 pt-0">
 					{/* ── Header ── */}
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-						<div>
+						<div className="min-w-0">
 							<h1 className="text-2xl font-semibold tracking-tight">
 								Panel de Control
 							</h1>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
 								Febrero 2026 — Planta Industrial
 							</p>
 						</div>
-						<div className="flex items-center gap-1.5">
+						<div className="flex flex-wrap items-center gap-1.5">
 							{[
 								{ label: "Supervisor", href: "/dashboard/supervisor" },
 								{ label: "Técnico", href: "/dashboard/tecnico" },
@@ -255,7 +255,7 @@ export default function DashboardPage() {
 								<a
 									key={r.href}
 									href={r.href}
-									className="rounded-sm bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+									className="rounded-sm bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground min-w-fit"
 								>
 									{r.label}
 								</a>
@@ -264,7 +264,7 @@ export default function DashboardPage() {
 					</div>
 
 					{/* ── Row 1: KPIs ── */}
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 w-full">
 						{kpis.map((kpi, idx) => {
 							const cfg = KPI_CONFIG[idx]
 							const Icon = cfg.icon
@@ -528,12 +528,6 @@ export default function DashboardPage() {
 														key={ot.id}
 														className="transition-colors hover:bg-muted/50"
 													>
-														<td className="max-w-[180px] truncate px-4 py-2.5 font-medium">
-															{ot.titulo}
-														</td>
-														<td className="hidden max-w-[120px] truncate px-4 py-2.5 text-muted-foreground sm:table-cell">
-															{eq?.nombre}
-														</td>
 														<td className="px-4 py-2.5">
 															<div className="flex items-center gap-1.5">
 																<span
@@ -553,9 +547,6 @@ export default function DashboardPage() {
 															>
 																{est.label}
 															</span>
-														</td>
-														<td className="hidden max-w-[100px] truncate px-4 py-2.5 text-muted-foreground md:table-cell">
-															{ot.tecnicoAsignado}
 														</td>
 													</tr>
 												)
