@@ -127,18 +127,28 @@ export default function LoginPage() {
 	}
 
 	const getAuthErrorMessage = (message: string) => {
-		if (message.toLowerCase().includes("invalid login credentials")) {
+		const msg = message.toLowerCase()
+		if (msg.includes("invalid login credentials")) {
 			return "Credenciales inválidas. Verifica tu correo y contraseña."
 		}
-
-		if (message.toLowerCase().includes("email not confirmed")) {
+		if (msg.includes("email not confirmed")) {
 			return "Tu correo aún no ha sido confirmado. Revisa tu bandeja de entrada."
 		}
-
-		if (message.toLowerCase().includes("user already registered")) {
-			return "Esta cuenta ya existe. Intenta iniciar sesión."
+		if (msg.includes("user already registered")) {
+			return "Este correo ya está registrado. Usa Iniciar Sesión."
 		}
-
+		if (msg.includes("password") && msg.includes("6")) {
+			return "La contraseña debe tener al menos 6 caracteres."
+		}
+		if (msg.includes("valid email") || msg.includes("invalid email")) {
+			return "Ingresa un correo electrónico válido."
+		}
+		if (msg.includes("rate limit") || msg.includes("too many")) {
+			return "Demasiados intentos. Espera un momento antes de reintentar."
+		}
+		if (msg.includes("network") || msg.includes("fetch")) {
+			return "Error de conexión. Verifica tu internet e intenta de nuevo."
+		}
 		return message
 	}
 
@@ -182,7 +192,7 @@ export default function LoginPage() {
 				options: {
 					data: {
 						nombre: nombre.trim(),
-						rol: "tecnico",
+						rol: "admin",
 					},
 				},
 			})
@@ -192,26 +202,22 @@ export default function LoginPage() {
 				return
 			}
 
-			if (data.session) {
-				setRole("tecnico")
-				navigateToDashboard()
-				return
-			}
-
-			const { error: signInError } = await supabase.auth.signInWithPassword({
-				email: email.trim(),
-				password,
-			})
-
-			if (signInError) {
+			if (data.user && !data.session) {
+				if (data.user.identities?.length === 0) {
+					setAuthError("Este correo ya está registrado. Usa Iniciar Sesión.")
+					return
+				}
 				setAuthSuccess(
 					"Cuenta creada. Revisa tu correo para confirmar tu acceso antes de iniciar sesión.",
 				)
 				return
 			}
 
-			setRole("tecnico")
-			navigateToDashboard()
+			if (data.session) {
+				setRole("admin")
+				navigateToDashboard()
+				return
+			}
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -227,42 +233,10 @@ export default function LoginPage() {
 				password: DEMO_PASSWORD,
 			})
 
-			if (!signInError) {
-				setRole(demoRole.rol)
-				navigateToDashboard()
-				return
-			}
-
-			const { data, error: signUpError } = await supabase.auth.signUp({
-				email: demoRole.email,
-				password: DEMO_PASSWORD,
-				options: {
-					data: {
-						nombre: demoRole.nombre,
-						rol: demoRole.rol,
-					},
-				},
-			})
-
-			if (signUpError) {
-				setAuthError(getAuthErrorMessage(signUpError.message))
-				return
-			}
-
-			if (data.session) {
-				setRole(demoRole.rol)
-				navigateToDashboard()
-				return
-			}
-
-			const { error: retrySignInError } =
-				await supabase.auth.signInWithPassword({
-					email: demoRole.email,
-					password: DEMO_PASSWORD,
-				})
-
-			if (retrySignInError) {
-				setAuthError(getAuthErrorMessage(retrySignInError.message))
+			if (signInError) {
+				setAuthError(
+					`No se pudo acceder como ${demoRole.nombre}. Verifica que los usuarios demo estén creados.`,
+				)
 				return
 			}
 

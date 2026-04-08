@@ -183,7 +183,11 @@ export default function NuevoEquipoPage() {
 
 		if (error || !equipo) {
 			setIsSubmitting(false)
-			setSubmitError(error.message)
+			setSubmitError(
+				error?.message?.includes("row-level security")
+					? "No tienes permisos para crear equipos. Contacta al administrador."
+					: (error?.message ?? "Error al crear el equipo. Intenta de nuevo."),
+			)
 			return
 		}
 

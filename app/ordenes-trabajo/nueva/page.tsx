@@ -290,7 +290,13 @@ export default function NuevaOrdenTrabajoPage() {
 		setIsSubmitting(false)
 
 		if (error) {
-			setSubmitError(error.message)
+			setSubmitError(
+				error.message?.includes("row-level security")
+					? "No tienes permisos para crear órdenes de trabajo."
+					: error.message?.includes("not-null")
+						? "Faltan campos obligatorios. Completa todos los campos requeridos."
+						: `Error al crear la orden: ${error.message}`,
+			)
 			return
 		}
 

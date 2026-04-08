@@ -54,6 +54,8 @@ export default function FormFillPage({
 	const router = useRouter()
 	const signatureRef = useRef<SignatureCanvas>(null)
 	const { user, profile } = useRole()
+	const [submitError, setSubmitError] = useState<string | null>(null)
+	const [submitSuccess, setSubmitSuccess] = useState(false)
 
 	const {
 		data: templatesData,
@@ -197,12 +199,16 @@ export default function FormFillPage({
 		setIsSubmitting(false)
 
 		if (insertError) {
-			alert(`No se pudo enviar el formulario: ${insertError.message}`)
+			setSubmitError(
+				insertError.message?.includes("row-level security")
+					? "No tienes permisos para enviar formularios."
+					: `Error al enviar: ${insertError.message}`,
+			)
 			return
 		}
 
-		alert("Formulario enviado exitosamente")
-		router.push("/formularios")
+		setSubmitSuccess(true)
+		setTimeout(() => router.push("/formularios"), 1500)
 	}
 
 	const currentDate = new Date()
