@@ -248,12 +248,8 @@ function CanvasDropZone({
 		<div
 			ref={setNodeRef}
 			className={cn(
-				"min-h-[300px] rounded-lg border-2 border-dashed p-4 transition-all",
-				isOver
-					? "border-primary bg-primary/5"
-					: isEmpty
-						? "border-muted-foreground/25"
-						: "border-transparent",
+				"min-h-[500px] rounded-lg border-2 border-dashed p-4 pb-24 transition-all",
+				isOver ? "border-primary bg-primary/5" : "border-muted-foreground/25",
 			)}
 		>
 			{isEmpty ? (
