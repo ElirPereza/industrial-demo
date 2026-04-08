@@ -23,8 +23,10 @@ import {
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { QRCodeSVG } from "qrcode.react"
-import { use, useState } from "react"
+import { use, useCallback, useEffect, useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { PageError } from "@/components/page-error"
+import { PageLoading } from "@/components/page-loading"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -48,12 +50,23 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
 import {
-	enviosFormularios,
-	equipos,
-	formulariosTemplate,
-	registrosMantenimiento,
-	usuarios,
+	mapAlertaRow,
+	mapEnvioRow,
+	mapEquipoRow,
+	mapFormTemplateRow,
+	mapMantenimientoRow,
+	mapProfileRow,
+} from "@/lib/data-mappers"
+import type {
+	AlertaEquipo,
+	EnvioFormulario,
+	Equipo,
+	FormTemplate,
+	RegistroMantenimiento,
+	Usuario,
 } from "@/lib/mock-data"
+import { createClient } from "@/lib/supabase/client"
+import type { Tables } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
 
 // Mock documents for equipment
@@ -215,7 +228,12 @@ interface ActividadEquipo {
 	usuario: string
 	rol: string
 	fecha: Date
-	detalles?: Record<string, string | number>
+	detalles?: {
+		horasEmpleadas?: number
+		costo?: number
+		estado?: string
+		[key: string]: string | number | undefined
+	}
 }
 
 // Mock extended activity for equipment
@@ -292,11 +310,132 @@ export default function EquipoDetailPage({
 	const { id: equipoId } = use(params)
 	const router = useRouter()
 	const [activeTab, setActiveTab] = useState<TabType>("info")
+	const [equipo, setEquipo] = useState<Equipo | null>(null)
+	const [registrosMantenimiento, setRegistrosMantenimiento] = useState<
+		RegistroMantenimiento[]
+	>([])
+	const [alertasEquipos, setAlertasEquipos] = useState<AlertaEquipo[]>([])
+	const [enviosFormularios, setEnviosFormularios] = useState<EnvioFormulario[]>(
+		[],
+	)
+	const [formulariosTemplate, setFormulariosTemplate] = useState<
+		FormTemplate[]
+	>([])
+	const [usuarios, setUsuarios] = useState<Usuario[]>([])
+	const [isLoading, setIsLoading] = useState(true)
+	const [error, setError] = useState<string | null>(null)
 
-	const equipo = equipos.find((e) => e.id === equipoId)
+	const loadEquipoDetalle = useCallback(async () => {
+		setIsLoading(true)
+		setError(null)
+
+		try {
+			const supabase = createClient()
+			const [
+				equipoResult,
+				mantenimientoResult,
+				alertasResult,
+				enviosResult,
+				formulariosResult,
+				profilesResult,
+			] = await Promise.all([
+				supabase.from("equipos").select("*").eq("id", equipoId).single(),
+				supabase
+					.from("registros_mantenimiento")
+					.select("*")
+					.eq("id_equipo", equipoId),
+				supabase.from("alertas_equipos").select("*").eq("id_equipo", equipoId),
+				supabase
+					.from("envios_formularios")
+					.select("*")
+					.eq("id_equipo", equipoId),
+				supabase.from("form_templates").select("*"),
+				supabase.from("profiles").select("*"),
+			])
+
+			if (equipoResult.error && equipoResult.error.code !== "PGRST116") {
+				throw equipoResult.error
+			}
+
+			if (mantenimientoResult.error) {
+				throw mantenimientoResult.error
+			}
+
+			if (alertasResult.error) {
+				throw alertasResult.error
+			}
+
+			if (enviosResult.error) {
+				throw enviosResult.error
+			}
+
+			if (formulariosResult.error) {
+				throw formulariosResult.error
+			}
+
+			if (profilesResult.error) {
+				throw profilesResult.error
+			}
+
+			const equipoRow: Tables<"equipos"> | null = equipoResult.data
+			const mantenimientoRows = mantenimientoResult.data ?? []
+			const alertasRows = alertasResult.data ?? []
+			const enviosRows = enviosResult.data ?? []
+			const formulariosRows = formulariosResult.data ?? []
+			const profileRows = profilesResult.data ?? []
+
+			setEquipo(equipoRow ? mapEquipoRow(equipoRow) : null)
+			setRegistrosMantenimiento(
+				mantenimientoRows.map((row: Tables<"registros_mantenimiento">) =>
+					mapMantenimientoRow(row),
+				),
+			)
+			setAlertasEquipos(
+				alertasRows.map((row: Tables<"alertas_equipos">) => mapAlertaRow(row)),
+			)
+			setEnviosFormularios(
+				enviosRows.map((row: Tables<"envios_formularios">) => mapEnvioRow(row)),
+			)
+			setFormulariosTemplate(
+				formulariosRows.map((row: Tables<"form_templates">) =>
+					mapFormTemplateRow(row),
+				),
+			)
+			setUsuarios(
+				profileRows.map((row: Tables<"profiles">) => mapProfileRow(row)),
+			)
+		} catch (fetchError) {
+			setError(
+				fetchError instanceof Error
+					? fetchError.message
+					: "Ocurrió un error al cargar el equipo",
+			)
+		} finally {
+			setIsLoading(false)
+		}
+	}, [equipoId])
+
+	useEffect(() => {
+		void loadEquipoDetalle()
+	}, [loadEquipoDetalle])
+
 	const historial = registrosMantenimiento
 		.filter((r) => r.idEquipo === equipoId)
 		.sort((a, b) => b.fechaInicio.getTime() - a.fechaInicio.getTime())
+
+	if (isLoading) {
+		return <PageLoading message="Cargando detalles del equipo..." />
+	}
+
+	if (error) {
+		return (
+			<PageError
+				message="No se pudo cargar el equipo"
+				description={error}
+				onRetry={() => void loadEquipoDetalle()}
+			/>
+		)
+	}
 
 	const documentos = documentosMock[equipoId] || []
 	const imagenes = imagenesMock[equipoId] || []
@@ -328,7 +467,7 @@ export default function EquipoDetailPage({
 		.slice(0, 10)
 
 	// Combine maintenance records with other activities for full timeline
-	const timelineCompleto = [
+	const timelineCompleto: ActividadEquipo[] = [
 		...historial.map((r) => ({
 			id: r.id,
 			tipo:
@@ -344,6 +483,18 @@ export default function EquipoDetailPage({
 				horasEmpleadas: r.horasEmpleadas,
 				costo: r.costo,
 				estado: r.estado,
+			},
+		})),
+		...alertasEquipos.map((alerta) => ({
+			id: alerta.id,
+			tipo: "falla" as ActividadTipo,
+			titulo: `Alerta ${alerta.codigoFalla}`,
+			descripcion: alerta.descripcionFalla,
+			usuario: "Sistema IoT",
+			rol: "Sistema",
+			fecha: alerta.fechaDeteccion,
+			detalles: {
+				estado: alerta.estado,
 			},
 		})),
 		...actividades,
