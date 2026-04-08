@@ -42,3 +42,12 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# AI tools (local only)
+.agents/
+.claude/
+.kiro/
+.mcp.json
+.sisyphus/
+.playwright-mcp/
+skills-lock.json
