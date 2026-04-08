@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
+import { DesktopOnly } from "@/components/desktop-only"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
@@ -29,7 +30,9 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					<TooltipProvider>{children}</TooltipProvider>
+					<TooltipProvider>
+						<DesktopOnly>{children}</DesktopOnly>
+					</TooltipProvider>
 				</ThemeProvider>
 			</body>
 		</html>

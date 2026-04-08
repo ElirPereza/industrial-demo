@@ -46,7 +46,54 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
-// Mock data for charts
+const CustomTooltip = ({ active, payload, label }: any) => {
+	if (!active || !payload || !payload.length) {
+		return null
+	}
+
+	const labelDate = label?.split(" ")[0] || label
+
+	return (
+		<div className="overflow-hidden rounded-lg border bg-background p-3 shadow-lg">
+			<p className="text-sm font-semibold mb-2">{labelDate}</p>
+			{payload.map((entry: any, idx: number) => (
+				<div
+					key={idx}
+					className="flex items-center justify-between gap-4 text-sm"
+				>
+					<div className="flex items-center gap-2">
+						<div
+							className="size-2.5 rounded-full"
+							style={{ backgroundColor: entry.color }}
+						/>
+						<span className="text-muted-foreground">{entry.name}</span>
+					</div>
+					<span className="font-semibold">{entry.value}</span>
+				</div>
+			))}
+		</div>
+	)
+}
+
+const CustomLegend = ({ data }: any) => {
+	return (
+		<div className="flex flex-wrap items-center justify-center gap-3">
+			{data.map((item: any, idx: number) => (
+				<div key={idx} className="flex items-center gap-2">
+					<div
+						className="size-2.5 rounded-full"
+						style={{ backgroundColor: item.color }}
+					/>
+					<span className="text-xs text-muted-foreground">{item.name}</span>
+				</div>
+			))}
+		</div>
+	)
+}
+
+const BAR_GRADIENT = "url(#barGradient)"
+const LINE_GRADIENT = "url(#lineGradient)"
+
 const formulariosporMes = [
 	{ mes: "Ene", completados: 45, pendientes: 12 },
 	{ mes: "Feb", completados: 52, pendientes: 8 },
@@ -84,9 +131,9 @@ const tecnicosMasActivos = [
 ]
 
 const tiposMantenimiento = [
-	{ tipo: "Preventivo", valor: 45, color: "#3b82f6" },
-	{ tipo: "Correctivo", valor: 30, color: "#f97316" },
-	{ tipo: "Inspección", valor: 25, color: "#22c55e" },
+	{ tipo: "Preventivo", valor: 45, color: "var(--color-chart-1)" },
+	{ tipo: "Correctivo", valor: 30, color: "var(--color-chart-3)" },
+	{ tipo: "Inspección", valor: 25, color: "var(--color-chart-2)" },
 ]
 
 const kpis = [
@@ -159,18 +206,18 @@ export default function AnaliticasPage() {
 					{/* KPIs */}
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 						{kpis.map((kpi) => (
-							<Card key={kpi.titulo}>
-								<CardContent className="p-4">
+							<Card key={kpi.titulo} className="overflow-hidden">
+								<CardContent className="p-5">
 									<div className="flex items-center justify-between">
-										<div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+										<div className="flex size-12 items-center justify-center rounded-xl bg-primary/10">
 											<kpi.icon
-												className="size-5 text-primary"
+												className="size-6 text-primary"
 												weight="duotone"
 											/>
 										</div>
 										<span
 											className={cn(
-												"flex items-center gap-1 text-xs font-medium",
+												"flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-medium",
 												kpi.tipo === "positivo"
 													? "text-green-600"
 													: "text-red-600",
@@ -184,8 +231,10 @@ export default function AnaliticasPage() {
 											{kpi.cambio}
 										</span>
 									</div>
-									<div className="mt-3">
-										<p className="text-2xl font-semibold">{kpi.valor}</p>
+									<div className="mt-4">
+										<p className="text-3xl font-semibold tracking-tight">
+											{kpi.valor}
+										</p>
 										<p className="text-xs text-muted-foreground">
 											{kpi.titulo}
 										</p>
@@ -197,7 +246,7 @@ export default function AnaliticasPage() {
 
 					{/* Charts Row 1 */}
 					<div className="grid gap-6 lg:grid-cols-2">
-						{/* Formularios por Mes */}
+						{/* Formularios por Mes - Enhanced Bar Chart */}
 						<Card>
 							<CardHeader>
 								<CardTitle>Formularios por Mes</CardTitle>
@@ -206,22 +255,71 @@ export default function AnaliticasPage() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ResponsiveContainer width="100%" height={250}>
+								<ResponsiveContainer width="100%" height={280}>
 									<BarChart data={formulariosporMes}>
-										<CartesianGrid strokeDasharray="3 3" vertical={false} />
-										<XAxis dataKey="mes" fontSize={12} />
-										<YAxis fontSize={12} />
-										<Tooltip />
+										<defs>
+											<linearGradient
+												id="barGradient"
+												x1="0"
+												y1="0"
+												x2="0"
+												y2="1"
+											>
+												<stop
+													offset="5%"
+													stopColor="var(--color-chart-1)"
+													stopOpacity={0.8}
+												/>
+												<stop
+													offset="95%"
+													stopColor="var(--color-chart-1)"
+													stopOpacity={0.2}
+												/>
+											</linearGradient>
+											<linearGradient
+												id="barGradientOrange"
+												x1="0"
+												y1="0"
+												x2="0"
+												y2="1"
+											>
+												<stop
+													offset="5%"
+													stopColor="var(--color-chart-3)"
+													stopOpacity={0.8}
+												/>
+												<stop
+													offset="95%"
+													stopColor="var(--color-chart-3)"
+													stopOpacity={0.2}
+												/>
+											</linearGradient>
+										</defs>
+										<CartesianGrid
+											strokeDasharray="2 2"
+											stroke="hsl(var(--border))"
+											vertical={false}
+										/>
+										<XAxis
+											dataKey="mes"
+											fontSize={12}
+											stroke="hsl(var(--muted-foreground))"
+										/>
+										<YAxis
+											fontSize={12}
+											stroke="hsl(var(--muted-foreground))"
+										/>
+										<Tooltip content={<CustomTooltip />} />
 										<Bar
 											dataKey="completados"
-											fill="#3b82f6"
-											radius={[4, 4, 0, 0]}
+											fill={BAR_GRADIENT}
+											radius={[6, 6, 0, 0]}
 											name="Completados"
 										/>
 										<Bar
 											dataKey="pendientes"
-											fill="#f97316"
-											radius={[4, 4, 0, 0]}
+											fill="url(#barGradientOrange)"
+											radius={[6, 6, 0, 0]}
 											name="Pendientes"
 										/>
 									</BarChart>
@@ -229,7 +327,7 @@ export default function AnaliticasPage() {
 							</CardContent>
 						</Card>
 
-						{/* Tendencia de Fallas */}
+						{/* Tendencia de Fallas - Enhanced Line Chart */}
 						<Card>
 							<CardHeader>
 								<CardTitle>Tendencia de Fallas</CardTitle>
@@ -238,19 +336,57 @@ export default function AnaliticasPage() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ResponsiveContainer width="100%" height={250}>
+								<ResponsiveContainer width="100%" height={280}>
 									<LineChart data={tendenciaFallas}>
-										<CartesianGrid strokeDasharray="3 3" vertical={false} />
-										<XAxis dataKey="semana" fontSize={12} />
-										<YAxis fontSize={12} />
-										<Tooltip />
+										<defs>
+											<linearGradient
+												id="lineGradient"
+												x1="0"
+												y1="0"
+												x2="0"
+												y2="1"
+											>
+												<stop
+													offset="0%"
+													stopColor="var(--color-chart-4)"
+													stopOpacity={0.3}
+												/>
+												<stop
+													offset="100%"
+													stopColor="var(--color-chart-4)"
+													stopOpacity={0}
+												/>
+											</linearGradient>
+										</defs>
+										<CartesianGrid
+											strokeDasharray="2 2"
+											stroke="hsl(var(--border))"
+											vertical={false}
+										/>
+										<XAxis
+											dataKey="semana"
+											fontSize={12}
+											stroke="hsl(var(--muted-foreground))"
+										/>
+										<YAxis
+											fontSize={12}
+											stroke="hsl(var(--muted-foreground))"
+										/>
+										<Tooltip content={<CustomTooltip />} />
 										<Line
 											type="monotone"
 											dataKey="fallas"
-											stroke="#ef4444"
-											strokeWidth={2}
-											dot={{ fill: "#ef4444", strokeWidth: 2 }}
+											stroke="var(--color-chart-4)"
+											strokeWidth={3}
+											dot={{
+												fill: "var(--color-chart-4)",
+												stroke: "white",
+												strokeWidth: 2,
+												r: 6,
+											}}
+											activeDot={{ r: 8, strokeWidth: 3 }}
 											name="Fallas"
+											animationDuration={1500}
 										/>
 									</LineChart>
 								</ResponsiveContainer>
@@ -260,7 +396,7 @@ export default function AnaliticasPage() {
 
 					{/* Charts Row 2 */}
 					<div className="grid gap-6 lg:grid-cols-3">
-						{/* Equipos Más Intervenidos */}
+						{/* Equipos Más Intervenidos - Enhanced Horizontal Bar Chart */}
 						<Card className="lg:col-span-2">
 							<CardHeader>
 								<CardTitle>Equipos Más Intervenidos</CardTitle>
@@ -269,25 +405,55 @@ export default function AnaliticasPage() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ResponsiveContainer width="100%" height={250}>
+								<ResponsiveContainer width="100%" height={280}>
 									<BarChart
 										data={equiposMasIntervenidos}
 										layout="vertical"
-										margin={{ left: 20 }}
+										margin={{ left: 60, right: 10, top: 10, bottom: 10 }}
 									>
-										<CartesianGrid strokeDasharray="3 3" horizontal={false} />
-										<XAxis type="number" fontSize={12} />
+										<defs>
+											<linearGradient
+												id="barGradientPurple"
+												x1="0"
+												y1="0"
+												x2="1"
+												y2="0"
+											>
+												<stop
+													offset="0%"
+													stopColor="var(--color-chart-5)"
+													stopOpacity={0.8}
+												/>
+												<stop
+													offset="100%"
+													stopColor="var(--color-chart-5)"
+													stopOpacity={0.2}
+												/>
+											</linearGradient>
+										</defs>
+										<CartesianGrid
+											strokeDasharray="2 2"
+											stroke="hsl(var(--border))"
+											horizontal={false}
+										/>
+										<XAxis
+											type="number"
+											fontSize={12}
+											stroke="hsl(var(--muted-foreground))"
+										/>
 										<YAxis
 											type="category"
 											dataKey="equipo"
 											fontSize={12}
-											width={100}
+											stroke="hsl(var(--muted-foreground))"
+											width={80}
+											tick={{ dx: 8 }}
 										/>
-										<Tooltip />
+										<Tooltip content={<CustomTooltip />} />
 										<Bar
 											dataKey="intervenciones"
-											fill="#8b5cf6"
-											radius={[0, 4, 4, 0]}
+											fill="url(#barGradientPurple)"
+											radius={[0, 6, 6, 0]}
 											name="Intervenciones"
 										/>
 									</BarChart>
@@ -295,7 +461,7 @@ export default function AnaliticasPage() {
 							</CardContent>
 						</Card>
 
-						{/* Tipos de Mantenimiento */}
+						{/* Tipos de Mantenimiento - Enhanced Donut Chart */}
 						<Card>
 							<CardHeader>
 								<CardTitle>Tipos de Mantenimiento</CardTitle>
@@ -310,33 +476,26 @@ export default function AnaliticasPage() {
 											nameKey="tipo"
 											cx="50%"
 											cy="50%"
-											innerRadius={50}
-											outerRadius={80}
+											innerRadius={70}
+											outerRadius={100}
 											paddingAngle={2}
+											startAngle={-90}
 										>
 											{tiposMantenimiento.map((entry) => (
 												<Cell key={entry.tipo} fill={entry.color} />
 											))}
 										</Pie>
-										<Tooltip />
+										<Tooltip content={<CustomTooltip />} />
 									</PieChart>
 								</ResponsiveContainer>
-								<div className="mt-4 flex justify-center gap-4">
-									{tiposMantenimiento.map((item) => (
-										<div key={item.tipo} className="flex items-center gap-2">
-											<div
-												className="size-3 rounded-full"
-												style={{ backgroundColor: item.color }}
-											/>
-											<span className="text-xs">{item.tipo}</span>
-										</div>
-									))}
+								<div className="mt-6">
+									<CustomLegend data={tiposMantenimiento} />
 								</div>
 							</CardContent>
 						</Card>
 					</div>
 
-					{/* Técnicos Más Activos */}
+					{/* Técnicos Más Activos - Enhanced Progress List */}
 					<Card>
 						<CardHeader>
 							<CardTitle>Técnicos Más Activos</CardTitle>
@@ -345,37 +504,51 @@ export default function AnaliticasPage() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="space-y-4">
+							<div className="space-y-5">
 								{tecnicosMasActivos.map((tecnico, index) => (
-									<div key={tecnico.nombre} className="flex items-center gap-4">
+									<div
+										key={tecnico.nombre}
+										className="group flex items-center gap-4"
+									>
+										{/* Rank Badge */}
 										<div
 											className={cn(
-												"flex size-8 items-center justify-center rounded-full text-sm font-medium",
+												"flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all group-hover:scale-110",
 												index === 0
-													? "bg-yellow-100 text-yellow-700"
+													? "bg-yellow-100 text-yellow-700 shadow-lg shadow-yellow-100/50 dark:bg-yellow-900/20 dark:text-yellow-600 dark:shadow-yellow-900/30"
 													: index === 1
-														? "bg-gray-100 text-gray-700"
+														? "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
 														: index === 2
-															? "bg-orange-100 text-orange-700"
+															? "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-600"
 															: "bg-muted text-muted-foreground",
 											)}
 										>
 											{index + 1}
 										</div>
-										<div className="flex-1">
-											<p className="text-sm font-medium">{tecnico.nombre}</p>
-											<div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+
+										{/* User Info */}
+										<div className="flex-1 min-w-0">
+											<p className="text-sm font-semibold text-foreground">
+												{tecnico.nombre}
+											</p>
+											{/* Progress Bar with Gradient */}
+											<div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
 												<div
-													className="h-full rounded-full bg-primary"
+													className="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-1000"
 													style={{
 														width: `${(tecnico.formularios / 45) * 100}%`,
 													}}
 												/>
 											</div>
 										</div>
-										<span className="text-sm font-medium">
-											{tecnico.formularios}
-										</span>
+
+										{/* Score */}
+										<div className="flex shrink-0 flex-col items-end">
+											<p className="text-lg font-bold text-foreground">
+												{tecnico.formularios}
+											</p>
+											<p className="text-xs text-muted-foreground">form.</p>
+										</div>
 									</div>
 								))}
 							</div>
