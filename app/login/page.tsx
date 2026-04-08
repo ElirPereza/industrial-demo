@@ -121,8 +121,8 @@ export default function LoginPage() {
 		setAuthSuccess(null)
 	}
 
-	const navigateToDashboard = () => {
-		router.push("/dashboard")
+	const navigateTo = (path: string) => {
+		router.push(path)
 		router.refresh()
 	}
 
@@ -182,7 +182,7 @@ export default function LoginPage() {
 					return
 				}
 
-				navigateToDashboard()
+				navigateTo("/dashboard")
 				return
 			}
 
@@ -215,7 +215,7 @@ export default function LoginPage() {
 
 			if (data.session) {
 				setRole("admin")
-				navigateToDashboard()
+				navigateTo("/onboarding")
 				return
 			}
 		} finally {
@@ -241,7 +241,7 @@ export default function LoginPage() {
 			}
 
 			setRole(demoRole.rol)
-			navigateToDashboard()
+			navigateTo("/dashboard")
 		} finally {
 			setQuickAccessLoading(null)
 		}
